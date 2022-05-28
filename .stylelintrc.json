@@ -1,16 +1,16 @@
 {
-    "extends": [
-        "stylelint-config-standard",
-        "stylelint-config-prettier"
-    ],
-    "rules": {
-        "color-function-notation": "legacy",
-        "color-hex-length": "long",
-        "hue-degree-notation": "number"
-    },
-    "ignoreFiles": [
-        "**/*.ts",
-        "**/*.js",
-        "**/node_modules"
-    ]
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-prettier"
+  ],
+  "rules": {
+    "color-function-notation": "legacy",
+    "color-hex-length": "long",
+    "hue-degree-notation": "number"
+  },
+  "ignoreFiles": [
+    "**/*.ts",
+    "**/*.js",
+    "**/node_modules"
+  ]
 }

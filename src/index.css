@@ -1,29 +1,28 @@
 :root {
-    --navbar-height: 3.5em;
+  --navbar-height: 3.5em;
 }
 
 body {
-    font-size: 14px;
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue",
-        sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-        monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
 }
 
 a {
-    text-decoration: none;
-    color: black;
+  text-decoration: none;
+  color: black;
 }
 
 .nunito {
-    font-family: Nunito, "Times New Roman", Times, serif;
+  font-family: Nunito, "Times New Roman", Times, serif;
 }
 
 /*
@@ -33,48 +32,48 @@ Navbar
 */
 
 .navbar {
-    height: var(--navbar-height);
-    width: 100vw;
-    background-color: hsl(0, 0%, 95%);
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid hsl(0, 0%, 80%);
+  height: var(--navbar-height);
+  width: 100vw;
+  background-color: hsl(0, 0%, 95%);
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid hsl(0, 0%, 80%);
 }
 
 .logo-wrapper {
-    --logo-padding: 0.4em;
+  --logo-padding: 0.4em;
 
-    max-height: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding-left: var(--logo-padding);
+  max-height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: var(--logo-padding);
 }
 
 .logo {
-    padding: var(--logo-padding);
-    height: calc(var(--navbar-height) - 2 * var(--logo-padding));
+  padding: var(--logo-padding);
+  height: calc(var(--navbar-height) - 2 * var(--logo-padding));
 }
 
 .logo-text {
-    font-size: 1.8em;
-    vertical-align: middle;
+  font-size: 1.8em;
+  vertical-align: middle;
 }
 
 .navbar-buttons-container {
-    display: flex;
+  display: flex;
 }
 
 .navbar-buttons {
-    padding: 0.5em;
-    margin: auto 0.5em;
-    border-radius: 3px;
-    cursor: pointer;
-    background-color: lightskyblue;
+  padding: 0.5em;
+  margin: auto 0.5em;
+  border-radius: 3px;
+  cursor: pointer;
+  background-color: lightskyblue;
 }
 
 .navbar-buttons:hover {
-    background-color: rgb(107, 198, 255);
+  background-color: rgb(107, 198, 255);
 }
 
 /*
@@ -84,20 +83,20 @@ Navbar
 */
 
 .red-text {
-    color: red;
+  color: red;
 }
 
 .text-beside-input {
-    margin-left: 0.5em;
+  margin-left: 0.5em;
 }
 
 .icon-beside-input {
-    margin-left: 0.3em;
-    max-height: 1.5em;
-    vertical-align: bottom;
+  margin-left: 0.3em;
+  max-height: 1.5em;
+  vertical-align: bottom;
 }
 
 input[type="submit"],
 button {
-    margin-top: 1em;
+  margin-top: 1em;
 }
