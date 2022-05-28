@@ -4,7 +4,6 @@ import { AuthContext } from "./AuthContext";
 import Home from "./Home";
 import Login from "./Login";
 import Logout from "./Logout";
-import Movies from "./Movies";
 import NavBar from "./NavBar";
 import NoMatch from "./NoMatch";
 import Private from "./Private";
@@ -62,7 +61,6 @@ function App() {
                 <Routes>
                     <Route path="/" exact element={<NavBar />}>
                         <Route path="/" element={<Home />} />
-                        <Route path="/movies" element={<Movies />} />
                         <Route
                             path="/private"
                             element={makePrivate(<Private />)}

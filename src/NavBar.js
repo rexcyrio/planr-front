@@ -11,19 +11,12 @@ function NavBar() {
             <nav className="navbar">
                 <Link to="/">
                     <div className="logo-wrapper">
-                        <img
-                            src={logo}
-                            alt="PlanR Logo"
-                            className="logo"
-                        />
+                        <img src={logo} alt="PlanR Logo" className="logo" />
                         <div className="nunito logo-text">PlanR</div>
                     </div>
                 </Link>
 
                 <div className="navbar-buttons-container">
-                    {/* <Link to="/movies">
-                        <div className="navbar-buttons">Movies</div>
-                    </Link> */}
                     {isAuthenticated ? (
                         <>
                             <Link to="/private" className="navbar-buttons">
