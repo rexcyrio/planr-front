@@ -60,7 +60,13 @@ function App() {
           <Route path="/" exact element={<NavBar />}>
             <Route
               path="/"
-              element={isAuthenticated ? <Private /> : <Login />}
+              element={
+                isAuthenticated ? (
+                  <Navigate replace to="/private" />
+                ) : (
+                  <Navigate replace to="/login" />
+                )
+              }
             />
             <Route path="/private" element={makePrivate(<Private />)} />
             <Route path="/login" element={makePublic(<Login />)} />
