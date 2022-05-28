@@ -125,37 +125,40 @@ function Signup() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="signup_username">Username</label>
-      <br />
-      <input
-        type="text"
-        id="signup_username"
-        name="signup_username"
-        value={username}
-        onChange={handleUsernameChange}
-        required
-      />
-      {allErrors[error]}
+    <>
+      <h1>Create a new account</h1>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="signup_username">Username</label>
+        <br />
+        <input
+          type="text"
+          id="signup_username"
+          name="signup_username"
+          value={username}
+          onChange={handleUsernameChange}
+          required
+        />
+        {allErrors[error]}
 
-      <br />
-      <label htmlFor="signup_password">Password</label>
-      <br />
-      <input
-        type="password"
-        id="signup_password"
-        name="signup_password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <br />
-      <input type="submit" value="Sign up" />
-      <span>
-        already have an account?
-        <Link to="/login"> Log in</Link>
-      </span>
-    </form>
+        <br />
+        <label htmlFor="signup_password">Password</label>
+        <br />
+        <input
+          type="password"
+          id="signup_password"
+          name="signup_password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <br />
+        <input type="submit" value="Sign up" />
+
+        <p>
+          Already have an account? <Link to="/login">Log in</Link>
+        </p>
+      </form>
+    </>
   );
 }
 
