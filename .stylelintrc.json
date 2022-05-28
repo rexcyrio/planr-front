@@ -9,6 +9,7 @@
         "hue-degree-notation": "number"
     },
     "ignoreFiles": [
+        "**/*.ts",
         "**/*.js",
         "**/node_modules"
     ]
