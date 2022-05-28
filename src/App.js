@@ -3,7 +3,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthContext } from "./store/AuthContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Logout from "./pages/Logout";
 import NavBar from "./components/layout/NavBar";
 import NoMatch from "./pages/NoMatch";
 import Private from "./pages/Private";
@@ -62,7 +61,6 @@ function App() {
           <Route path="/" exact element={<NavBar />}>
             <Route path="/" element={<Home />} />
             <Route path="/private" element={makePrivate(<Private />)} />
-            <Route path="/logout" element={makePrivate(<Logout />)} />
             <Route path="/login" element={makePublic(<Login />)} />
             <Route path="/signup" element={makePublic(<Signup />)} />
             <Route

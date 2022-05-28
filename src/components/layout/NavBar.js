@@ -1,10 +1,33 @@
 import React, { useContext } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../store/AuthContext";
 import logo from "./../../icons/logo.svg";
 
 function NavBar() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, setIsAuthenticated, setLoggedInUsername } =
+    useContext(AuthContext);
+  const navigate = useNavigate();
+
+  function logoutNow(e) {
+    e.preventDefault();
+
+    fetch("/logout", {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.logout_success) {
+          setIsAuthenticated(false);
+          setLoggedInUsername(null);
+          navigate("/login", { replace: true });
+        }
+      });
+  }
 
   return (
     <>
@@ -22,7 +45,7 @@ function NavBar() {
               <Link to="/private" className="navbar-buttons">
                 Private
               </Link>
-              <Link to="/logout" className="navbar-buttons">
+              <Link to="/login" className="navbar-buttons" onClick={logoutNow}>
                 Log out
               </Link>
             </>
