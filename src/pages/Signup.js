@@ -1,8 +1,8 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "./AuthContext";
-import checkmarkIcon from "./icons/icons8-checkmark-yes-32.png";
-import loadingIcon from "./icons/icons8-loading-circle.gif";
+import { AuthContext } from "../store/AuthContext";
+import checkmarkIcon from "./../icons/icons8-checkmark-yes-32.png";
+import loadingIcon from "./../icons/icons8-loading-circle.gif";
 
 function Signup() {
   const [username, setUsername] = useState("");

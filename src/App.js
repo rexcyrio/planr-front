@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AuthContext } from "./AuthContext";
-import Home from "./Home";
-import Login from "./Login";
-import Logout from "./Logout";
-import NavBar from "./NavBar";
-import NoMatch from "./NoMatch";
-import Private from "./Private";
-import ResetPassword from "./ResetPassword";
-import Signup from "./Signup";
+import { AuthContext } from "./store/AuthContext";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Logout from "./pages/Logout";
+import NavBar from "./components/layout/NavBar";
+import NoMatch from "./pages/NoMatch";
+import Private from "./pages/Private";
+import ResetPassword from "./pages/ResetPassword";
+import Signup from "./pages/Signup";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

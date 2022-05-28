@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { AuthContext } from "./AuthContext";
-import logo from "./icons/logo.svg";
+import { AuthContext } from "../../store/AuthContext";
+import logo from "./../../icons/logo.svg";
 
 function NavBar() {
   const { isAuthenticated } = useContext(AuthContext);

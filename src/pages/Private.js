@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../store/AuthContext";
 
 function Private() {
   const { loggedInUsername } = useContext(AuthContext);
