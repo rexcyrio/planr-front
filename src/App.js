@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthContext } from "./store/AuthContext";
-import Home from "./pages/Home";
 import Login from "./pages/Login";
 import NavBar from "./components/layout/NavBar";
 import NoMatch from "./pages/NoMatch";
@@ -59,7 +58,10 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" exact element={<NavBar />}>
-            <Route path="/" element={<Home />} />
+            <Route
+              path="/"
+              element={isAuthenticated ? <Private /> : <Login />}
+            />
             <Route path="/private" element={makePrivate(<Private />)} />
             <Route path="/login" element={makePublic(<Login />)} />
             <Route path="/signup" element={makePublic(<Signup />)} />

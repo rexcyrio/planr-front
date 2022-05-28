@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../store/AuthContext";
+import { Link } from "react-router-dom";
 import checkmarkIcon from "./../icons/icons8-checkmark-yes-32.png";
 import loadingIcon from "./../icons/icons8-loading-circle.gif";
 
@@ -150,6 +151,10 @@ function Signup() {
       />
       <br />
       <input type="submit" value="Sign up" />
+      <span>
+        already have an account?
+        <Link to="/login"> Log in</Link>
+      </span>
     </form>
   );
 }
