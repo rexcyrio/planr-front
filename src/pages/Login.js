@@ -22,13 +22,16 @@ function Login() {
     })
       .then((res) => {
         console.log(res);
-        if (res.status === 401) {
-          console.log("failed");
-        } else if (res.status === 200) {
+        if (res.status === 200) {
           return res.json();
-        } else {
-          console.log("others");
         }
+        setError(true);
+        setIsAuthenticated(false);
+        setLoggedInUsername(null);
+        if (res.status !== 401) {
+          alert("Something went wrong!");
+        }
+        return { login_success: false };
       })
       .then((json) => {
         console.log(json);
@@ -40,9 +43,6 @@ function Login() {
           navigate("/private", { replace: true });
         } else {
           console.log(false);
-          setError(true);
-          setIsAuthenticated(false);
-          setLoggedInUsername(null);
         }
       });
   }

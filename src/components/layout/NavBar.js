@@ -21,7 +21,7 @@ function NavBar() {
     })
       .then((res) => {
         console.log(res);
-        res.json();
+        return res.json();
       })
       .then((json) => {
         if (json.logout_success) {
