@@ -19,10 +19,7 @@ function NavBar() {
       },
       credentials: "same-origin",
     })
-      .then((res) => {
-        console.log(res);
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((json) => {
         if (json.logout_success) {
           setIsAuthenticated(false);

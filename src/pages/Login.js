@@ -21,28 +21,27 @@ function Login() {
       body: JSON.stringify({ username: username, password: password }),
     })
       .then((res) => {
-        console.log(res);
         if (res.status === 200) {
           return res.json();
         }
-        setError(true);
-        setIsAuthenticated(false);
-        setLoggedInUsername(null);
-        if (res.status !== 401) {
-          alert("Something went wrong!");
+        if (res.status === 401) {
+          return { login_success: false };
         }
-        return { login_success: false };
+        return { error: `Error ${res.status}: something went wrong!` };
       })
       .then((json) => {
-        console.log(json);
+        if (json.error) {
+          alert(json.error);
+          return;
+        }
+
         if (json.login_success) {
-          console.log(true);
           setError(false);
           setIsAuthenticated(true);
           setLoggedInUsername(json.loggedInUsername);
           navigate("/private", { replace: true });
         } else {
-          console.log(false);
+          setError(true);
         }
       });
   }
