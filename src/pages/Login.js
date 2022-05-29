@@ -42,6 +42,8 @@ function Login() {
           navigate("/private", { replace: true });
         } else {
           setError(true);
+          setUsername("");
+          setPassword("");
         }
       });
   }
