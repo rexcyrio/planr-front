@@ -22,7 +22,13 @@ function Login() {
     })
       .then((res) => {
         console.log(res);
-        return res.json();
+        if (res.status === 401) {
+          console.log("failed");
+        } else if (res.status === 200) {
+          return res.json();
+        } else {
+          console.log("others");
+        }
       })
       .then((json) => {
         console.log(json);
