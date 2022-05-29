@@ -22,8 +22,7 @@ function Login() {
     })
       .then((res) => {
         console.log(res);
-        res.json();
-        console.log("json read");
+        return res.json();
       })
       .then((json) => {
         console.log(json);
