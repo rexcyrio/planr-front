@@ -20,14 +20,21 @@ function Login() {
       },
       body: JSON.stringify({ username: username, password: password }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        console.log(res);
+        res.json();
+        console.log("json read");
+      })
       .then((json) => {
+        console.log(json);
         if (json.login_success) {
+          console.log(true);
           setError(false);
           setIsAuthenticated(true);
           setLoggedInUsername(json.loggedInUsername);
           navigate("/private", { replace: true });
         } else {
+          console.log(false);
           setError(true);
           setIsAuthenticated(false);
           setLoggedInUsername(null);
