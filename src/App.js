@@ -20,7 +20,7 @@ function App() {
   };
 
   useEffect(() => {
-    fetch("/is-authenticated", {
+    fetch("/api/is-authenticated", {
       method: "POST",
       headers: {
         Accept: "application/json",

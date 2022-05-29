@@ -9,7 +9,7 @@ function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/verify-password-reset-credentials", {
+    fetch("/api/verify-password-reset-credentials", {
       method: "POST",
       headers: {
         Accept: "application/json",
