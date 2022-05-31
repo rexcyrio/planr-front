@@ -20,7 +20,7 @@ function App() {
   };
 
   useEffect(() => {
-    fetch("/is-authenticated", {
+    fetch("/api/is-authenticated", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -31,6 +31,7 @@ function App() {
       .then((json) => {
         setIsAuthenticated(json.isAuthenticated);
         setLoggedInUsername(json.loggedInUsername);
+        console.log(`${json.loggedInUsername} set`);
       })
       .then(() => setIsLoading(false));
   }, []);

@@ -50,7 +50,7 @@ function Signup() {
 
     setError("FETCHING");
 
-    fetch("/is-username-available", {
+    fetch("/api/is-username-available", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -80,7 +80,7 @@ function Signup() {
       return;
     }
 
-    fetch("/signup", {
+    fetch("/api/signup", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -104,7 +104,7 @@ function Signup() {
   }
 
   function autoLogin() {
-    fetch("/login", {
+    fetch("/api/login", {
       method: "POST",
       headers: {
         Accept: "application/json",

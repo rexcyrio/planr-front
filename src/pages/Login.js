@@ -12,7 +12,7 @@ function Login() {
   function handleSubmit(event) {
     event.preventDefault();
 
-    fetch("/login", {
+    fetch("/api/login", {
       method: "POST",
       headers: {
         Accept: "application/json",
