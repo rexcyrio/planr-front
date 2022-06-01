@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../store/AuthContext";
 
-Links.propTypes = {
-  username: PropTypes.string,
-};
-
-function Links(props) {
-  console.log(props.username);
+function Links() {
+  const { loggedInUsername: username } = useContext(AuthContext);
   const [link, setLink] = useState("");
   const [error, setError] = useState("NONE");
   const [links, setLinks] = useState([]);
 
   useEffect(() => {
-    fetch(`/api/private/link?username=${props.username}`)
+    fetch(`/api/private/link?username=${username}`)
       .then((res) => res.json())
       .then((json) => {
-        console.log(json);
+        console.log(`json from fetch links is ${json}`);
+        console.log(`json.links is ${json.links}`);
         setLinks(json.links);
       });
   }, []);
@@ -32,18 +29,18 @@ function Links(props) {
       return;
     }
     setLink("");
-    console.log(props.username);
-    console.log(link);
+    console.log(`${username} sent`);
+    console.log(`${link} sent`);
     fetch("/api/private/link", {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username: props.username, link }),
+      body: JSON.stringify({ username: username, link }),
     })
       .then((res) => {
-        res.json();
+        return res.json();
       })
       .then((json) => {
         setLinks(json.links);

@@ -31,7 +31,7 @@ function App() {
       .then((json) => {
         setIsAuthenticated(json.isAuthenticated);
         setLoggedInUsername(json.loggedInUsername);
-        console.log(`${json.loggedInUsername} set`);
+        console.log(`${json.loggedInUsername} set in app`);
       })
       .then(() => setIsLoading(false));
   }, []);

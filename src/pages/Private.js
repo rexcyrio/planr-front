@@ -4,12 +4,11 @@ import { AuthContext } from "../store/AuthContext";
 
 function Private() {
   const { loggedInUsername } = useContext(AuthContext);
-  console.log(loggedInUsername);
   return (
     <>
       <h1>Welcome {loggedInUsername}!</h1>
       <h2>This is the private page.</h2>
-      <Links usename={loggedInUsername} />
+      <Links />
     </>
   );
 }
