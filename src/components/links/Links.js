@@ -48,18 +48,36 @@ function Links() {
   };
 
   const openAllLinksHandler = () => {
-    links.forEach((link) => {
-      window.open(link);
+    links.forEach((link, idx) => {
+      window.open(link, `${idx}`, "popup=false");
     });
+  };
+
+  const removeLinkHandler = (link) => {
+    fetch(`/api/private/link?username=${username}`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ link }),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        setLinks(json.links);
+      });
   };
 
   return (
     <div>
       <div>
         {links.map((link) => (
-          <a key={link} href={`${link}`}>
-            {link}
-          </a>
+          <div key={link}>
+            <a href={`${link}`}>{link}</a>
+            <button onClick={() => removeLinkHandler(link)}>remove</button>
+          </div>
         ))}
       </div>
       <button onClick={openAllLinksHandler}>Open all</button>
