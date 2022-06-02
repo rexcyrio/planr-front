@@ -19,15 +19,15 @@ function Links() {
 
   const addLinkHandler = () => {
     event.preventDefault();
+    setError("NONE");
     if (!link.includes(".com")) {
       setError("INVALID_LINK");
-    } else {
-      setError("NONE");
-    }
-
-    if (error !== "NONE") {
+      return;
+    } else if (links.includes(link)) {
+      setError("DUPLICATE");
       return;
     }
+
     setLink("");
     console.log(`${username} sent`);
     console.log(`${link} sent`);
@@ -70,6 +70,17 @@ function Links() {
       });
   };
 
+  const errorMessage = () => {
+    switch (error) {
+      case "INVALID_LINK":
+        return <span>Invalid link!.</span>;
+      case "DUPLICATE":
+        return <span>Duplicate link!.</span>;
+      case "NONE":
+        return <></>;
+    }
+  };
+
   return (
     <div>
       <div>
@@ -92,11 +103,7 @@ function Links() {
         ></input>
         <input type="submit" value="Add" />
       </form>
-      {error !== "NONE" ? (
-        <span className="red-text">Invalid link!.</span>
-      ) : (
-        <></>
-      )}
+      {errorMessage()}
     </div>
   );
 }
