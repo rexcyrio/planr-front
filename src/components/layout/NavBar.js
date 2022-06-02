@@ -11,7 +11,7 @@ function NavBar() {
   function logoutNow(e) {
     e.preventDefault();
 
-    fetch("/logout", {
+    fetch("/api/logout", {
       method: "DELETE",
       headers: {
         Accept: "application/json",
