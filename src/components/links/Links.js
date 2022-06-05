@@ -3,7 +3,7 @@ import { AuthContext } from "../../store/AuthContext";
 
 function Links() {
   const { loggedInUsername: username } = useContext(AuthContext);
-  const [link, setLink] = useState("");
+  const [link, setLink] = useState("https://");
   const [error, setError] = useState("NONE");
   const [links, setLinks] = useState([]);
 
@@ -28,7 +28,7 @@ function Links() {
       return;
     }
 
-    setLink("");
+    setLink("https://");
     console.log(`${username} sent`);
     console.log(`${link} sent`);
     fetch("/api/private/link", {
