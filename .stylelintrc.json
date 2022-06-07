@@ -11,6 +11,7 @@
   "ignoreFiles": [
     "**/*.ts",
     "**/*.js",
+    "**/*.html",
     "**/node_modules"
   ]
 }

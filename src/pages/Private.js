@@ -1,12 +1,28 @@
-import React, { useContext } from "react";
-import { AuthContext } from "../store/AuthContext";
+import React from "react";
+import Links from "../components/Links";
+import Notes from "../components/Notes";
+import Tasks from "../components/Tasks";
+import Timetable from "../components/Timetable";
 
 function Private() {
-  const { loggedInUsername } = useContext(AuthContext);
   return (
     <>
-      <h1>Welcome {loggedInUsername}!</h1>
-      <h2>This is the private page.</h2>
+      <div className="background">
+        <div className="grid">
+          <div className="links-section">
+            <Links />
+          </div>
+          <div className="notes-section">
+            <Notes />
+          </div>
+          <div className="tasks-section">
+            <Tasks />
+          </div>
+          <div className="timetable-section">
+            <Timetable />
+          </div>
+        </div>
+      </div>
     </>
   );
 }
