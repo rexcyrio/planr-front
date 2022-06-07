@@ -1,0 +1,2 @@
+/api/* https://cryptic-beyond-85342.herokuapp.com/api/:splat 200
+/* /index.html 200

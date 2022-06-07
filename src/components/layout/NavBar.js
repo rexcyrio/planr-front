@@ -1,3 +1,5 @@
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import React, { useContext } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../store/AuthContext";
@@ -39,25 +41,21 @@ function NavBar() {
           </div>
         </Link>
 
-        <div className="navbar-buttons-container">
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           {isAuthenticated ? (
-            <>
-              <Link to="/private" className="navbar-buttons">
-                Private
-              </Link>
-              <Link to="/login" className="navbar-buttons" onClick={logoutNow}>
-                Log out
-              </Link>
-            </>
+            <Button sx={{ mr: "1rem" }} onClick={logoutNow}>
+              Log out
+            </Button>
           ) : (
-            <>
-              <Link to="/signup" className="navbar-buttons">
+            <Link to="/signup">
+              <Button sx={{ mr: "1rem" }} variant="contained">
                 Sign up
-              </Link>
-            </>
+              </Button>
+            </Link>
           )}
-        </div>
+        </Box>
       </nav>
+
       <Outlet />
     </>
   );

@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AuthContext } from "./store/AuthContext";
-import Login from "./pages/Login";
 import NavBar from "./components/layout/NavBar";
+import Login from "./pages/Login";
 import NoMatch from "./pages/NoMatch";
 import Private from "./pages/Private";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
+import { AuthContext } from "./store/AuthContext";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loggedInUsername, setLoggedInUsername] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const value = {
     isAuthenticated: isAuthenticated,
     loggedInUsername: loggedInUsername,
+    userData: userData,
     setLoggedInUsername: setLoggedInUsername,
     setIsAuthenticated: setIsAuthenticated,
+    setUserData: setUserData,
   };
 
   useEffect(() => {
@@ -31,7 +34,7 @@ function App() {
       .then((json) => {
         setIsAuthenticated(json.isAuthenticated);
         setLoggedInUsername(json.loggedInUsername);
-        console.log(`${json.loggedInUsername} set in app`);
+        setUserData(json.userData);
       })
       .then(() => setIsLoading(false));
   }, []);

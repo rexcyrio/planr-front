@@ -1,82 +1,117 @@
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
 import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../store/AuthContext";
-import { Link } from "react-router-dom";
-import checkmarkIcon from "./../icons/icons8-checkmark-yes-32.png";
-import loadingIcon from "./../icons/icons8-loading-circle.gif";
 
 function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("NONE");
-  const { setIsAuthenticated, setLoggedInUsername } = useContext(AuthContext);
+  const [usernameState, setUsernameState] = useState("NONE");
+  const { setIsAuthenticated, setLoggedInUsername, setUserData } =
+    useContext(AuthContext);
   const navigate = useNavigate();
 
   // match A-Z, a-z, 0-9, "_"
   const usernameRegex = /^\w+$/g;
-  const allErrors = {
-    NONE: <></>,
-    FETCHING: (
-      <img src={loadingIcon} alt="Loading..." className="icon-beside-input" />
-    ),
-    ALL_GOOD: (
-      <img src={checkmarkIcon} alt="All good!" className="icon-beside-input" />
-    ),
-    USERNAME_ALREADY_IN_USE: (
-      <span className="red-text text-beside-input">
-        Please choose another username
-      </span>
-    ),
-    USERNAME_INCORRECT_FORMAT: (
-      <span className="red-text text-beside-input">
-        Only A-Z, a-z, 0-9 and _ (underscore) is allowed
-      </span>
-    ),
+
+  const usernameStates = {
+    NONE: {
+      icon: <></>,
+      helperText: " ",
+      isError: false,
+    },
+
+    FETCHING: {
+      icon: (
+        // padding values needed to align CircularProgress with CheckCircleOutlineIcon
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            p: "0 0.15rem",
+          }}
+        >
+          <CircularProgress size="1.2rem" />
+        </Box>
+      ),
+      helperText: " ",
+      isError: false,
+    },
+
+    ALL_GOOD: {
+      icon: (
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <CheckCircleOutlineIcon sx={{ color: "green" }} />
+        </Box>
+      ),
+      helperText: " ",
+      isError: false,
+    },
+
+    USERNAME_ALREADY_IN_USE: {
+      icon: <></>,
+      helperText: "Please choose another username",
+      isError: true,
+    },
+
+    USERNAME_INCORRECT_FORMAT: {
+      icon: <></>,
+      helperText: "Only A-Z, a-z, 0-9 and _ (underscore) is allowed",
+      isError: true,
+    },
   };
+
+  async function isUsernameAvailable(username) {
+    const res = await fetch("/api/is-username-available", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username: username }),
+    });
+
+    const json = await res.json();
+
+    if (json.error) {
+      alert(json.error);
+    } else {
+      return json.isAvailable;
+    }
+  }
 
   async function handleUsernameChange(event) {
     const newUsername = event.target.value;
     setUsername(newUsername);
 
     if (newUsername === "") {
-      setError("NONE");
+      setUsernameState("NONE");
       return;
     }
 
     if (!newUsername.match(usernameRegex)) {
-      setError("USERNAME_INCORRECT_FORMAT");
+      setUsernameState("USERNAME_INCORRECT_FORMAT");
       return;
     }
 
-    setError("FETCHING");
+    setUsernameState("FETCHING");
 
-    fetch("/api/is-username-available", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username: newUsername }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.error) {
-          alert(json.error);
-          return;
-        }
-
-        if (json.isAvailable) {
-          setError("ALL_GOOD");
-        } else {
-          setError("USERNAME_ALREADY_IN_USE");
-        }
-      });
+    if (await isUsernameAvailable(newUsername)) {
+      setUsernameState("ALL_GOOD");
+    } else {
+      setUsernameState("USERNAME_ALREADY_IN_USE");
+    }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    if (error !== "ALL_GOOD") {
+    if (!(await isUsernameAvailable(username))) {
       return;
     }
 
@@ -97,8 +132,6 @@ function Signup() {
 
         if (json.signup_success) {
           autoLogin();
-        } else {
-          alert("Sign up for new user failed.");
         }
       });
   }
@@ -117,6 +150,7 @@ function Signup() {
         if (json.login_success) {
           setIsAuthenticated(true);
           setLoggedInUsername(json.loggedInUsername);
+          setUserData(json.userData);
           navigate("/private", { replace: true });
         } else {
           alert(json.error);
@@ -126,38 +160,57 @@ function Signup() {
 
   return (
     <>
-      <h1>Create a new account</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="signup_username">Username</label>
-        <br />
-        <input
-          type="text"
-          id="signup_username"
-          name="signup_username"
-          value={username}
-          onChange={handleUsernameChange}
-          required
-        />
-        {allErrors[error]}
-
-        <br />
-        <label htmlFor="signup_password">Password</label>
-        <br />
-        <input
-          type="password"
-          id="signup_password"
-          name="signup_password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <br />
-        <input type="submit" value="Sign up" />
+      <Box
+        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      >
+        <h1>Create a new account</h1>
+        <Box component="form" onSubmit={handleSubmit}>
+          <TextField
+            sx={{ mb: "1rem", width: "20rem" }}
+            id="username"
+            label="Username"
+            type="text"
+            variant="outlined"
+            required
+            value={username}
+            onChange={handleUsernameChange}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {usernameStates[usernameState].icon}
+                </InputAdornment>
+              ),
+            }}
+            helperText={usernameStates[usernameState].helperText}
+            error={usernameStates[usernameState].isError}
+          />
+          <br />
+          <TextField
+            sx={{ mb: "1rem", width: "20rem" }}
+            id="password"
+            label="Password"
+            type="password"
+            variant="outlined"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            helperText=" "
+          />
+          <br />
+          <Button
+            sx={{ mb: "1rem" }}
+            type="submit"
+            variant="contained"
+            fullWidth
+          >
+            Sign up
+          </Button>
+        </Box>
 
         <p>
           Already have an account? <Link to="/login">Log in</Link>
         </p>
-      </form>
+      </Box>
     </>
   );
 }
