@@ -1,6 +1,6 @@
 import React from "react";
-import Links from "../components/Links";
-import Notes from "../components/Notes";
+import Links from "../components/links/Links";
+import Notes from "../components/notes/Notes";
 import Tasks from "../components/Tasks";
 import Timetable from "../components/Timetable";
 

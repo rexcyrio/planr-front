@@ -8,7 +8,7 @@ import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
 import React, { useState, useEffect, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { AuthContext } from "../store/AuthContext";
+import { AuthContext } from "../../store/AuthContext";
 import styles from "./Notes.module.css";
 
 function Notes() {
