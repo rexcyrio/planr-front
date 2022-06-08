@@ -6,13 +6,27 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { AuthContext } from "../store/AuthContext";
 import styles from "./Notes.module.css";
 
 function Notes() {
   const [notes, setNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
+  const { userData, setUserData, loggedInUsername } = useContext(AuthContext);
+
+  const loadNotes = () => {
+    fetch(`/api/private/notes/get-notes?username=${loggedInUsername}`)
+      .then((res) => res.json())
+      .then((json) => {
+        setNotes(json.notes);
+      });
+  };
+
+  useEffect(() => {
+    loadNotes();
+  }, []);
 
   function insertNote() {
     const trimmedText = newNoteText.trim();
@@ -23,17 +37,43 @@ function Notes() {
         text: trimmedText,
         isEditMode: false,
       };
-      setNotes([...notes, newNote]);
+
+      addNoteToDatabase(newNote);
     }
 
     setNewNoteText("");
   }
 
-  function deleteNote(self) {
-    const t = notes.filter((each) => each._id !== self._id);
-    setNotes(t);
+  function addNoteToDatabase(note) {
+    fetch("/api/private/notes/add-note", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username: loggedInUsername, note }),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        if (json.error) {
+          alert(json.error);
+          return;
+        }
+
+        setNotes(json.notes);
+        userData.notes = json.notes;
+        setUserData({ ...userData });
+      });
   }
 
+  function deleteNote(self) {
+    const t = notes.filter((each) => each._id !== self._id);
+    updateNotesInDatabase(t);
+  }
+
+  //maybe
   function updateText(self, text) {
     const newNote = {
       _id: self._id,
@@ -46,6 +86,7 @@ function Notes() {
     setNotes([...notes]);
   }
 
+  //maybe
   function updateEditMode(self, newMode) {
     const newNote = {
       _id: self._id,
@@ -67,7 +108,31 @@ function Notes() {
 
     const index = notes.findIndex((each) => each._id === self._id);
     notes[index] = newNote;
-    setNotes([...notes]);
+    updateNotesInDatabase(notes);
+  }
+
+  function updateNotesInDatabase(notes) {
+    fetch("/api/private/notes/update-notes", {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username: loggedInUsername, notes }),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        if (json.error) {
+          alert(json.error);
+          return;
+        }
+
+        setNotes(json.notes);
+        userData.notes = json.notes;
+        setUserData({ ...userData });
+      });
   }
 
   function handleDoubleClick(self) {

@@ -34,7 +34,7 @@ function Links() {
   }
 
   const loadLinks = () => {
-    fetch(`/api/private/link/get-link?username=${loggedInUsername}`)
+    fetch(`/api/private/links/get-links?username=${loggedInUsername}`)
       .then((res) => res.json())
       .then((json) => {
         setLinks(json.links);
@@ -108,7 +108,7 @@ function Links() {
   };
 
   function updateLinksInDatabase(links) {
-    fetch("/api/private/link/update-links", {
+    fetch("/api/private/links/update-links", {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -199,7 +199,7 @@ function Links() {
   }
 
   function addLinkToDatabase(link) {
-    fetch("/api/private/link/add-link", {
+    fetch("/api/private/links/add-link", {
       method: "POST",
       headers: {
         Accept: "application/json",
