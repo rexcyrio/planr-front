@@ -87,6 +87,8 @@ function Links() {
         };
         newLinks.push(newLink);
       }
+
+      updateLinksInDatabase(newLinks);
     } else {
       for (const link of links) {
         const newLink = {
@@ -98,10 +100,10 @@ function Links() {
           url: link.url,
         };
         newLinks.push(newLink);
+        setLinks(newLinks);
       }
     }
     await sleep(150);
-    updateLinksInDatabase(newLinks);
     // setLinks(newLinks);
   };
 
@@ -144,6 +146,7 @@ function Links() {
     setLinks([...links]);
   }
 
+  //not really needed
   function updateTempName(self, _name) {
     const newLink = {
       _id: self._id,
@@ -159,6 +162,7 @@ function Links() {
     setLinks([...links]);
   }
 
+  //not really needed
   function updateTempURL(self, _url) {
     const newLink = {
       _id: self._id,
