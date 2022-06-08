@@ -33,18 +33,16 @@ function Links() {
     });
   }
 
+  const loadLinks = () => {
+    fetch(`/api/private/link/get-link?username=${loggedInUsername}`)
+      .then((res) => res.json())
+      .then((json) => {
+        setLinks(json.links);
+      });
+  };
+
   useEffect(() => {
-    setLinks([
-      {
-        _id: "1",
-        _toBeDeleted: false,
-        _name: "Google",
-        _url: "https://google.com",
-        name: "Google",
-        url: "https://google.com",
-      },
-    ]);
-    // setLinks([...userData.links]);
+    loadLinks();
   }, []);
 
   function openAllLinks() {
@@ -161,36 +159,62 @@ function Links() {
       url: newURL,
     };
 
-    const newLinks = [...links, t];
-    setLinks(newLinks);
+    addLinkToDatabase(t);
 
-    userData.links = newLinks;
-    setUserData({ ...userData });
-    updateDatabase();
+    // const newLinks = [...links, t];
+    // setLinks(newLinks);
+
+    // userData.links = newLinks;
+    // setUserData({ ...userData });
+    // updateDatabase();
   }
 
-  function updateDatabase() {
-    fetch("/api/update-data", {
-      method: "PUT",
+  function addLinkToDatabase(link) {
+    fetch("/api/private/link/add-link", {
+      method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username: loggedInUsername, userData: userData }),
+      body: JSON.stringify({ username: loggedInUsername, link }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        return res.json();
+      })
       .then((json) => {
         if (json.error) {
           alert(json.error);
           return;
         }
 
-        if (json.update_success) {
-          console.log("successfully updated ; new data is");
-          console.log(userData);
-        }
+        setLinks(json.links);
+        userData.links = json.links;
+        setUserData({ ...userData });
       });
   }
+
+  // function updateDatabase() {
+  //   fetch("/api/update-data", {
+  //     method: "PUT",
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ username: loggedInUsername, userData: userData }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((json) => {
+  //       if (json.error) {
+  //         alert(json.error);
+  //         return;
+  //       }
+
+  //       if (json.update_success) {
+  //         console.log("successfully updated ; new data is");
+  //         console.log(userData);
+  //       }
+  //     });
+  // }
 
   return (
     <>
