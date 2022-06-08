@@ -101,8 +101,33 @@ function Links() {
       }
     }
     await sleep(150);
-    setLinks(newLinks);
+    updateLinksInDatabase(newLinks);
+    // setLinks(newLinks);
   };
+
+  function updateLinksInDatabase(links) {
+    fetch("/api/private/link/update-links", {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username: loggedInUsername, links }),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        if (json.error) {
+          alert(json.error);
+          return;
+        }
+
+        setLinks(json.links);
+        userData.links = json.links;
+        setUserData({ ...userData });
+      });
+  }
 
   function toggleToBeDeleted(self) {
     const newLink = {
