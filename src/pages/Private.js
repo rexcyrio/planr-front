@@ -1,8 +1,8 @@
 import React from "react";
 import Links from "../components/links/Links";
 import Notes from "../components/notes/Notes";
-import Tasks from "../components/Tasks";
-import Timetable from "../components/Timetable";
+import Tasks from "../components/tasks/Tasks";
+import Timetable from "../components/timetable/Timetable";
 
 function Private() {
   return (
