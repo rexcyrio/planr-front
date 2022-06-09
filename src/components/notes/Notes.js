@@ -17,7 +17,7 @@ function Notes() {
   const { userData, setUserData, loggedInUsername } = useContext(AuthContext);
 
   const loadNotes = () => {
-    fetch(`/api/private/notes/get-notes?username=${loggedInUsername}`)
+    fetch(`/api/private/notes?username=${loggedInUsername}`)
       .then((res) => res.json())
       .then((json) => {
         setNotes(json.notes);
@@ -45,7 +45,7 @@ function Notes() {
   }
 
   function addNoteToDatabase(note) {
-    fetch("/api/private/notes/add-note", {
+    fetch("/api/private/notes", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -112,7 +112,7 @@ function Notes() {
   }
 
   function updateNotesInDatabase(notes) {
-    fetch("/api/private/notes/update-notes", {
+    fetch("/api/private/notes", {
       method: "PUT",
       headers: {
         Accept: "application/json",
