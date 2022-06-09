@@ -14,18 +14,14 @@ import styles from "./Notes.module.css";
 function Notes() {
   const [notes, setNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
-  const { userData, setUserData, loggedInUsername } = useContext(AuthContext);
+  const { loggedInUsername } = useContext(AuthContext);
 
-  const loadNotes = () => {
+  useEffect(() => {
     fetch(`/api/private/notes?username=${loggedInUsername}`)
       .then((res) => res.json())
       .then((json) => {
         setNotes(json.notes);
       });
-  };
-
-  useEffect(() => {
-    loadNotes();
   }, []);
 
   function insertNote() {
@@ -53,9 +49,7 @@ function Notes() {
       },
       body: JSON.stringify({ username: loggedInUsername, note }),
     })
-      .then((res) => {
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((json) => {
         if (json.error) {
           alert(json.error);
@@ -63,17 +57,14 @@ function Notes() {
         }
 
         setNotes(json.notes);
-        userData.notes = json.notes;
-        setUserData({ ...userData });
       });
   }
 
   function deleteNote(self) {
-    const t = notes.filter((each) => each._id !== self._id);
-    updateNotesInDatabase(t);
+    const newNotes = notes.filter((each) => each._id !== self._id);
+    updateNotesInDatabase(newNotes);
   }
 
-  //maybe
   function updateText(self, text) {
     const newNote = {
       _id: self._id,
@@ -81,12 +72,16 @@ function Notes() {
       isEditMode: self.isEditMode,
     };
 
-    const index = notes.findIndex((each) => each._id === self._id);
-    notes[index] = newNote;
-    setNotes([...notes]);
+    setNotes((prev) => {
+      const index = prev.findIndex((each) => each._id === self._id);
+      return [
+        ...prev.slice(0, index),
+        newNote,
+        ...prev.slice(index + 1, prev.length),
+      ];
+    });
   }
 
-  //maybe
   function updateEditMode(self, newMode) {
     const newNote = {
       _id: self._id,
@@ -94,9 +89,14 @@ function Notes() {
       isEditMode: newMode,
     };
 
-    const index = notes.findIndex((each) => each._id === self._id);
-    notes[index] = newNote;
-    setNotes([...notes]);
+    setNotes((prev) => {
+      const index = prev.findIndex((each) => each._id === self._id);
+      return [
+        ...prev.slice(0, index),
+        newNote,
+        ...prev.slice(index + 1, prev.length),
+      ];
+    });
   }
 
   function exitEditMode(self) {
@@ -107,8 +107,12 @@ function Notes() {
     };
 
     const index = notes.findIndex((each) => each._id === self._id);
-    notes[index] = newNote;
-    updateNotesInDatabase(notes);
+    const newNotes = [
+      ...notes.slice(0, index),
+      newNote,
+      ...notes.slice(index + 1, notes.length),
+    ];
+    updateNotesInDatabase(newNotes);
   }
 
   function updateNotesInDatabase(notes) {
@@ -130,8 +134,6 @@ function Notes() {
         }
 
         setNotes(json.notes);
-        userData.notes = json.notes;
-        setUserData({ ...userData });
       });
   }
 

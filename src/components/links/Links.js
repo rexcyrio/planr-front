@@ -20,8 +20,8 @@ import styles from "./Links.module.css";
 function Links() {
   const [links, setLinks] = useState([]);
   const [newName, setNewName] = useState("");
-  const [newURL, setNewURL] = useState("");
-  const { userData, setUserData, loggedInUsername } = useContext(AuthContext);
+  const [newURL, setNewURL] = useState("https://");
+  const { loggedInUsername } = useContext(AuthContext);
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
 
@@ -33,16 +33,12 @@ function Links() {
     });
   }
 
-  const loadLinks = () => {
-    fetch(`/api/private/links/?username=${loggedInUsername}`)
+  useEffect(() => {
+    fetch(`/api/private/links?username=${loggedInUsername}`)
       .then((res) => res.json())
       .then((json) => {
         setLinks(json.links);
       });
-  };
-
-  useEffect(() => {
-    loadLinks();
   }, []);
 
   function openAllLinks() {
@@ -58,7 +54,7 @@ function Links() {
   const add_closeDialog = () => {
     add_setOpen(false);
     setNewName("");
-    setNewURL("");
+    setNewURL("https://");
   };
 
   const edit_openDialog = () => {
@@ -100,8 +96,8 @@ function Links() {
           url: link.url,
         };
         newLinks.push(newLink);
-        setLinks(newLinks);
       }
+      setLinks(newLinks);
     }
     await sleep(150);
     // setLinks(newLinks);
@@ -126,8 +122,6 @@ function Links() {
         }
 
         setLinks(json.links);
-        userData.links = json.links;
-        setUserData({ ...userData });
       });
   }
 
@@ -141,12 +135,16 @@ function Links() {
       url: self.url,
     };
 
-    const index = links.findIndex((each) => each._id === self._id);
-    links[index] = newLink;
-    setLinks([...links]);
+    setLinks((prev) => {
+      const index = prev.findIndex((each) => each._id === self._id);
+      return [
+        ...prev.slice(0, index),
+        newLink,
+        ...prev.slice(index + 1, prev.length),
+      ];
+    });
   }
 
-  //not really needed
   function updateTempName(self, _name) {
     const newLink = {
       _id: self._id,
@@ -157,12 +155,16 @@ function Links() {
       url: self.url,
     };
 
-    const index = links.findIndex((each) => each._id === self._id);
-    links[index] = newLink;
-    setLinks([...links]);
+    setLinks((prev) => {
+      const index = prev.findIndex((each) => each._id === self._id);
+      return [
+        ...prev.slice(0, index),
+        newLink,
+        ...prev.slice(index + 1, prev.length),
+      ];
+    });
   }
 
-  //not really needed
   function updateTempURL(self, _url) {
     const newLink = {
       _id: self._id,
@@ -173,13 +175,18 @@ function Links() {
       url: self.url,
     };
 
-    const index = links.findIndex((each) => each._id === self._id);
-    links[index] = newLink;
-    setLinks([...links]);
+    setLinks((prev) => {
+      const index = prev.findIndex((each) => each._id === self._id);
+      return [
+        ...prev.slice(0, index),
+        newLink,
+        ...prev.slice(index + 1, prev.length),
+      ];
+    });
   }
 
   function addNewLink() {
-    const t = {
+    const newLink = {
       _id: uuidv4(),
       _toBeDeleted: false,
       _name: newName,
@@ -188,14 +195,7 @@ function Links() {
       url: newURL,
     };
 
-    addLinkToDatabase(t);
-
-    // const newLinks = [...links, t];
-    // setLinks(newLinks);
-
-    // userData.links = newLinks;
-    // setUserData({ ...userData });
-    // updateDatabase();
+    addLinkToDatabase(newLink);
   }
 
   function addLinkToDatabase(link) {
@@ -207,9 +207,7 @@ function Links() {
       },
       body: JSON.stringify({ username: loggedInUsername, link }),
     })
-      .then((res) => {
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((json) => {
         if (json.error) {
           alert(json.error);
@@ -217,33 +215,8 @@ function Links() {
         }
 
         setLinks(json.links);
-        userData.links = json.links;
-        setUserData({ ...userData });
       });
   }
-
-  // function updateDatabase() {
-  //   fetch("/api/update-data", {
-  //     method: "PUT",
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ username: loggedInUsername, userData: userData }),
-  //   })
-  //     .then((res) => res.json())
-  //     .then((json) => {
-  //       if (json.error) {
-  //         alert(json.error);
-  //         return;
-  //       }
-
-  //       if (json.update_success) {
-  //         console.log("successfully updated ; new data is");
-  //         console.log(userData);
-  //       }
-  //     });
-  // }
 
   return (
     <>
