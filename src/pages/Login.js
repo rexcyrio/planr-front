@@ -10,7 +10,8 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
-  const { setIsAuthenticated, setLoggedInUsername } = useContext(AuthContext);
+  const { setIsAuthenticated, setLoggedInUsername, setUserId } =
+    useContext(AuthContext);
   const navigate = useNavigate();
 
   function handleSubmit(event) {
@@ -43,6 +44,7 @@ function Login() {
           setError(false);
           setIsAuthenticated(true);
           setLoggedInUsername(json.loggedInUsername);
+          setUserId(json.userId);
           navigate("/private", { replace: true });
         } else {
           setError(true);

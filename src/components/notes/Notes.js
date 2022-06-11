@@ -1,6 +1,8 @@
 import DeleteIcon from "@mui/icons-material/Delete";
+import { CircularProgress, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
+import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -15,6 +17,7 @@ function Notes() {
   const [notes, setNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
   const { userId } = useContext(AuthContext);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     fetch(`/api/private/notes?id=${userId}`)
@@ -34,7 +37,9 @@ function Notes() {
         isEditMode: false,
       };
 
+      setUpdating(true);
       addNoteToDatabase(newNote);
+      setNotes([...notes, newNote]);
     }
 
     setNewNoteText("");
@@ -56,13 +61,15 @@ function Notes() {
           return;
         }
 
-        setNotes(json.notes);
+        setUpdating(false);
       });
   }
 
   function deleteNote(self) {
     const newNotes = notes.filter((each) => each._id !== self._id);
+    setUpdating(true);
     updateNotesInDatabase(newNotes);
+    setNotes(newNotes);
   }
 
   function updateText(self, text) {
@@ -112,7 +119,9 @@ function Notes() {
       newNote,
       ...notes.slice(index + 1, notes.length),
     ];
+    setUpdating(true);
     updateNotesInDatabase(newNotes);
+    setNotes(newNotes);
   }
 
   function updateNotesInDatabase(notes) {
@@ -133,7 +142,7 @@ function Notes() {
           return;
         }
 
-        setNotes(json.notes);
+        setUpdating(false);
       });
   }
 
@@ -145,10 +154,35 @@ function Notes() {
     }
     updateEditMode(self, true);
   }
-
+  updating;
   return (
     <>
-      <h1>Notes</h1>
+      <div className={styles.title}>
+        <h1>Notes</h1>
+        <div>
+          {updating ? (
+            <Tooltip title="Updating Database">
+              <CircularProgress
+                size={24}
+                sx={{
+                  padding: "8px",
+                  verticalAlign: "middle",
+                }}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip title="In sync with database">
+              <DownloadDoneIcon
+                color="success"
+                sx={{
+                  padding: "8px",
+                  verticalAlign: "middle",
+                }}
+              />
+            </Tooltip>
+          )}
+        </div>
+      </div>
       <div className={styles["main-container"]}>
         {notes.length > 0 ? (
           <List dense={true} sx={{ maxWidth: "15rem", p: "0px" }}>

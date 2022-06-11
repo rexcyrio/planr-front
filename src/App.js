@@ -7,6 +7,15 @@ import Private from "./pages/Private";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
 import { AuthContext } from "./store/AuthContext";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+const theme = createTheme({
+  palette: {
+    success: {
+      main: "#64dd17",
+    },
+  },
+});
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -59,30 +68,32 @@ function App() {
     <></>
   ) : (
     <AuthContext.Provider value={value}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" exact element={<NavBar />}>
-            <Route
-              path="/"
-              element={
-                isAuthenticated ? (
-                  <Navigate replace to="/private" />
-                ) : (
-                  <Navigate replace to="/login" />
-                )
-              }
-            />
-            <Route path="/private" element={makePrivate(<Private />)} />
-            <Route path="/login" element={makePublic(<Login />)} />
-            <Route path="/signup" element={makePublic(<Signup />)} />
-            <Route
-              path="/reset-password/:_id/:token"
-              element={makePublic(<ResetPassword />)}
-            />
-            <Route path="*" element={<NoMatch />} status={404} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" exact element={<NavBar />}>
+              <Route
+                path="/"
+                element={
+                  isAuthenticated ? (
+                    <Navigate replace to="/private" />
+                  ) : (
+                    <Navigate replace to="/login" />
+                  )
+                }
+              />
+              <Route path="/private" element={makePrivate(<Private />)} />
+              <Route path="/login" element={makePublic(<Login />)} />
+              <Route path="/signup" element={makePublic(<Signup />)} />
+              <Route
+                path="/reset-password/:_id/:token"
+                element={makePublic(<ResetPassword />)}
+              />
+              <Route path="*" element={<NoMatch />} status={404} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </AuthContext.Provider>
   );
 }

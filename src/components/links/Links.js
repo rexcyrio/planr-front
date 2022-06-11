@@ -1,5 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CircularProgress from "@mui/material/CircularProgress";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import Box from "@mui/material/Box";
@@ -8,6 +9,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
@@ -24,6 +26,7 @@ function Links() {
   const { userId } = useContext(AuthContext);
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   async function sleep(ms) {
     return new Promise((resolve) => {
@@ -85,6 +88,7 @@ function Links() {
         newLinks.push(newLink);
       }
 
+      setUpdating(true);
       updateLinksInDatabase(newLinks);
     } else {
       for (const link of links) {
@@ -98,10 +102,9 @@ function Links() {
         };
         newLinks.push(newLink);
       }
-      setLinks(newLinks);
     }
     await sleep(150);
-    // setLinks(newLinks);
+    setLinks(newLinks);
   };
 
   function updateLinksInDatabase(links) {
@@ -122,7 +125,7 @@ function Links() {
           return;
         }
 
-        setLinks(json.links);
+        setUpdating(false);
       });
   }
 
@@ -195,8 +198,9 @@ function Links() {
       name: newName,
       url: newURL,
     };
-
+    setUpdating(true);
     addLinkToDatabase(newLink);
+    setLinks([...links, newLink]);
   }
 
   function addLinkToDatabase(link) {
@@ -215,15 +219,36 @@ function Links() {
           return;
         }
 
-        setLinks(json.links);
+        setUpdating(false);
       });
   }
-
+  updating;
   return (
     <>
       <div className={styles.title}>
         <h1>Links</h1>
         <div>
+          {updating ? (
+            <Tooltip title="Updating Database">
+              <CircularProgress
+                size={24}
+                sx={{
+                  padding: "8px",
+                  verticalAlign: "middle",
+                }}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip title="In sync with database">
+              <DownloadDoneIcon
+                color="success"
+                sx={{
+                  padding: "8px",
+                  verticalAlign: "middle",
+                }}
+              />
+            </Tooltip>
+          )}
           <Tooltip title="Edit">
             <IconButton onClick={edit_openDialog}>
               <EditIcon />
