@@ -21,7 +21,7 @@ function Links() {
   const [links, setLinks] = useState([]);
   const [newName, setNewName] = useState("");
   const [newURL, setNewURL] = useState("https://");
-  const { loggedInUsername } = useContext(AuthContext);
+  const { userId } = useContext(AuthContext);
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
 
@@ -34,7 +34,8 @@ function Links() {
   }
 
   useEffect(() => {
-    fetch(`/api/private/links?username=${loggedInUsername}`)
+    console.log(userId);
+    fetch(`/api/private/links?id=${userId}`)
       .then((res) => res.json())
       .then((json) => {
         setLinks(json.links);
@@ -110,7 +111,7 @@ function Links() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username: loggedInUsername, links }),
+      body: JSON.stringify({ userId: userId, links }),
     })
       .then((res) => {
         return res.json();
@@ -205,7 +206,7 @@ function Links() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username: loggedInUsername, link }),
+      body: JSON.stringify({ userId, link }),
     })
       .then((res) => res.json())
       .then((json) => {

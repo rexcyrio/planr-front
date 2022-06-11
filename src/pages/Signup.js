@@ -12,7 +12,7 @@ function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usernameState, setUsernameState] = useState("NONE");
-  const { setIsAuthenticated, setLoggedInUsername } = useContext(AuthContext);
+  const { setIsAuthenticated, setLoggedInUsername, setUserId } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // match A-Z, a-z, 0-9, "_"
@@ -149,6 +149,7 @@ function Signup() {
         if (json.login_success) {
           setIsAuthenticated(true);
           setLoggedInUsername(json.loggedInUsername);
+          setUserId(json.userId);
           navigate("/private", { replace: true });
         } else {
           alert(json.error);

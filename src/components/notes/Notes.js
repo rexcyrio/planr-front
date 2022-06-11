@@ -14,10 +14,10 @@ import styles from "./Notes.module.css";
 function Notes() {
   const [notes, setNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
-  const { loggedInUsername } = useContext(AuthContext);
+  const { userId } = useContext(AuthContext);
 
   useEffect(() => {
-    fetch(`/api/private/notes?username=${loggedInUsername}`)
+    fetch(`/api/private/notes?id=${userId}`)
       .then((res) => res.json())
       .then((json) => {
         setNotes(json.notes);
@@ -47,7 +47,7 @@ function Notes() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username: loggedInUsername, note }),
+      body: JSON.stringify({ userId, note }),
     })
       .then((res) => res.json())
       .then((json) => {
@@ -122,7 +122,7 @@ function Notes() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username: loggedInUsername, notes }),
+      body: JSON.stringify({ userId, notes }),
     })
       .then((res) => {
         return res.json();

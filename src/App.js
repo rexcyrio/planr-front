@@ -11,15 +11,15 @@ import { AuthContext } from "./store/AuthContext";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loggedInUsername, setLoggedInUsername] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const value = {
     isAuthenticated: isAuthenticated,
     loggedInUsername: loggedInUsername,
-    userData: userData,
+    userId,
     setLoggedInUsername: setLoggedInUsername,
     setIsAuthenticated: setIsAuthenticated,
-    setUserData: setUserData,
+    setUserId,
   };
 
   useEffect(() => {
@@ -34,7 +34,7 @@ function App() {
       .then((json) => {
         setIsAuthenticated(json.isAuthenticated);
         setLoggedInUsername(json.loggedInUsername);
-        setUserData(json.userData);
+        setUserId(json.userId);
       })
       .then(() => setIsLoading(false));
   }, []);
