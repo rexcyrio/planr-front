@@ -3,7 +3,9 @@ import Button from "@mui/material/Button";
 import React, { useContext } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../store/AuthContext";
+import Settings from "../settings/Settings";
 import logo from "./../../icons/logo.svg";
+import styles from "./NavBar.module.css";
 
 function NavBar() {
   const { isAuthenticated, setIsAuthenticated, setLoggedInUsername } =
@@ -40,20 +42,22 @@ function NavBar() {
             <div className="nunito logo-text">PlanR</div>
           </div>
         </Link>
-
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {isAuthenticated ? (
-            <Button sx={{ mr: "1rem" }} onClick={logoutNow}>
-              Log out
-            </Button>
-          ) : (
-            <Link to="/signup">
-              <Button sx={{ mr: "1rem" }} variant="contained">
-                Sign up
+        <div className={styles.ultility}>
+          <Settings />
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            {isAuthenticated ? (
+              <Button sx={{ mr: "1rem" }} onClick={logoutNow}>
+                Log out
               </Button>
-            </Link>
-          )}
-        </Box>
+            ) : (
+              <Link to="/signup">
+                <Button sx={{ mr: "1rem" }} variant="contained">
+                  Sign up
+                </Button>
+              </Link>
+            )}
+          </Box>
+        </div>
       </nav>
 
       <Outlet />
