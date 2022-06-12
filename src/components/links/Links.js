@@ -11,6 +11,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import IconButton from "@mui/material/IconButton";
+import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
@@ -27,6 +28,7 @@ function Links() {
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   async function sleep(ms) {
     return new Promise((resolve) => {
@@ -42,6 +44,7 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         setLinks(json.links);
+        setInitialLoad(false);
       });
   }, []);
 
@@ -368,7 +371,14 @@ function Links() {
       </Dialog>
 
       <div className={styles["links-container"]}>
-        {links.length > 0 ? (
+        {initialLoad ? (
+          <Skeleton
+            variant="rectangle"
+            height="100%"
+            width="100%"
+            animation="wave"
+          />
+        ) : links.length > 0 ? (
           <Stack
             direction="column"
             alignItems="stretch"

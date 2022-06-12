@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
+import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
 import React, { useState, useEffect, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -18,12 +19,14 @@ function Notes() {
   const [newNoteText, setNewNoteText] = useState("");
   const { userId } = useContext(AuthContext);
   const [updating, setUpdating] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     fetch(`/api/private/notes?id=${userId}`)
       .then((res) => res.json())
       .then((json) => {
         setNotes(json.notes);
+        setInitialLoad(false);
       });
   }, []);
 
@@ -184,7 +187,15 @@ function Notes() {
         </div>
       </div>
       <div className={styles["main-container"]}>
-        {notes.length > 0 ? (
+        {initialLoad ? (
+          <Skeleton
+            variant="rectangle"
+            height="95%"
+            width="90%"
+            animation="wave"
+            sx={{ margin: "5%", marginTop: 0 }}
+          />
+        ) : notes.length > 0 ? (
           <List dense={true} sx={{ maxWidth: "15rem", p: "0px" }}>
             <Divider />
 
