@@ -32,3 +32,10 @@
   width: 5.8rem;
   border: 1px solid hsl(0, 0%, 75%);
 }
+
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-right: 0.5rem;
+}

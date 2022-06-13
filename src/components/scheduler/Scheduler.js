@@ -1,28 +1,41 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../../store/AuthContext";
 import styles from "./Scheduler.module.css";
 import TaskCreator from "./TaskCreator";
 import TaskItem from "./TaskItem";
 import TimetableCell from "./TimetableCell";
+import CircularProgress from "@mui/material/CircularProgress";
+import CloudDoneIcon from "@mui/icons-material/CloudDone";
+import Skeleton from "@mui/material/Skeleton";
+import Tooltip from "@mui/material/Tooltip";
 
 function Scheduler() {
   const [matrix, setMatrix] = useState(defaultMatrix());
   const [tasks, setTasks] = useState([]);
+  const [updating, setUpdating] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const { userId } = useContext(AuthContext);
 
   const zeroPad = (num, places) => String(num).padStart(places, "0");
 
   useEffect(() => {
-    // TODO: load from database
-    setTasks([
-      {
-        _id: "5897963",
-        name: "assignment 3",
-        dueDate: "2022-01-01",
-        dueTime: "23:00",
-        durationHours: "2",
-        timeUnits: 4,
-        moduleCode: "CS1231S",
-      },
-    ]);
+    fetch(`/api/private/tasks?id=${userId}`)
+      .then((res) => res.json())
+      .then((json) => {
+        setTasks(json.tasks);
+        setInitialLoad(false);
+      });
+    // setTasks([
+    //   {
+    //     _id: "5897963",
+    //     name: "assignment 3",
+    //     dueDate: "2022-01-01",
+    //     dueTime: "23:00",
+    //     durationHours: "2",
+    //     timeUnits: 4,
+    //     moduleCode: "CS1231S",
+    //   },
+    // ]);
   }, []);
 
   function defaultMatrix() {
@@ -142,10 +155,13 @@ function Scheduler() {
   // ==========================================================================
 
   function addTask(newTask) {
+    setUpdating(true);
+    addTaskToDatabase(newTask);
     setTasks((prev) => [...prev, newTask]);
   }
 
   function updateTask(newTask) {
+    setUpdating(true);
     setTasks((prev) => {
       const index = prev.findIndex((each) => each._id === newTask._id);
       const newTasks = [
@@ -153,12 +169,74 @@ function Scheduler() {
         newTask,
         ...prev.slice(index + 1),
       ];
+      updateTasksInDatabase(newTask);
       return newTasks;
     });
   }
 
   function deleteTask(task) {
-    setTasks((prev) => prev.filter((each) => each._id !== task._id));
+    setUpdating(true);
+    setTasks((prev) => {
+      const newTasks = prev.filter((each) => each._id !== task._id);
+      updateTasksInDatabase(newTasks);
+      return newTasks;
+    });
+  }
+
+  function addTaskToDatabase(task) {
+    fetch("/api/private/tasks", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, task }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.error) {
+          alert(json.error);
+          return;
+        }
+
+        setUpdating(false);
+      });
+  }
+
+  function updateTasksInDatabase(tasks) {
+    fetch("/api/private/tasks", {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: userId, tasks }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.error) {
+          alert(json.error);
+          return;
+        }
+
+        setUpdating(false);
+      });
+  }
+
+  function generateSkeletons(num) {
+    let arr = [];
+    for (let i = 0; i < num; i++) {
+      arr.push(
+        <Skeleton
+          variant="rectangular"
+          animation="wave"
+          height="3.375rem"
+          width="calc(100% - 1rem)"
+          sx={{ margin: "0.5rem" }}
+        />
+      );
+    }
+    return arr;
   }
 
   return (
@@ -223,8 +301,31 @@ function Scheduler() {
       {/* ================================================================= */}
 
       <div className="tasks-section">
-        <h1>Tasks</h1>
-        {tasks.length > 0 ? (
+        <div className={styles.title}>
+          <h1>Tasks</h1>
+          {updating ? (
+            <Tooltip title="Updating Database">
+              <CircularProgress
+                size={24}
+                sx={{
+                  padding: "8px",
+                }}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip title="In sync with database">
+              <CloudDoneIcon
+                color="success"
+                sx={{
+                  padding: "8px",
+                }}
+              />
+            </Tooltip>
+          )}
+        </div>
+        {initialLoad ? (
+          generateSkeletons(5)
+        ) : tasks.length > 0 ? (
           tasks.map((self) => (
             <React.Fragment key={self._id}>
               <TaskItem self={self} />
