@@ -60,23 +60,6 @@ Navbar
   vertical-align: middle;
 }
 
-.navbar-buttons-container {
-  display: flex;
-  align-items: center;
-}
-
-.navbar-buttons {
-  padding: 0.5rem;
-  margin: auto 0.5rem;
-  border-radius: 3px;
-  cursor: pointer;
-  background-color: lightskyblue;
-}
-
-.navbar-buttons:hover {
-  background-color: rgb(107, 198, 255);
-}
-
 /*
 ===============================================================================
 Private
