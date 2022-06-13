@@ -12,63 +12,25 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import styles from "./Tasks.module.css";
 
-function Tasks() {
-  const [tasks, setTasks] = useState([]);
+TaskCreator.propTypes = {
+  addTask: PropTypes.func,
+
+  // TODO: both of the following props are currently unused
+  updateTask: PropTypes.func,
+  deleteTask: PropTypes.func,
+};
+
+function TaskCreator({ addTask }) {
   const [name, setName] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [dueTime, setDueTime] = useState("");
-  const [duration, setDuration] = useState("");
+  const [dueDate, setDueDate] = useState(getDateNowString());
+  const [dueTime, setDueTime] = useState("23:59");
+  const [durationHours, setDurationHours] = useState("");
   const [moduleCode, setModuleCode] = useState("");
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    setTasks([
-      {
-        _id: uuidv4(),
-        name: "Weekly assignment",
-        dueDate: "2023-01-01",
-        dueTime: "00:00",
-        duration: "2",
-        moduleCode: "CS3230",
-      },
-    ]);
-  }, []);
-
-  function resetState() {
-    setName("");
-    setDueDate(getDateNowString());
-    setDueTime("23:59");
-    setDuration("");
-    setModuleCode("");
-  }
-
-  const handleClickOpen = () => {
-    resetState();
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  function convert_24H_to_12H(str) {
-    const [hour, min] = str.split(":");
-    const int_hour = Number(hour);
-
-    if (int_hour === 0) {
-      return `12:${min}am`;
-    }
-
-    if (int_hour >= 1 && int_hour <= 11) {
-      return `${str}am`;
-    }
-
-    return `${(int_hour - 12).toString()}:${min}pm`;
-  }
 
   function getDateNowString() {
     const date = new Date();
@@ -84,52 +46,48 @@ function Tasks() {
     return `${y}-${m2}-${d2}`;
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  function resetState() {
+    setName("");
+    setDueDate(getDateNowString());
+    setDueTime("23:59");
+    setDurationHours("");
+    setModuleCode("");
+  }
+
+  function handleOpen() {
+    setOpen(true);
+  }
+
+  function handleClose() {
+    setOpen(false);
+    resetState();
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
     setOpen(false);
 
-    const t = {
+    const newTask = {
       _id: uuidv4(),
       name: name,
       dueDate: dueDate,
       dueTime: dueTime,
-      duration: duration,
+      durationHours: durationHours,
+      timeUnits: Number(durationHours) * 2,
       moduleCode: moduleCode,
     };
 
-    setTasks([...tasks, t]);
+    addTask(newTask);
     resetState();
   }
 
   return (
     <>
-      <h1>Tasks</h1>
-      {tasks.length > 0 ? (
-        tasks.map((each) => (
-          <React.Fragment key={each._id}>
-            <div className={styles["outer-container"]}>
-              <div>
-                <div>
-                  <span className={styles["grey"]}>[{each.moduleCode}]</span>{" "}
-                  {each.name} ({each.duration} hr)
-                </div>
-
-                <div>
-                  <span className={styles["grey"]}>due on:</span> {each.dueDate}
-                  @{convert_24H_to_12H(each.dueTime)}
-                </div>
-              </div>
-            </div>
-          </React.Fragment>
-        ))
-      ) : (
-        <div>There are no tasks.</div>
-      )}
       <Fab
         color="primary"
         aria-label="add"
         style={{ position: "absolute", right: "1.5rem", bottom: "1rem" }}
-        onClick={handleClickOpen}
+        onClick={handleOpen}
       >
         <AddIcon />
       </Fab>
@@ -147,6 +105,7 @@ function Tasks() {
                 onChange={(e) => setModuleCode(e.target.value)}
                 required
               >
+                {/* TODO: update module codes */}
                 <MenuItem value={"CS1101S"}>CS1101S</MenuItem>
                 <MenuItem value={"CS1231S"}>CS1231S</MenuItem>
                 <MenuItem value={"MA1521"}>MA1521</MenuItem>
@@ -168,13 +127,13 @@ function Tasks() {
             <TextField
               sx={{ width: "15rem", mr: "1rem" }}
               margin="dense"
-              id="duration"
+              id="durationHours"
               label="Time needed"
               type="number"
               variant="outlined"
               required
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
+              value={durationHours}
+              onChange={(e) => setDurationHours(e.target.value)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">hour(s)</InputAdornment>
@@ -213,9 +172,4 @@ function Tasks() {
   );
 }
 
-export default Tasks;
-
-// <div>
-//   <span className={styles["grey"]}>due on: </span>
-//   {each.dueDate}
-// </div>;
+export default TaskCreator;
