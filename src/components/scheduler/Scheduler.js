@@ -163,7 +163,7 @@ function Scheduler() {
 
   return (
     <>
-      <div style={{ gridArea: "timetable", padding: "1rem" }}>
+      <div className="timetable-section">
         <div className={styles["timetable-container"]}>
           <div className={styles["sticky"]}>
             <table className={styles["sticky-table"]}>
@@ -222,7 +222,7 @@ function Scheduler() {
       {/* Tasks */}
       {/* ================================================================= */}
 
-      <div style={{ gridArea: "tasks" }}>
+      <div className="tasks-section">
         <h1>Tasks</h1>
         {tasks.length > 0 ? (
           tasks.map((self) => (
