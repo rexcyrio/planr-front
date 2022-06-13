@@ -1,8 +1,8 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { CircularProgress, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
+import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import Divider from "@mui/material/Divider";
-import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -162,29 +162,25 @@ function Notes() {
     <>
       <div className={styles.title}>
         <h1>Notes</h1>
-        <div>
-          {updating ? (
-            <Tooltip title="Updating Database">
-              <CircularProgress
-                size={24}
-                sx={{
-                  padding: "8px",
-                  verticalAlign: "middle",
-                }}
-              />
-            </Tooltip>
-          ) : (
-            <Tooltip title="In sync with database">
-              <DownloadDoneIcon
-                color="success"
-                sx={{
-                  padding: "8px",
-                  verticalAlign: "middle",
-                }}
-              />
-            </Tooltip>
-          )}
-        </div>
+        {updating ? (
+          <Tooltip title="Updating Database">
+            <CircularProgress
+              size={24}
+              sx={{
+                padding: "8px",
+              }}
+            />
+          </Tooltip>
+        ) : (
+          <Tooltip title="In sync with database">
+            <CloudDoneIcon
+              color="success"
+              sx={{
+                padding: "8px",
+              }}
+            />
+          </Tooltip>
+        )}
       </div>
       <div className={styles["main-container"]}>
         {initialLoad ? (

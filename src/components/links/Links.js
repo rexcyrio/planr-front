@@ -1,6 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CircularProgress from "@mui/material/CircularProgress";
+import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import RestoreIcon from "@mui/icons-material/Restore";
@@ -10,7 +11,6 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import IconButton from "@mui/material/IconButton";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
@@ -40,7 +40,6 @@ function Links() {
   }
 
   useEffect(() => {
-    console.log(userId);
     fetch(`/api/private/links?id=${userId}`)
       .then((res) => res.json())
       .then((json) => {
@@ -135,11 +134,7 @@ function Links() {
   function _updateLink(newLink) {
     setLinks((prev) => {
       const index = prev.findIndex((each) => each._id === newLink._id);
-      return [
-        ...prev.slice(0, index),
-        newLink,
-        ...prev.slice(index + 1),
-      ];
+      return [...prev.slice(0, index), newLink, ...prev.slice(index + 1)];
     });
   }
 
@@ -215,33 +210,33 @@ function Links() {
         setUpdating(false);
       });
   }
-  
+
   return (
     <>
       <div className={styles.title}>
-        <h1>Links</h1>
-        <div>
+        <div className={styles["title-update-container"]}>
+          <h1>Links</h1>
           {updating ? (
             <Tooltip title="Updating Database">
               <CircularProgress
                 size={24}
                 sx={{
                   padding: "8px",
-                  verticalAlign: "middle",
                 }}
               />
             </Tooltip>
           ) : (
             <Tooltip title="In sync with database">
-              <DownloadDoneIcon
+              <CloudDoneIcon
                 color="success"
                 sx={{
                   padding: "8px",
-                  verticalAlign: "middle",
                 }}
               />
             </Tooltip>
           )}
+        </div>
+        <div>
           <Tooltip title="Edit">
             <IconButton onClick={edit_openDialog}>
               <EditIcon />
