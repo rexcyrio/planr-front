@@ -157,7 +157,7 @@ function Notes() {
     }
     updateEditMode(self, true);
   }
-  updating;
+
   return (
     <>
       <div className={styles.title}>
