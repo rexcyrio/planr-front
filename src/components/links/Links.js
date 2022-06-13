@@ -3,6 +3,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CircularProgress from "@mui/material/CircularProgress";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import RestoreIcon from "@mui/icons-material/Restore";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -83,6 +84,7 @@ function Links() {
 
         const newLink = {
           _id: link._id,
+          _toBeDeleted: false,
           _name: link._name,
           _url: link._url,
           name: link._name,
@@ -119,9 +121,7 @@ function Links() {
       },
       body: JSON.stringify({ userId: userId, links }),
     })
-      .then((res) => {
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((json) => {
         if (json.error) {
           alert(json.error);
@@ -130,6 +130,17 @@ function Links() {
 
         setUpdating(false);
       });
+  }
+
+  function _updateLink(newLink) {
+    setLinks((prev) => {
+      const index = prev.findIndex((each) => each._id === newLink._id);
+      return [
+        ...prev.slice(0, index),
+        newLink,
+        ...prev.slice(index + 1),
+      ];
+    });
   }
 
   function toggleToBeDeleted(self) {
@@ -142,14 +153,7 @@ function Links() {
       url: self.url,
     };
 
-    setLinks((prev) => {
-      const index = prev.findIndex((each) => each._id === self._id);
-      return [
-        ...prev.slice(0, index),
-        newLink,
-        ...prev.slice(index + 1, prev.length),
-      ];
-    });
+    _updateLink(newLink);
   }
 
   function updateTempName(self, _name) {
@@ -162,14 +166,7 @@ function Links() {
       url: self.url,
     };
 
-    setLinks((prev) => {
-      const index = prev.findIndex((each) => each._id === self._id);
-      return [
-        ...prev.slice(0, index),
-        newLink,
-        ...prev.slice(index + 1, prev.length),
-      ];
-    });
+    _updateLink(newLink);
   }
 
   function updateTempURL(self, _url) {
@@ -182,14 +179,7 @@ function Links() {
       url: self.url,
     };
 
-    setLinks((prev) => {
-      const index = prev.findIndex((each) => each._id === self._id);
-      return [
-        ...prev.slice(0, index),
-        newLink,
-        ...prev.slice(index + 1, prev.length),
-      ];
-    });
+    _updateLink(newLink);
   }
 
   function addNewLink() {
@@ -225,7 +215,7 @@ function Links() {
         setUpdating(false);
       });
   }
-  updating;
+  
   return (
     <>
       <div className={styles.title}>
@@ -284,7 +274,11 @@ function Links() {
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <TextField
                     disabled={self._toBeDeleted}
-                    sx={{ marginRight: "1rem", width: "13rem" }}
+                    sx={{
+                      marginRight: "1rem",
+                      width: "13rem",
+                      textDecoration: self._toBeDeleted ? "line-through" : "",
+                    }}
                     margin="dense"
                     id="name"
                     label="Link Name"
@@ -297,7 +291,11 @@ function Links() {
                   />
                   <TextField
                     disabled={self._toBeDeleted}
-                    sx={{ marginRight: "0.5rem", width: "27rem" }}
+                    sx={{
+                      marginRight: "0.5rem",
+                      width: "27rem",
+                      textDecoration: self._toBeDeleted ? "line-through" : "",
+                    }}
                     margin="dense"
                     id="url"
                     label="URL"
@@ -308,11 +306,19 @@ function Links() {
                     autoComplete="off"
                     onChange={(e) => updateTempURL(self, e.target.value)}
                   />
-                  <Tooltip title="Mark for Deletion">
-                    <IconButton onClick={() => toggleToBeDeleted(self)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
+                  {self._toBeDeleted ? (
+                    <Tooltip title="Restore link">
+                      <IconButton onClick={() => toggleToBeDeleted(self)}>
+                        <RestoreIcon />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title="Delete link">
+                      <IconButton onClick={() => toggleToBeDeleted(self)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                   <br />
                 </Box>
               </React.Fragment>
