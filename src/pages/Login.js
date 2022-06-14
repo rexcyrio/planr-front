@@ -61,12 +61,13 @@ function Login() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          height: "100%",
         }}
       >
         <h1>Welcome back!</h1>
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
+            sx={{ mb: "1rem", width: "20rem", backgroundColor: "#fff" }}
             id="username"
             label="Username"
             type="text"
@@ -80,7 +81,7 @@ function Login() {
           />
           <br />
           <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
+            sx={{ mb: "1rem", width: "20rem", backgroundColor: "#fff" }}
             id="password"
             label="Password"
             type="password"

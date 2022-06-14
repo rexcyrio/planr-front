@@ -178,6 +178,7 @@ function Signup() {
                   {usernameStates[usernameState].icon}
                 </InputAdornment>
               ),
+              sx: { backgroundColor: "#fff" },
             }}
             helperText={usernameStates[usernameState].helperText}
             error={usernameStates[usernameState].isError}
@@ -192,6 +193,7 @@ function Signup() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            InputProps={{ sx: { backgroundColor: "#fff" } }}
             helperText=" "
           />
           <br />

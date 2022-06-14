@@ -332,7 +332,7 @@ function Scheduler() {
             </React.Fragment>
           ))
         ) : (
-          <div>There are no tasks.</div>
+          <div className={styles["no-tasks"]}>There are no tasks.</div>
         )}
         <TaskCreator
           addTask={addTask}

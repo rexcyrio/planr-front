@@ -38,4 +38,9 @@
   flex-direction: row;
   align-items: center;
   padding-right: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.no-tasks {
+  margin-left: 0.5rem;
 }

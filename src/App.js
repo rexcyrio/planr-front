@@ -11,8 +11,23 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const theme = createTheme({
   palette: {
+    primary: {
+      main: "#ab844b",
+    },
+    medium: {
+      main: "#fce5c4",
+    },
+    light: {
+      main: "#FFF4E4",
+    },
     success: {
       main: "#64dd17",
+    },
+    textBox: {
+      main: "#fff",
+    },
+    error: {
+      main: "#f50a08",
     },
   },
 });
