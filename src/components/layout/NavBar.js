@@ -43,7 +43,7 @@ function NavBar() {
           </div>
         </Link>
         <div className={styles.ultility}>
-          <Settings />
+          {isAuthenticated && <Settings />}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {isAuthenticated ? (
               <Button sx={{ mr: "1rem" }} onClick={logoutNow}>
