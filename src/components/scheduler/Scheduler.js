@@ -6,14 +6,20 @@ import TaskItem from "./TaskItem";
 import TimetableCell from "./TimetableCell";
 import CircularProgress from "@mui/material/CircularProgress";
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
+import ErrorIcon from "@mui/icons-material/Error";
 import Skeleton from "@mui/material/Skeleton";
+import Snackbar from "@mui/material/Snackbar";
 import Tooltip from "@mui/material/Tooltip";
+import { Alert } from "@mui/material";
 
 function Scheduler() {
   const [matrix, setMatrix] = useState(defaultMatrix());
   const [tasks, setTasks] = useState([]);
   const [updating, setUpdating] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [outOfSync, setOutOfSync] = useState(false);
+  const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
+  const [initialSnackbar, setInitialSnackbar] = useState(false);
   const { userId } = useContext(AuthContext);
 
   const zeroPad = (num, places) => String(num).padStart(places, "0");
@@ -23,6 +29,7 @@ function Scheduler() {
       .then((res) => res.json())
       .then((json) => {
         setTasks(json.tasks);
+        setInitialSnackbar(true);
         setInitialLoad(false);
       });
     // setTasks([
@@ -195,6 +202,8 @@ function Scheduler() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
+          setOutOfSync(true);
+          setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
@@ -215,6 +224,8 @@ function Scheduler() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
+          setOutOfSync(true);
+          setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
@@ -239,8 +250,66 @@ function Scheduler() {
     return arr;
   }
 
+  const closeSnackbar = () => {
+    setOpenSyncErrorSnackbar(false);
+  };
+  const closeInitialSnackbar = () => {
+    setInitialSnackbar(false);
+  };
+
+  const dataStatus = updating ? (
+    <Tooltip title="Updating Database">
+      <CircularProgress
+        size={24}
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  ) : outOfSync ? (
+    <Tooltip title="Database sync failed">
+      <ErrorIcon
+        color="error"
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  ) : (
+    <Tooltip title="In sync with database">
+      <CloudDoneIcon
+        color="success"
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  );
+
   return (
     <>
+      <Snackbar
+        open={initialSnackbar}
+        onClose={closeInitialSnackbar}
+        message={`There are ${tasks.length} tasks`}
+      >
+        <Alert
+          onClose={closeInitialSnackbar}
+          severity="info"
+          sx={{ width: "100%" }}
+        >
+          There are {tasks.length} tasks
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={openSyncErrorSnackbar}
+        autoHideDuration={6000}
+        onClose={closeSnackbar}
+      >
+        <Alert onClose={closeSnackbar} severity="error" sx={{ width: "100%" }}>
+          Something went wrong! Your notes might not be saved
+        </Alert>
+      </Snackbar>
       <div className="timetable-section">
         <div className={styles["timetable-container"]}>
           <div className={styles["sticky"]}>
@@ -303,25 +372,7 @@ function Scheduler() {
       <div className="tasks-section">
         <div className={styles.title}>
           <h1>Tasks</h1>
-          {updating ? (
-            <Tooltip title="Updating Database">
-              <CircularProgress
-                size={24}
-                sx={{
-                  padding: "8px",
-                }}
-              />
-            </Tooltip>
-          ) : (
-            <Tooltip title="In sync with database">
-              <CloudDoneIcon
-                color="success"
-                sx={{
-                  padding: "8px",
-                }}
-              />
-            </Tooltip>
-          )}
+          {dataStatus}
         </div>
         {initialLoad ? (
           generateSkeletons(5)

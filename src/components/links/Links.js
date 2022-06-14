@@ -4,6 +4,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ErrorIcon from "@mui/icons-material/Error";
 import RestoreIcon from "@mui/icons-material/Restore";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -13,6 +14,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Skeleton from "@mui/material/Skeleton";
+import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
@@ -20,6 +22,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../../store/AuthContext";
 import styles from "./Links.module.css";
+import { Alert } from "@mui/material";
 
 function Links() {
   const [links, setLinks] = useState([]);
@@ -30,6 +33,8 @@ function Links() {
   const [edit_open, edit_setOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [outOfSync, setOutOfSync] = useState(false);
+  const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   async function sleep(ms) {
     return new Promise((resolve) => {
@@ -123,6 +128,8 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
+          setOutOfSync(true);
+          setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
@@ -203,6 +210,8 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
+          setOutOfSync(true);
+          setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
@@ -211,30 +220,54 @@ function Links() {
       });
   }
 
+  const closeSnackbar = () => {
+    setOpenSyncErrorSnackbar(false);
+  };
+
+  const dataStatus = updating ? (
+    <Tooltip title="Updating Database">
+      <CircularProgress
+        size={24}
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  ) : outOfSync ? (
+    <Tooltip title="Database sync failed">
+      <ErrorIcon
+        color="error"
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  ) : (
+    <Tooltip title="In sync with database">
+      <CloudDoneIcon
+        color="success"
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  );
+
   return (
     <>
+      <Snackbar
+        open={openSyncErrorSnackbar}
+        autoHideDuration={6000}
+        onClose={closeSnackbar}
+      >
+        <Alert onClose={closeSnackbar} severity="error" sx={{ width: "100%" }}>
+          Something went wrong! Your links might not be saved
+        </Alert>
+      </Snackbar>
       <div className={styles.title}>
         <div className={styles["title-update-container"]}>
           <h1>Links</h1>
-          {updating ? (
-            <Tooltip title="Updating Database">
-              <CircularProgress
-                size={24}
-                sx={{
-                  padding: "8px",
-                }}
-              />
-            </Tooltip>
-          ) : (
-            <Tooltip title="In sync with database">
-              <CloudDoneIcon
-                color="success"
-                sx={{
-                  padding: "8px",
-                }}
-              />
-            </Tooltip>
-          )}
+          {dataStatus}
         </div>
         <div>
           <Tooltip title="Edit">

@@ -1,13 +1,15 @@
 import DeleteIcon from "@mui/icons-material/Delete";
-import { CircularProgress, Tooltip } from "@mui/material";
+import { Alert, CircularProgress, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import Divider from "@mui/material/Divider";
+import ErrorIcon from "@mui/icons-material/Error";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Skeleton from "@mui/material/Skeleton";
+import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
 import React, { useState, useEffect, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -20,6 +22,8 @@ function Notes() {
   const { userId } = useContext(AuthContext);
   const [updating, setUpdating] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [outOfSync, setOutOfSync] = useState(false);
+  const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   useEffect(() => {
     fetch(`/api/private/notes?id=${userId}`)
@@ -60,6 +64,8 @@ function Notes() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
+          setOutOfSync(true);
+          setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
@@ -141,6 +147,8 @@ function Notes() {
       })
       .then((json) => {
         if (json.error) {
+          setOutOfSync(true);
+          setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
@@ -158,29 +166,53 @@ function Notes() {
     updateEditMode(self, true);
   }
 
+  const closeSnackbar = () => {
+    setOpenSyncErrorSnackbar(false);
+  };
+
+  const dataStatus = updating ? (
+    <Tooltip title="Updating Database">
+      <CircularProgress
+        size={24}
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  ) : outOfSync ? (
+    <Tooltip title="Database sync failed">
+      <ErrorIcon
+        color="error"
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  ) : (
+    <Tooltip title="In sync with database">
+      <CloudDoneIcon
+        color="success"
+        sx={{
+          padding: "8px",
+        }}
+      />
+    </Tooltip>
+  );
+
   return (
     <>
+      <Snackbar
+        open={openSyncErrorSnackbar}
+        autoHideDuration={6000}
+        onClose={closeSnackbar}
+      >
+        <Alert onClose={closeSnackbar} severity="error" sx={{ width: "100%" }}>
+          Something went wrong! Your notes might not be saved
+        </Alert>
+      </Snackbar>
       <div className={styles.title}>
         <h1>Notes</h1>
-        {updating ? (
-          <Tooltip title="Updating Database">
-            <CircularProgress
-              size={24}
-              sx={{
-                padding: "8px",
-              }}
-            />
-          </Tooltip>
-        ) : (
-          <Tooltip title="In sync with database">
-            <CloudDoneIcon
-              color="success"
-              sx={{
-                padding: "8px",
-              }}
-            />
-          </Tooltip>
-        )}
+        {dataStatus}
       </div>
       <div className={styles["main-container"]}>
         {initialLoad ? (

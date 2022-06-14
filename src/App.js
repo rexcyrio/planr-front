@@ -26,9 +26,6 @@ const theme = createTheme({
     textBox: {
       main: "#fff",
     },
-    error: {
-      main: "#f50a08",
-    },
   },
 });
 
