@@ -67,7 +67,7 @@ function Login() {
         <h1>Welcome back!</h1>
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
-            sx={{ mb: "1rem", width: "20rem", backgroundColor: "#fff" }}
+            sx={{ mb: "1rem", width: "20rem" }}
             id="username"
             label="Username"
             type="text"
@@ -81,7 +81,7 @@ function Login() {
           />
           <br />
           <TextField
-            sx={{ mb: "1rem", width: "20rem", backgroundColor: "#fff" }}
+            sx={{ mb: "1rem", width: "20rem" }}
             id="password"
             label="Password"
             type="password"

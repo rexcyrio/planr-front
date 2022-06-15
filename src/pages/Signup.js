@@ -11,7 +11,10 @@ import { AuthContext } from "../store/AuthContext";
 function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [verifyPassword, setVerifyPassword] = useState("");
+  const [verifyPasswordGood, setVerifyPasswordGood] = useState(true);
   const [usernameState, setUsernameState] = useState("NONE");
+  const [passwordState, setPasswordState] = useState("NONE");
   const { setIsAuthenticated, setLoggedInUsername, setUserId } =
     useContext(AuthContext);
   const navigate = useNavigate();
@@ -66,6 +69,22 @@ function Signup() {
     },
   };
 
+  const passwordStates = {
+    NONE: {
+      helperText: " ",
+      isError: false,
+    },
+    ALL_GOOD: {
+      helperText: " ",
+      isError: false,
+    },
+
+    PASSWORD_TOO_SHORT: {
+      helperText: "Minimum of 6 characters required for password",
+      isError: true,
+    },
+  };
+
   async function isUsernameAvailable(username) {
     const res = await fetch("/api/is-username-available", {
       method: "POST",
@@ -108,8 +127,34 @@ function Signup() {
     }
   }
 
+  function handlePasswordChange(event) {
+    const newPassword = event.target.value;
+    setPassword(newPassword);
+
+    if (newPassword === "") {
+      setUsernameState("NONE");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordState("PASSWORD_TOO_SHORT");
+      return;
+    }
+
+    setPasswordState("ALL_GOOD");
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (passwordState !== "ALL_GOOD") {
+      return;
+    }
+
+    if (password !== verifyPassword) {
+      setVerifyPasswordGood(false);
+      return;
+    }
 
     if (!(await isUsernameAvailable(username))) {
       return;
@@ -178,7 +223,6 @@ function Signup() {
                   {usernameStates[usernameState].icon}
                 </InputAdornment>
               ),
-              sx: { backgroundColor: "#fff" },
             }}
             helperText={usernameStates[usernameState].helperText}
             error={usernameStates[usernameState].isError}
@@ -192,9 +236,22 @@ function Signup() {
             variant="outlined"
             required
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            InputProps={{ sx: { backgroundColor: "#fff" } }}
-            helperText=" "
+            onChange={handlePasswordChange}
+            helperText={passwordStates[passwordState].helperText}
+            error={passwordStates[passwordState].isError}
+          />
+          <br />
+          <TextField
+            sx={{ mb: "1rem", width: "20rem" }}
+            id="verifyPassword"
+            label="verify password"
+            type="password"
+            variant="outlined"
+            required
+            value={verifyPassword}
+            onChange={(e) => setVerifyPassword(e.target.value)}
+            helperText={verifyPasswordGood || "Passwords do not match"}
+            error={!verifyPasswordGood}
           />
           <br />
           <Button
