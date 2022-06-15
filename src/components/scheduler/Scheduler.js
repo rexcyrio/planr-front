@@ -292,6 +292,7 @@ function Scheduler() {
         open={initialSnackbar}
         onClose={closeInitialSnackbar}
         message={`There are ${tasks.length} tasks`}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={closeInitialSnackbar}

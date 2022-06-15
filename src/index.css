@@ -1,5 +1,5 @@
 html {
-  background-color: #fff4e4;
+  background-color: #ffffff;
 }
 
 :root {
@@ -38,7 +38,7 @@ Navbar
 .navbar {
   height: var(--navbar-height);
   width: 100vw;
-  background-color: #fce5c4;
+  background-color: #fff4e4;
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid hsl(0, 0%, 80%);
@@ -74,7 +74,7 @@ Private
   /* 1px is for the bottom border of the navbar */
   height: calc(100vh - var(--navbar-height) - 1px);
   width: 100vw;
-  background-color: #ab844b;
+  background-color: #e6e2dc;
 }
 
 .grid {
@@ -96,21 +96,17 @@ Private
 
 .links-section {
   grid-area: links;
-  background-color: #fff4e4;
 }
 
 .notes-section {
   grid-area: notes;
-  background-color: #fff4e4;
 }
 
 .timetable-section {
   grid-area: timetable;
-  background-color: #fff4e4;
   padding: 1rem;
 }
 
 .tasks-section {
   grid-area: tasks;
-  background-color: #fff4e4;
 }

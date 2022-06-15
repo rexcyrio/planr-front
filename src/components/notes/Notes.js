@@ -275,7 +275,7 @@ function Notes() {
             ))}
           </List>
         ) : (
-          <div>There are no notes.</div>
+          <div className={styles["no-notes"]}>There are no notes.</div>
         )}
       </div>
 
