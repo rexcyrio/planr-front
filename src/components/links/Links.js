@@ -23,6 +23,7 @@ import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../../store/AuthContext";
 import styles from "./Links.module.css";
 import { Alert } from "@mui/material";
+import LinkItem from "./LinkItem";
 
 function Links() {
   const [links, setLinks] = useState([]);
@@ -420,17 +421,9 @@ function Links() {
             spacing={1}
           >
             {links.map((self) => (
-              <a
-                key={self._id}
-                href={self.url}
-                rel="noreferrer noopener"
-                target="_blank"
-              >
-                <div className={styles["links-button"]}>
-                  <div>{self.name}</div>
-                  <ArrowForwardIcon />
-                </div>
-              </a>
+              <React.Fragment key={self._id}>
+                <LinkItem self={self} />
+              </React.Fragment>
             ))}
           </Stack>
         ) : (

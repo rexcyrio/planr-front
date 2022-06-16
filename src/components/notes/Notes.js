@@ -1,13 +1,9 @@
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Alert, CircularProgress, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import Divider from "@mui/material/Divider";
 import ErrorIcon from "@mui/icons-material/Error";
-import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
@@ -15,6 +11,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../../store/AuthContext";
 import styles from "./Notes.module.css";
+import NoteItem from "./NoteItem";
 
 function Notes() {
   const [notes, setNotes] = useState([]);
@@ -229,48 +226,13 @@ function Notes() {
 
             {notes.map((self) => (
               <React.Fragment key={self._id}>
-                <ListItem
-                  sx={{ overflowWrap: "break-word" }}
-                  onDoubleClick={() => handleDoubleClick(self)}
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => deleteNote(self)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                >
-                  {self.isEditMode ? (
-                    <Box
-                      component="form"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-
-                        if (self.text === "") {
-                          deleteNote(self);
-                        } else {
-                          exitEditMode(self);
-                        }
-                      }}
-                    >
-                      <TextField
-                        autoFocus={true}
-                        id="editMode"
-                        variant="outlined"
-                        autoComplete="off"
-                        value={self.text}
-                        fullWidth
-                        size="small"
-                        onChange={(e) => updateText(self, e.target.value)}
-                      />
-                    </Box>
-                  ) : (
-                    <ListItemText primary={self.text} />
-                  )}
-                </ListItem>
-                <Divider />
+                <NoteItem
+                  self={self}
+                  handleDoubleClick={handleDoubleClick}
+                  deleteNote={deleteNote}
+                  exitEditMode={exitEditMode}
+                  updateText={updateText}
+                />
               </React.Fragment>
             ))}
           </List>

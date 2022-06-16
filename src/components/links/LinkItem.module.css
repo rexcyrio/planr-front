@@ -1,0 +1,12 @@
+.links-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: hsl(265, 100%, 91%);
+  border-radius: 5px;
+  padding: 0.5rem;
+}
+
+.links-button:hover {
+  background-color: hsl(265, 100%, 88%);
+}
