@@ -13,7 +13,6 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
-import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
@@ -24,6 +23,20 @@ import { AuthContext } from "../../store/AuthContext";
 import styles from "./Links.module.css";
 import { Alert } from "@mui/material";
 import LinkItem from "./LinkItem";
+import generateSkeletons from "../../helper/skeletonHelper";
+
+const DUMMY_LINK_ITEM = (
+  <LinkItem
+    self={{
+      _id: "1",
+      _toBeDeleted: false,
+      _name: "dummy",
+      _url: "https://google.com",
+      name: "dummy",
+      url: "https://google.com",
+    }}
+  />
+);
 
 function Links() {
   const [links, setLinks] = useState([]);
@@ -406,29 +419,19 @@ function Links() {
       </Dialog>
 
       <div className={styles["links-container"]}>
-        {initialLoad ? (
-          <Skeleton
-            variant="rectangle"
-            height="100%"
-            width="100%"
-            animation="wave"
-          />
-        ) : links.length > 0 ? (
-          <Stack
-            direction="column"
-            alignItems="stretch"
-            justifyContent="flex-start"
-            spacing={1}
-          >
-            {links.map((self) => (
+        <Stack spacing={1}>
+          {initialLoad ? (
+            generateSkeletons(3, DUMMY_LINK_ITEM)
+          ) : links.length > 0 ? (
+            links.map((self) => (
               <React.Fragment key={self._id}>
                 <LinkItem self={self} />
               </React.Fragment>
-            ))}
-          </Stack>
-        ) : (
-          <div>There are no links.</div>
-        )}
+            ))
+          ) : (
+            <div>There are no links.</div>
+          )}
+        </Stack>
       </div>
 
       <Stack justifyContent="flex-end" direction="row" padding="0.5em">

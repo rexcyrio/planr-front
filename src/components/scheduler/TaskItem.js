@@ -51,7 +51,6 @@ function TaskItem({ self }) {
         display: "flex",
         alignItems: "center",
         padding: "0.5rem",
-        margin: "0.5rem",
         borderRadius: "5px",
         opacity: isDragging ? "0.75" : "1",
       }}

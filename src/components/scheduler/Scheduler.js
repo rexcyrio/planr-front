@@ -7,10 +7,24 @@ import TimetableCell from "./TimetableCell";
 import CircularProgress from "@mui/material/CircularProgress";
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import ErrorIcon from "@mui/icons-material/Error";
-import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
 import Tooltip from "@mui/material/Tooltip";
-import { Alert } from "@mui/material";
+import { Alert, Stack } from "@mui/material";
+import generateSkeletons from "../../helper/skeletonHelper";
+
+const DUMMY_TASK_ITEM = (
+  <TaskItem
+    self={{
+      _id: "5897963",
+      name: "assignment 3",
+      dueDate: "2022-01-01",
+      dueTime: "23:00",
+      durationHours: "2",
+      timeUnits: 4,
+      moduleCode: "CS1231S",
+    }}
+  />
+);
 
 function Scheduler() {
   const [matrix, setMatrix] = useState(defaultMatrix());
@@ -32,17 +46,6 @@ function Scheduler() {
         setInitialSnackbar(true);
         setInitialLoad(false);
       });
-    // setTasks([
-    //   {
-    //     _id: "5897963",
-    //     name: "assignment 3",
-    //     dueDate: "2022-01-01",
-    //     dueTime: "23:00",
-    //     durationHours: "2",
-    //     timeUnits: 4,
-    //     moduleCode: "CS1231S",
-    //   },
-    // ]);
   }, []);
 
   function defaultMatrix() {
@@ -234,22 +237,6 @@ function Scheduler() {
       });
   }
 
-  function generateSkeletons(num) {
-    let arr = [];
-    for (let i = 0; i < num; i++) {
-      arr.push(
-        <Skeleton
-          variant="rectangular"
-          animation="wave"
-          height="3.375rem"
-          width="calc(100% - 1rem)"
-          sx={{ margin: "0.5rem" }}
-        />
-      );
-    }
-    return arr;
-  }
-
   const closeSnackbar = () => {
     setOpenSyncErrorSnackbar(false);
   };
@@ -375,17 +362,19 @@ function Scheduler() {
           <h1>Tasks</h1>
           {dataStatus}
         </div>
-        {initialLoad ? (
-          generateSkeletons(5)
-        ) : tasks.length > 0 ? (
-          tasks.map((self) => (
-            <React.Fragment key={self._id}>
-              <TaskItem self={self} />
-            </React.Fragment>
-          ))
-        ) : (
-          <div className={styles["no-tasks"]}>There are no tasks.</div>
-        )}
+        <Stack spacing={1} sx={{ marginX: "0.5rem" }}>
+          {initialLoad ? (
+            generateSkeletons(5, DUMMY_TASK_ITEM)
+          ) : tasks.length > 0 ? (
+            tasks.map((self) => (
+              <React.Fragment key={self._id}>
+                <TaskItem self={self} />
+              </React.Fragment>
+            ))
+          ) : (
+            <div className={styles["no-tasks"]}>There are no tasks.</div>
+          )}
+        </Stack>
         <TaskCreator
           addTask={addTask}
           updateTask={updateTask}
