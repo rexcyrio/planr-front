@@ -16,8 +16,13 @@ LinkItem.propTypes = {
 
 function LinkItem({ self }) {
   return (
-    <a href={self.url} rel="noreferrer noopener" target="_blank">
-      <div className={styles["links-button"]}>
+    <a
+      className={styles["link-item"]}
+      href={self.url}
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      <div className={styles["link-button"]}>
         <div>{self.name}</div>
         <ArrowForwardIcon />
       </div>

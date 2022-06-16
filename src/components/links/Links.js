@@ -419,7 +419,7 @@ function Links() {
       </Dialog>
 
       <div className={styles["links-container"]}>
-        <Stack spacing={1}>
+        <Stack spacing={1} sx={{ scrollSnapType: "y mandatory" }}>
           {initialLoad ? (
             generateSkeletons(3, DUMMY_LINK_ITEM)
           ) : links.length > 0 ? (
