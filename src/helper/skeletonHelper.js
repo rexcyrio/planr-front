@@ -5,9 +5,16 @@ function generateSkeletons(count, child) {
   let arr = [];
   for (let i = 0; i < count; i++) {
     arr.push(
-      <Skeleton key={i} variant="rectangular" animation="wave" width={"auto"}>
-        {child}
-      </Skeleton>
+      <React.Fragment key={i}>
+        <Skeleton
+          sx={{ borderRadius: "5px" }}
+          variant="rectangular"
+          animation="wave"
+          width={"auto"}
+        >
+          {child}
+        </Skeleton>
+      </React.Fragment>
     );
   }
   return arr;
