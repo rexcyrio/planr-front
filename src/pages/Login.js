@@ -109,9 +109,7 @@ function Login() {
         </p>
 
         {error ? (
-          <Alert severity="error" fullWidth>
-            Username or password is incorrect.
-          </Alert>
+          <Alert severity="error">Username or password is incorrect.</Alert>
         ) : (
           <></>
         )}
