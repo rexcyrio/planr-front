@@ -1,8 +1,7 @@
 .timetable-container {
-  display: "flex";
-  justify-content: "center";
-  height: calc(100vh - var(--navbar-height) - 1px - 1rem);
+  height: calc(100% - 1.5rem);
   overflow-y: auto;
+  position: relative;
 
   /* Hide scrollbar for IE, Edge and Firefox */
   -ms-overflow-style: none; /* IE and Edge */
@@ -14,9 +13,22 @@
   display: none;
 }
 
-.sticky {
-  position: sticky;
-  top: -1px;
+.tasks-container {
+  height: calc(100% - 5.1rem);
+  overflow-y: auto;
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.tasks-container::-webkit-scrollbar {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  display: none;
+}
+
+.sticky-container {
+  z-index: 7;
 }
 
 .sticky-table {
@@ -24,13 +36,16 @@
   border-collapse: collapse;
 }
 
-.table {
+.timetable-table {
   border-collapse: collapse;
+  margin-bottom: 1rem;
 }
 
 .cell {
   width: 5.8rem;
   border: 1px solid hsl(0, 0%, 75%);
+  position: relative;
+  z-index: 5;
 }
 
 .title {

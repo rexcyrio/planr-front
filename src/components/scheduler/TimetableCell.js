@@ -1,18 +1,60 @@
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import PropTypes from "prop-types";
-import React from "react";
-import { useDrop } from "react-dnd";
+import React, { useEffect, useState } from "react";
+import { useDrag, useDrop } from "react-dnd";
+import { getEmptyImage } from "react-dnd-html5-backend";
 import styles from "./Scheduler.module.css";
 
 TimetableCell.propTypes = {
-  name: PropTypes.string,
-  row: PropTypes.number,
-  col: PropTypes.number,
-  rowSpan: PropTypes.number,
-  matrix: PropTypes.array,
-  scheduleTask: PropTypes.func,
+  self: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+
+    name: PropTypes.string.isRequired,
+    dueDate: PropTypes.string.isRequired,
+    dueTime: PropTypes.string.isRequired,
+    durationHours: PropTypes.string.isRequired,
+    moduleCode: PropTypes.string.isRequired,
+
+    row: PropTypes.number.isRequired,
+    col: PropTypes.number.isRequired,
+    timeUnits: PropTypes.number.isRequired,
+
+    isCompleted: PropTypes.bool.isRequired,
+  }).isRequired,
+
+  row: PropTypes.number.isRequired,
+  col: PropTypes.number.isRequired,
+  matrix: PropTypes.array.isRequired,
+  tasks: PropTypes.array.isRequired,
+  _setMatrix: PropTypes.func.isRequired,
+  setTaskFields: PropTypes.func.isRequired,
 };
 
-function TimetableCell({ name, row, col, rowSpan, matrix, scheduleTask }) {
+function TimetableCell({
+  self,
+  row,
+  col,
+  matrix,
+  tasks,
+  _setMatrix,
+  setTaskFields,
+}) {
+  const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
+  const [isMouseOver, setIsMouseOver] = useState(false);
+
+  function handleMouseEnter() {
+    // if the user is dragging an item around, it shouldn't make the
+    // drag indicator icon appear
+    if (isDragging) {
+      return;
+    }
+    setIsMouseOver(true);
+  }
+
+  function handleMouseLeave() {
+    setIsMouseOver(false);
+  }
+
   function getTaskID(row, col) {
     return matrix[row][col];
   }
@@ -29,35 +71,168 @@ function TimetableCell({ name, row, col, rowSpan, matrix, scheduleTask }) {
     return rowPointer - row + 1;
   }
 
+  // ==========================================================================
+  // Drag and drop
+  // ==========================================================================
+
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: "TASK",
       drop: (item) => {
-        const { task } = item;
-        scheduleTask(task, row, col);
+        const { _id: taskID, timeUnits } = item.task;
+
+        // add task to matrix
+        for (let i = 0; i < timeUnits; i++) {
+          _setMatrix(row + i, col, taskID);
+        }
+
+        // update `row` and `col` fields accordingly
+        setTaskFields(taskID, { row: row, col: col });
       },
       canDrop: (item) => {
-        const { task } = item;
-        return task.timeUnits <= getNumberOfAvailableTimeUnits(row, col);
+        const { timeUnits } = item.task;
+
+        // update task silhouette
+        setDroppingTaskTimeUnits(timeUnits);
+
+        return timeUnits <= getNumberOfAvailableTimeUnits(row, col);
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
       }),
     }),
-    [row, col, matrix]
+    [matrix, tasks]
   );
+
+  const [{ isDragging }, drag, preview] = useDrag(
+    () => ({
+      type: "TASK",
+      item: { task: self },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    }),
+    [self]
+  );
+
+  // needed for custom drag layer
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
+
+  // FIXME: performance
+  useEffect(() => {
+    if (isDragging) {
+      if (isMouseOver) {
+        setIsMouseOver(false);
+      }
+
+      for (let i = 0; i < self.timeUnits; i++) {
+        // temporarily set taskID to "0"
+        _setMatrix(row + i, col, "0");
+      }
+    } else {
+      for (let i = 0; i < self.timeUnits; i++) {
+        // set taskID back
+        _setMatrix(row + i, col, self._id);
+      }
+    }
+  }, [isDragging]);
 
   return (
     <td
       ref={drop}
       className={styles["cell"]}
-      rowSpan={rowSpan}
-      style={{ backgroundColor: isOver ? (canDrop ? "green" : "red") : "" }}
+      rowSpan={self.timeUnits}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ verticalAlign: "top" }}
     >
-      {name}
+      <div
+        title="Move task around"
+        ref={drag}
+        style={{
+          cursor: "grab",
+          visibility: self._id !== "0" && isMouseOver ? "visible" : "hidden",
+          fontSize: "0.95rem",
+        }}
+      >
+        <DragIndicatorIcon
+          fontSize="inherit"
+          sx={{ color: "hsl(0, 0%, 75%)" }}
+        />
+      </div>
+
+      <div
+        title={self.name}
+        style={{
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          WebkitLineClamp: `${self.timeUnits - 1}`,
+          overflow: "hidden",
+          width: "5.7rem",
+        }}
+      >
+        {self.name}
+      </div>
+
+      {isOver ? (
+        <div
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "0",
+            height: getRem(droppingTaskTimeUnits),
+            width: "5.9rem",
+            zIndex: "4",
+            backgroundColor: canDrop ? "green" : "red",
+          }}
+        ></div>
+      ) : (
+        <></>
+      )}
     </td>
   );
 }
+
+function roundOff(number, places) {
+  const divisor = Math.pow(10, places);
+  return Math.round(number * divisor) / divisor;
+}
+
+function getRem(timeUnits) {
+  if (timeUnits in mappingTimeUnitsToRemUnits) {
+    return `${mappingTimeUnitsToRemUnits[timeUnits]}rem`;
+  }
+
+  const numGaps = Math.floor((timeUnits - 1) / 4);
+  const gapsRem = numGaps * 1.35;
+
+  const numChunks = Math.floor(timeUnits / 4);
+  const chunksRem = (numChunks - 1) * 4.2;
+
+  const remainder = timeUnits % 4;
+  const remainderRem = Math.max((remainder - 1) * 1.4, 0);
+
+  const total = roundOff(5.5 + gapsRem + chunksRem + remainderRem, 2);
+  return `${total}rem`;
+}
+
+const mappingTimeUnitsToRemUnits = {
+  0: 0,
+
+  1: 1.3,
+  2: 2.7,
+  3: 4.1,
+  4: 5.5,
+
+  5: 6.85,
+  6: 8.25,
+  7: 9.65,
+  8: 11.05,
+
+  9: 12.4,
+};
 
 export default TimetableCell;

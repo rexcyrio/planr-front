@@ -12,6 +12,7 @@ body {
     Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-y: hidden;
 }
 
 code {
@@ -104,7 +105,7 @@ Private
 
 .timetable-section {
   grid-area: timetable;
-  padding: 1rem;
+  padding: 1rem 1rem 0;
 }
 
 .tasks-section {

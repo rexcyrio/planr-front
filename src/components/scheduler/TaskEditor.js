@@ -1,39 +1,57 @@
-import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import Fab from "@mui/material/Fab";
 import FormControl from "@mui/material/FormControl";
+import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 
-TaskCreator.propTypes = {
-  addTask: PropTypes.func.isRequired,
+TaskEditor.propTypes = {
+  self: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+
+    name: PropTypes.string.isRequired,
+    dueDate: PropTypes.string.isRequired,
+    dueTime: PropTypes.string.isRequired,
+    durationHours: PropTypes.string.isRequired,
+    moduleCode: PropTypes.string.isRequired,
+
+    row: PropTypes.number.isRequired,
+    col: PropTypes.number.isRequired,
+    timeUnits: PropTypes.number.isRequired,
+
+    isCompleted: PropTypes.bool.isRequired,
+  }).isRequired,
+
+  _setMatrix: PropTypes.func.isRequired,
+  _setTask: PropTypes.func.isRequired,
+  deleteTask: PropTypes.func.isRequired,
 };
 
-function TaskCreator({ addTask }) {
-  const [name, setName] = useState("");
-  const [dueDate, setDueDate] = useState(getDateNowString());
-  const [dueTime, setDueTime] = useState("23:59");
-  const [durationHours, setDurationHours] = useState("");
-  const [moduleCode, setModuleCode] = useState("");
+function TaskEditor({ self, _setMatrix, _setTask, deleteTask }) {
+  const [name, setName] = useState(self.name);
+  const [dueDate, setDueDate] = useState(self.dueDate);
+  const [dueTime, setDueTime] = useState(self.dueTime);
+  const [durationHours, setDurationHours] = useState(self.durationHours);
+  const [moduleCode, setModuleCode] = useState(self.moduleCode);
   const [open, setOpen] = useState(false);
 
   function resetState() {
-    setName("");
-    setDueDate(getDateNowString());
-    setDueTime("23:59");
-    setDurationHours("");
-    setModuleCode("");
+    setName(self.name);
+    setDueDate(self.dueDate);
+    setDueTime(self.dueTime);
+    setDurationHours(self.durationHours);
+    setModuleCode(self.moduleCode);
   }
 
   function handleOpen() {
@@ -50,7 +68,7 @@ function TaskCreator({ addTask }) {
     setOpen(false);
 
     const newTask = {
-      _id: uuidv4(),
+      _id: self._id,
 
       name: name,
       dueDate: dueDate,
@@ -58,30 +76,46 @@ function TaskCreator({ addTask }) {
       durationHours: durationHours,
       moduleCode: moduleCode,
 
-      row: -1,
-      col: -1,
+      row: self.row,
+      col: self.col,
       timeUnits: Math.ceil(Number(durationHours) * 2),
 
-      isCompleted: false,
+      isCompleted: self.isCompleted,
     };
 
-    addTask(newTask);
-    resetState();
+    // TODO:
+
+    // updating matrix
+
+    // case 1: user shortened time needed for task
+    if (newTask.timeUnits < self.timeUnits) {
+      const diff = self.timeUnits - newTask.timeUnits;
+
+      for (let i = 0; i < diff; i++) {
+        _setMatrix(self.row + i, self.col, "0");
+      }
+    }
+
+    // case 2: user lengthened time needed for task, enough available time units
+    // case 3: user lengthened time needed for task, NOT enough available time units
+
+    // updating tasks array
+    _setTask(self._id, newTask);
+
+    // no need to call `resetState()` here since the fields already represent
+    // the correct information even on immediate reopen
   }
 
   return (
     <>
-      <Fab
-        color="primary"
-        aria-label="add"
-        style={{ position: "absolute", right: "1.5rem", bottom: "1rem" }}
-        onClick={handleOpen}
-      >
-        <AddIcon />
-      </Fab>
+      <Tooltip title="Edit">
+        <IconButton size="small" onClick={handleOpen}>
+          <EditIcon />
+        </IconButton>
+      </Tooltip>
 
       <Dialog open={open} onClose={handleClose} maxWidth="md">
-        <DialogTitle>Add a new Task</DialogTitle>
+        <DialogTitle>Edit your Task</DialogTitle>
         <Box component="form" onSubmit={handleSubmit}>
           <DialogContent>
             <FormControl sx={{ width: "10rem", mr: "1rem" }} margin="dense">
@@ -151,9 +185,23 @@ function TaskCreator({ addTask }) {
               onChange={(e) => setDueTime(e.target.value)}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit">Add</Button>
+          <DialogActions sx={{ justifyContent: "space-between" }}>
+            <Box sx={{ ml: "0.5rem" }}>
+              <Button
+                sx={{ color: "red" }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleClose();
+                  deleteTask(self);
+                }}
+              >
+                Delete
+              </Button>
+            </Box>
+            <Box>
+              <Button onClick={handleClose}>Discard Changes</Button>
+              <Button type="submit">Save</Button>
+            </Box>
           </DialogActions>
         </Box>
       </Dialog>
@@ -161,18 +209,4 @@ function TaskCreator({ addTask }) {
   );
 }
 
-function getDateNowString() {
-  const date = new Date();
-
-  const y = date.getFullYear().toString();
-  // converting from 0-based indexing to 1-based indexing
-  const m = (date.getMonth() + 1).toString();
-  const d = date.getDate().toString();
-
-  const m2 = m.length === 2 ? m : "0" + m;
-  const d2 = d.length === 2 ? d : "0" + d;
-
-  return `${y}-${m2}-${d2}`;
-}
-
-export default TaskCreator;
+export default TaskEditor;

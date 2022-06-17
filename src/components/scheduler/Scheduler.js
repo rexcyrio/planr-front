@@ -1,16 +1,20 @@
-import React, { useEffect, useState, useContext } from "react";
+import CloudDoneIcon from "@mui/icons-material/CloudDone";
+import ErrorIcon from "@mui/icons-material/Error";
+import Alert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
+import Skeleton from "@mui/material/Skeleton";
+import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
+import React, { useContext, useEffect, useState } from "react";
+import generateSkeletons from "../../helper/skeletonHelper";
 import { AuthContext } from "../../store/AuthContext";
+import LineMarker from "./LineMarker";
+import MyDragLayer from "./MyDragLayer";
 import styles from "./Scheduler.module.css";
 import TaskCreator from "./TaskCreator";
 import TaskItem from "./TaskItem";
 import TimetableCell from "./TimetableCell";
-import CircularProgress from "@mui/material/CircularProgress";
-import CloudDoneIcon from "@mui/icons-material/CloudDone";
-import ErrorIcon from "@mui/icons-material/Error";
-import Snackbar from "@mui/material/Snackbar";
-import Tooltip from "@mui/material/Tooltip";
-import { Alert, Stack } from "@mui/material";
-import generateSkeletons from "../../helper/skeletonHelper";
 
 const DUMMY_TASK_ITEM = (
   <TaskItem
@@ -27,7 +31,7 @@ const DUMMY_TASK_ITEM = (
 );
 
 function Scheduler() {
-  const [matrix, setMatrix] = useState(defaultMatrix());
+  const [matrix, setMatrix] = useState(defaultMatrix("0"));
   const [tasks, setTasks] = useState([]);
   const [updating, setUpdating] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
@@ -36,7 +40,21 @@ function Scheduler() {
   const [initialSnackbar, setInitialSnackbar] = useState(false);
   const { userId } = useContext(AuthContext);
 
-  const zeroPad = (num, places) => String(num).padStart(places, "0");
+  const EMPTY_TASK = {
+    _id: "0",
+
+    name: "",
+    dueDate: "",
+    dueTime: "",
+    durationHours: "",
+    moduleCode: "",
+
+    row: -1,
+    col: -1,
+    timeUnits: 1,
+
+    isCompleted: false,
+  };
 
   useEffect(() => {
     fetch(`/api/private/tasks?id=${userId}`)
@@ -48,19 +66,44 @@ function Scheduler() {
       });
   }, []);
 
-  function defaultMatrix() {
-    const arr = [];
-    for (let i = 0; i < 48; i++) {
-      const row = ["0", "0", "0", "0", "0", "0", "0"];
-      arr.push(row);
-    }
-    return arr;
+  // ==========================================================================
+  // General Helper Functions
+  // ==========================================================================
+
+  function getTaskID(row, col) {
+    return matrix[row][col];
   }
 
+  function getTaskObject(row, col) {
+    const taskID = getTaskID(row, col);
+    const task = tasks.find((each) => each._id === taskID);
+    return task;
+  }
+
+  // ==========================================================================
+  // Matrix Helper Functions
+  // ==========================================================================
+
   function _setMatrix(row, col, el) {
+    // silently ignore out of range indices
+    if (row < 0 || row >= 48 || col < 0 || col >= 7) {
+      return;
+    }
+
+    // skip unnecessary updates
+    if (matrix[row][col] === el) {
+      return;
+    }
+
     setMatrix((prevMatrix) => {
-      const row_ = prevMatrix[row];
-      const newRow = [...row_.slice(0, col), el, ...row_.slice(col + 1, 7)];
+      const prevRow = prevMatrix[row];
+
+      const newRow = [
+        ...prevRow.slice(0, col),
+        el,
+        ...prevRow.slice(col + 1, 7),
+      ];
+
       const newMatrix = [
         ...prevMatrix.slice(0, row),
         newRow,
@@ -73,121 +116,146 @@ function Scheduler() {
     });
   }
 
-  function get30MinLater(time24H) {
-    const [hour, min] = time24H.split(":");
-
-    if (min === "00") {
-      return `${hour}:30`;
-    } else if (min === "30") {
-      return `${zeroPad((Number(hour) + 1) % 24, 2)}:00`;
-    } else {
-      throw Error("incorrect time format");
-    }
-  }
-
-  function getTaskID(row, col) {
-    return matrix[row][col];
-  }
-
-  function getTaskName(row, col) {
-    const taskID = getTaskID(row, col);
-    const task = tasks.find((each) => each._id === taskID);
-    return task.name;
-  }
-
-  function getTimePairArray() {
-    const arr = [];
-    let time = "00:00";
-
-    for (let i = 0; i < 48; i++) {
-      const time_ = get30MinLater(time);
-      arr.push([time, time_]);
-      time = time_;
-    }
-
-    return arr;
-  }
-
   function createTimetableCell(row, col) {
     if (getTaskID(row, col) === "0") {
       // render empty cell
 
       return (
         <TimetableCell
-          name=""
+          self={EMPTY_TASK}
           row={row}
           col={col}
-          rowSpan={1}
           matrix={matrix}
-          scheduleTask={scheduleTask}
+          tasks={tasks}
+          _setMatrix={_setMatrix}
+          setTaskFields={setTaskFields}
         />
       );
     }
 
     if (row > 0 && getTaskID(row - 1, col) === getTaskID(row, col)) {
-      // render nothing to enable the cell the span multiple rows
+      // render nothing to enable the cell to span multiple rows
       return <></>;
     }
 
     // render rowSpan cell
-    let rowPointer = row;
-    while (
-      rowPointer + 1 < 48 &&
-      getTaskID(row, col) === getTaskID(rowPointer + 1, col)
-    ) {
-      rowPointer += 1;
-    }
-
-    const rowSpan = rowPointer - row + 1;
-
     return (
       <TimetableCell
-        name={getTaskName(row, col)}
+        self={getTaskObject(row, col)}
         row={row}
         col={col}
-        rowSpan={rowSpan}
         matrix={matrix}
-        scheduleTask={scheduleTask}
+        tasks={tasks}
+        _setMatrix={_setMatrix}
+        setTaskFields={setTaskFields}
       />
     );
   }
 
-  function scheduleTask(task, row, col) {
-    const { _id: taskID, timeUnits } = task;
-
-    for (let i = 0; i < timeUnits; i++) {
-      _setMatrix(row + i, col, taskID);
-    }
-  }
-
   // ==========================================================================
-  // Tasks
+  // Task Helper Functions
   // ==========================================================================
 
-  function addTask(newTask) {
+  function _setTask(taskID, newTask) {
     setUpdating(true);
-    addTaskToDatabase(newTask);
-    setTasks((prev) => [...prev, newTask]);
-  }
 
-  function updateTask(newTask) {
-    setUpdating(true);
     setTasks((prev) => {
-      const index = prev.findIndex((each) => each._id === newTask._id);
+      const index = prev.findIndex((each) => each._id === taskID);
       const newTasks = [
         ...prev.slice(0, index),
         newTask,
         ...prev.slice(index + 1),
       ];
-      updateTasksInDatabase(newTask);
+
+      updateTasksInDatabase(newTasks);
       return newTasks;
     });
   }
 
-  function deleteTask(task) {
+  function setTaskFields(taskID, newKeyValuePairs) {
+    // cannot update fields of EMPTY_TASK
+    if (taskID === "0") {
+      return;
+    }
+
+    const task = tasks.find((each) => each._id === taskID);
+    const newTask = {};
+
+    for (const [key, value] of Object.entries(task)) {
+      if (key in newKeyValuePairs) {
+        newTask[key] = newKeyValuePairs[key];
+      } else {
+        newTask[key] = value;
+      }
+    }
+
+    _setTask(taskID, newTask);
+  }
+
+  function addTask(newTask) {
     setUpdating(true);
+    setTasks((prev) => [...prev, newTask]);
+    addTaskToDatabase(newTask);
+  }
+
+  // function updateTask(newTask) {
+  //   const { _id: taskID, row, col, timeUnits } = newTask;
+
+  //   if (canExpand(row, col, timeUnits, taskID)) {
+  //     // update matrix to reflect the task occupying more timeUnits
+  //     for (let i = 0; i < timeUnits; i++) {
+  //       _setMatrix(row + i, col, taskID);
+  //     }
+  //     _updateTask(newTask);
+  //   } else {
+  //     // user edited the task to occupy more timeUnits, but there is not enough
+  //     // space available for the task to expand
+  //     for (let i = 0; i < timeUnits; i++) {
+  //       _setMatrix(row + i, col, "0");
+  //     }
+
+  //     setTaskFields(taskID, { row: -1, col: -1 });
+  //   }
+  // }
+
+  // function canExpand(row, col, timeUnits, taskID) {
+  //   if (row === -1 || col === -1) {
+  //     return;
+  //   }
+
+  //   if (row + timeUnits >= 48) {
+  //     return false;
+  //   }
+
+  //   for (let i = 0; i < timeUnits; i++) {
+  //     const cell = matrix[row + i][col];
+
+  //     if (cell !== "0" && cell !== taskID) {
+  //       return false;
+  //     }
+  //   }
+
+  //   return true;
+  // }
+
+  function deleteTask(task) {
+    const { _id: taskID, row, col, timeUnits } = task;
+
+    // cannot delete EMPTY_TASK
+    if (row === -1 && col === -1) {
+      return;
+    }
+
+    setUpdating(true);
+
+    // remove from matrix
+    for (let i = 0; i < timeUnits; i++) {
+      _setMatrix(row + i, col, "0");
+    }
+
+    // remove from tasks array
     setTasks((prev) => {
-      const newTasks = prev.filter((each) => each._id !== task._id);
+      const newTasks = prev.filter((each) => each._id !== taskID);
       updateTasksInDatabase(newTasks);
       return newTasks;
     });
@@ -200,7 +268,7 @@ function Scheduler() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId, task }),
+      body: JSON.stringify({ userId: userId, task }),
     })
       .then((res) => res.json())
       .then((json) => {
@@ -298,27 +366,29 @@ function Scheduler() {
           Something went wrong! Your notes might not be saved
         </Alert>
       </Snackbar>
+      <MyDragLayer />
       <div className="timetable-section">
-        <div className={styles["timetable-container"]}>
-          <div className={styles["sticky"]}>
-            <table className={styles["sticky-table"]}>
-              <thead>
-                <tr>
-                  <th className={styles["cell"]}></th>
-                  <th className={styles["cell"]}>Monday</th>
-                  <th className={styles["cell"]}>Tuesday</th>
-                  <th className={styles["cell"]}>Wednesday</th>
-                  <th className={styles["cell"]}>Thursday</th>
-                  <th className={styles["cell"]}>Friday</th>
-                  <th className={styles["cell"]}></th>
-                  <th className={styles["cell"]}>Saturday</th>
-                  <th className={styles["cell"]}>Sunday</th>
-                </tr>
-              </thead>
-            </table>
-          </div>
+        <div className={styles["sticky-container"]}>
+          <table className={styles["sticky-table"]}>
+            <thead>
+              <tr>
+                <th className={styles["cell"]}></th>
+                <th className={styles["cell"]}>Monday</th>
+                <th className={styles["cell"]}>Tuesday</th>
+                <th className={styles["cell"]}>Wednesday</th>
+                <th className={styles["cell"]}>Thursday</th>
+                <th className={styles["cell"]}>Friday</th>
+                <th className={styles["cell"]}></th>
+                <th className={styles["cell"]}>Saturday</th>
+                <th className={styles["cell"]}>Sunday</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
 
-          <table className={styles["table"]}>
+        <div className={styles["timetable-container"]}>
+          <LineMarker />
+          <table className={styles["timetable-table"]}>
             <tbody>
               {getTimePairArray().map((timePair, index) => {
                 const [time24H, time24H_] = timePair;
@@ -362,6 +432,7 @@ function Scheduler() {
           <h1>Tasks</h1>
           {dataStatus}
         </div>
+
         <Stack spacing={1} sx={{ marginX: "0.5rem" }}>
           {initialLoad ? (
             generateSkeletons(5, DUMMY_TASK_ITEM)
@@ -375,14 +446,66 @@ function Scheduler() {
             <div className={styles["no-tasks"]}>There are no tasks.</div>
           )}
         </Stack>
-        <TaskCreator
-          addTask={addTask}
-          updateTask={updateTask}
-          deleteTask={deleteTask}
-        />
+
+        <TaskCreator addTask={addTask} />
       </div>
     </>
   );
+}
+
+function defaultMatrix(val) {
+  const arr = [];
+  for (let i = 0; i < 48; i++) {
+    const row = [val, val, val, val, val, val, val];
+    arr.push(row);
+  }
+  return arr;
+}
+
+function getTimePairArray() {
+  const arr = [];
+  let time = "00:00";
+
+  for (let i = 0; i < 48; i++) {
+    const time_ = get30MinLater(time);
+    arr.push([time, time_]);
+    time = time_;
+  }
+
+  return arr;
+}
+
+function get30MinLater(time24H) {
+  const [hour, min] = time24H.split(":");
+
+  if (min === "00") {
+    return `${hour}:30`;
+  } else if (min === "30") {
+    return `${zeroPad((Number(hour) + 1) % 24, 2)}:00`;
+  } else {
+    throw Error("incorrect time format");
+  }
+}
+
+function zeroPad(num, places) {
+  return String(num).padStart(places, "0");
+}
+
+function generateSkeletons(num) {
+  const arr = [];
+  for (let i = 0; i < num; i++) {
+    // TODO: replace with taskItem
+    arr.push(
+      <Skeleton
+        variant="rectangular"
+        animation="wave"
+        height="3.375rem"
+        width="calc(100% - 1rem)"
+        sx={{ margin: "0.5rem", borderRadius: "5px" }}
+      />
+    );
+  }
+  return arr;
 }
 
 export default Scheduler;
