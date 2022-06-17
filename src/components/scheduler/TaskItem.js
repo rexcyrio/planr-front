@@ -27,10 +27,11 @@ TaskItem.propTypes = {
 
   _setMatrix: PropTypes.func.isRequired,
   _setTask: PropTypes.func.isRequired,
+  matrix: PropTypes.array.isRequired,
   deleteTask: PropTypes.func.isRequired,
 };
 
-function TaskItem({ self, _setMatrix, _setTask, deleteTask }) {
+function TaskItem({ self, _setMatrix, _setTask, matrix, deleteTask }) {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
@@ -113,6 +114,7 @@ function TaskItem({ self, _setMatrix, _setTask, deleteTask }) {
           self={self}
           _setMatrix={_setMatrix}
           _setTask={_setTask}
+          matrix={matrix}
           deleteTask={deleteTask}
         />
 

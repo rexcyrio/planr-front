@@ -2,7 +2,6 @@ import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import ErrorIcon from "@mui/icons-material/Error";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
@@ -16,19 +15,21 @@ import TaskCreator from "./TaskCreator";
 import TaskItem from "./TaskItem";
 import TimetableCell from "./TimetableCell";
 
-const DUMMY_TASK_ITEM = (
-  <TaskItem
-    self={{
-      _id: "5897963",
-      name: "assignment 3",
-      dueDate: "2022-01-01",
-      dueTime: "23:00",
-      durationHours: "2",
-      timeUnits: 4,
-      moduleCode: "CS1231S",
-    }}
-  />
-);
+const EMPTY_TASK = {
+  _id: "0",
+
+  name: "",
+  dueDate: "",
+  dueTime: "",
+  durationHours: "",
+  moduleCode: "",
+
+  row: -1,
+  col: -1,
+  timeUnits: 1,
+
+  isCompleted: false,
+};
 
 function Scheduler() {
   const [matrix, setMatrix] = useState(defaultMatrix("0"));
@@ -40,21 +41,15 @@ function Scheduler() {
   const [initialSnackbar, setInitialSnackbar] = useState(false);
   const { userId } = useContext(AuthContext);
 
-  const EMPTY_TASK = {
-    _id: "0",
-
-    name: "",
-    dueDate: "",
-    dueTime: "",
-    durationHours: "",
-    moduleCode: "",
-
-    row: -1,
-    col: -1,
-    timeUnits: 1,
-
-    isCompleted: false,
-  };
+  const EMPTY_TASK_ITEM = (
+    <TaskItem
+      self={EMPTY_TASK}
+      _setMatrix={_setMatrix}
+      _setTask={_setTask}
+      matrix={matrix}
+      deleteTask={deleteTask}
+    />
+  );
 
   useEffect(() => {
     fetch(`/api/private/tasks?id=${userId}`)
@@ -435,11 +430,17 @@ function Scheduler() {
 
         <Stack spacing={1} sx={{ marginX: "0.5rem" }}>
           {initialLoad ? (
-            generateSkeletons(5, DUMMY_TASK_ITEM)
+            generateSkeletons(5, EMPTY_TASK_ITEM)
           ) : tasks.length > 0 ? (
             tasks.map((self) => (
               <React.Fragment key={self._id}>
-                <TaskItem self={self} />
+                <TaskItem
+                  self={self}
+                  _setMatrix={_setMatrix}
+                  _setTask={_setTask}
+                  matrix={matrix}
+                  deleteTask={deleteTask}
+                />
               </React.Fragment>
             ))
           ) : (

@@ -35,10 +35,11 @@ TaskEditor.propTypes = {
 
   _setMatrix: PropTypes.func.isRequired,
   _setTask: PropTypes.func.isRequired,
+  matrix: PropTypes.array.isRequired,
   deleteTask: PropTypes.func.isRequired,
 };
 
-function TaskEditor({ self, _setMatrix, _setTask, deleteTask }) {
+function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
   const [name, setName] = useState(self.name);
   const [dueDate, setDueDate] = useState(self.dueDate);
   const [dueTime, setDueTime] = useState(self.dueTime);
@@ -83,21 +84,21 @@ function TaskEditor({ self, _setMatrix, _setTask, deleteTask }) {
       isCompleted: self.isCompleted,
     };
 
-    // TODO:
-
     // updating matrix
-
-    // case 1: user shortened time needed for task
     if (newTask.timeUnits < self.timeUnits) {
+      // case 1: user shortened time needed for task
       const diff = self.timeUnits - newTask.timeUnits;
 
       for (let i = 0; i < diff; i++) {
         _setMatrix(self.row + i, self.col, "0");
       }
+    } else if (newTask.timeUnits === self.timeUnits) {
+      // do nothing
+    } else if (newTask.timeUnits > self.timeUnits) {
+      // check whether there is enough available time units to expand
+      // case 2: user lengthened time needed for task, enough available time units
+      // case 3: user lengthened time needed for task, NOT enough available time units
     }
-
-    // case 2: user lengthened time needed for task, enough available time units
-    // case 3: user lengthened time needed for task, NOT enough available time units
 
     // updating tasks array
     _setTask(self._id, newTask);
