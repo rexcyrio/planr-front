@@ -12,8 +12,8 @@ function NavBar() {
     useContext(AuthContext);
   const navigate = useNavigate();
 
-  function logoutNow(e) {
-    e.preventDefault();
+  function logoutNow(event) {
+    event.preventDefault();
 
     fetch("/api/logout", {
       method: "DELETE",
@@ -25,11 +25,14 @@ function NavBar() {
     })
       .then((res) => res.json())
       .then((json) => {
-        if (json.logout_success) {
-          setIsAuthenticated(false);
-          setLoggedInUsername(null);
-          navigate("/login", { replace: true });
+        if (json.error) {
+          alert(json.error);
+          return;
         }
+
+        setIsAuthenticated(false);
+        setLoggedInUsername(null);
+        navigate("/login", { replace: true });
       });
   }
 
@@ -42,8 +45,10 @@ function NavBar() {
             <div className="nunito logo-text">PlanR</div>
           </div>
         </Link>
-        <div className={styles.ultility}>
+
+        <div className={styles.utility}>
           {isAuthenticated && <Settings />}
+
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {isAuthenticated ? (
               <Button sx={{ mr: "1rem" }} onClick={logoutNow}>
