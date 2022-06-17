@@ -491,23 +491,6 @@ function zeroPad(num, places) {
   return String(num).padStart(places, "0");
 }
 
-function generateSkeletons(num) {
-  const arr = [];
-  for (let i = 0; i < num; i++) {
-    // TODO: replace with taskItem
-    arr.push(
-      <Skeleton
-        variant="rectangular"
-        animation="wave"
-        height="3.375rem"
-        width="calc(100% - 1rem)"
-        sx={{ margin: "0.5rem", borderRadius: "5px" }}
-      />
-    );
-  }
-  return arr;
-}
-
 export default Scheduler;
 
 // ============================================================================
