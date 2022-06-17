@@ -249,8 +249,11 @@ function Signup() {
             variant="outlined"
             required
             value={verifyPassword}
+            onFocus={() => {
+              setVerifyPasswordGood(true);
+            }}
             onChange={(e) => setVerifyPassword(e.target.value)}
-            helperText={verifyPasswordGood || "Passwords do not match"}
+            helperText={verifyPasswordGood ? " " : "Passwords do not match"}
             error={!verifyPasswordGood}
           />
           <br />
