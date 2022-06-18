@@ -23,7 +23,7 @@ function LinkItem({ self }) {
       target="_blank"
     >
       <div className={styles["link-button"]}>
-        <div>{self.name}</div>
+        <div className={styles["link-item-name"]}>{self.name}</div>
         <ArrowForwardIcon />
       </div>
     </a>

@@ -14,3 +14,9 @@
 .link-item {
   scroll-snap-align: start;
 }
+
+.link-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 75%;
+}
