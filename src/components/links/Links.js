@@ -19,22 +19,8 @@ import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../../store/AuthContext";
 import styles from "./Links.module.css";
 import { Alert } from "@mui/material";
-import LinkItem from "./LinkItem";
-import generateSkeletons from "../../helper/skeletonHelper";
 import DataStatus from "../helperComponents/DataStatus";
-
-const DUMMY_LINK_ITEM = (
-  <LinkItem
-    self={{
-      _id: "1",
-      _toBeDeleted: false,
-      _name: "dummy",
-      _url: "https://google.com",
-      name: "dummy",
-      url: "https://google.com",
-    }}
-  />
-);
+import LinksList from "./LinksList";
 
 function Links() {
   const [links, setLinks] = useState([]);
@@ -387,21 +373,7 @@ function Links() {
         </Box>
       </Dialog>
 
-      <div className={styles["links-container"]}>
-        <Stack spacing={1} sx={{ scrollSnapType: "y mandatory" }}>
-          {dataState === "INITIAL_LOAD" ? (
-            generateSkeletons(3, DUMMY_LINK_ITEM)
-          ) : links.length > 0 ? (
-            links.map((self) => (
-              <React.Fragment key={self._id}>
-                <LinkItem self={self} />
-              </React.Fragment>
-            ))
-          ) : (
-            <div>There are no links.</div>
-          )}
-        </Stack>
-      </div>
+      <LinksList dataState={dataState} links={links} />
 
       <Stack justifyContent="flex-end" direction="row" padding="0.5em">
         <Button
