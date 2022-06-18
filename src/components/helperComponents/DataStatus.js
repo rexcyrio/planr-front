@@ -38,7 +38,7 @@ function DataStatus({ status }) {
 
     case "INITIAL_LOAD":
       return (
-        <Tooltip title="Updating Database">
+        <Tooltip title="Loading from Database">
           <PendingIcon
             color="info"
             sx={{
