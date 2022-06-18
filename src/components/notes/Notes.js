@@ -154,15 +154,6 @@ function Notes() {
       });
   }
 
-  function handleDoubleClick(self) {
-    if (self.isEditMode) {
-      // double clicking in edit mode should NOT exit edit mode
-      // the user might be double clicking to select an entire word
-      return;
-    }
-    updateEditMode(self, true);
-  }
-
   const closeSnackbar = () => {
     setOpenSyncErrorSnackbar(false);
   };
@@ -228,8 +219,8 @@ function Notes() {
               <React.Fragment key={self._id}>
                 <NoteItem
                   self={self}
-                  handleDoubleClick={handleDoubleClick}
                   deleteNote={deleteNote}
+                  updateEditMode={updateEditMode}
                   exitEditMode={exitEditMode}
                   updateText={updateText}
                 />
