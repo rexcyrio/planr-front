@@ -18,11 +18,19 @@ NoteItem.propTypes = {
   deleteNote: PropTypes.func,
   updateEditMode: PropTypes.func,
   exitEditMode: PropTypes.func,
+  cancelEditMode: PropTypes.func,
   updateText: PropTypes.func,
 };
 
 function NoteItem(props) {
-  const { self, deleteNote, updateEditMode, exitEditMode, updateText } = props;
+  const {
+    self,
+    deleteNote,
+    updateEditMode,
+    exitEditMode,
+    cancelEditMode,
+    updateText,
+  } = props;
   const [originalNote, setOriginalNote] = useState("");
 
   function handleDoubleClick(self) {
@@ -44,8 +52,7 @@ function NoteItem(props) {
   };
 
   const cancelEditHandler = () => {
-    updateText(originalNote);
-    exitEditMode(self);
+    cancelEditMode(self, originalNote);
   };
 
   return (

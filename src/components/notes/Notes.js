@@ -130,6 +130,23 @@ function Notes() {
     setNotes(newNotes);
   }
 
+  function cancelEditMode(self, prevText) {
+    const newNote = {
+      _id: self._id,
+      text: prevText,
+      isEditMode: false,
+    };
+
+    setNotes((prev) => {
+      const index = prev.findIndex((each) => each._id === self._id);
+      return [
+        ...prev.slice(0, index),
+        newNote,
+        ...prev.slice(index + 1, prev.length),
+      ];
+    });
+  }
+
   function updateNotesInDatabase(notes) {
     fetch("/api/private/notes", {
       method: "PUT",
@@ -222,6 +239,7 @@ function Notes() {
                   deleteNote={deleteNote}
                   updateEditMode={updateEditMode}
                   exitEditMode={exitEditMode}
+                  cancelEditMode={cancelEditMode}
                   updateText={updateText}
                 />
               </React.Fragment>
