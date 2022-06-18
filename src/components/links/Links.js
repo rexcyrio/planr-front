@@ -1,10 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CircularProgress from "@mui/material/CircularProgress";
-import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import ErrorIcon from "@mui/icons-material/Error";
 import RestoreIcon from "@mui/icons-material/Restore";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -24,6 +21,7 @@ import styles from "./Links.module.css";
 import { Alert } from "@mui/material";
 import LinkItem from "./LinkItem";
 import generateSkeletons from "../../helper/skeletonHelper";
+import DataStatus from "../helperComponents/DataStatus";
 
 const DUMMY_LINK_ITEM = (
   <LinkItem
@@ -45,9 +43,8 @@ function Links() {
   const { userId } = useContext(AuthContext);
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
-  const [updating, setUpdating] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [outOfSync, setOutOfSync] = useState(false);
+  // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
+  const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   async function sleep(ms) {
@@ -63,7 +60,7 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         setLinks(json.links);
-        setInitialLoad(false);
+        setDataState("IN_SYNC");
       });
   }, []);
 
@@ -111,7 +108,7 @@ function Links() {
         newLinks.push(newLink);
       }
 
-      setUpdating(true);
+      setDataState("UPDATING");
       updateLinksInDatabase(newLinks);
     } else {
       for (const link of links) {
@@ -142,13 +139,13 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
-          setOutOfSync(true);
+          setDataState("OUT_OF_SYNC");
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setUpdating(false);
+        setDataState("IN_SYNC");
       });
   }
 
@@ -207,7 +204,8 @@ function Links() {
       name: newName,
       url: newURL,
     };
-    setUpdating(true);
+
+    setDataState("UPDATING");
     addLinkToDatabase(newLink);
     setLinks([...links, newLink]);
   }
@@ -224,48 +222,19 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
-          setOutOfSync(true);
+          setDataState("OUT_OF_SYNC");
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setUpdating(false);
+        setDataState("IN_SYNC");
       });
   }
 
   const closeSnackbar = () => {
     setOpenSyncErrorSnackbar(false);
   };
-
-  const dataStatus = updating ? (
-    <Tooltip title="Updating Database">
-      <CircularProgress
-        size={24}
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  ) : outOfSync ? (
-    <Tooltip title="Database sync failed">
-      <ErrorIcon
-        color="error"
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  ) : (
-    <Tooltip title="In sync with database">
-      <CloudDoneIcon
-        color="success"
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  );
 
   return (
     <>
@@ -281,7 +250,7 @@ function Links() {
       <div className={styles.title}>
         <div className={styles["title-update-container"]}>
           <h1>Links</h1>
-          {dataStatus}
+          <DataStatus status={dataState} />
         </div>
         <div>
           <Tooltip title="Edit">
@@ -420,7 +389,7 @@ function Links() {
 
       <div className={styles["links-container"]}>
         <Stack spacing={1} sx={{ scrollSnapType: "y mandatory" }}>
-          {initialLoad ? (
+          {dataState === "INITIAL_LOAD" ? (
             generateSkeletons(3, DUMMY_LINK_ITEM)
           ) : links.length > 0 ? (
             links.map((self) => (
