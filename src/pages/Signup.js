@@ -83,6 +83,11 @@ function Signup() {
       helperText: "Minimum of 6 characters required for password",
       isError: true,
     },
+
+    MISSING_NUMBER_OR_LETTER: {
+      helperText: "Password requires at least 1 letter and number",
+      isError: true,
+    },
   };
 
   async function isUsernameAvailable(username) {
@@ -141,7 +146,36 @@ function Signup() {
       return;
     }
 
-    setPasswordState("ALL_GOOD");
+    let hasLetter = false;
+    let hasNumber = false;
+    let lowerCasePassword = newPassword.toLowerCase();
+
+    for (let i = 0; i < newPassword.length; i++) {
+      if (
+        lowerCasePassword.charCodeAt(i) > 96 &&
+        lowerCasePassword.charCodeAt(i) < 123
+      ) {
+        hasLetter = true;
+        break;
+      }
+    }
+
+    for (let i = 0; i < newPassword.length; i++) {
+      if (
+        lowerCasePassword.charCodeAt(i) > 47 &&
+        lowerCasePassword.charCodeAt(i) < 58
+      ) {
+        hasNumber = true;
+        break;
+      }
+    }
+
+    if (hasNumber && hasLetter) {
+      setPasswordState("ALL_GOOD");
+      return;
+    }
+
+    setPasswordState("MISSING_NUMBER_OR_LETTER");
   }
 
   async function handleSubmit(event) {
