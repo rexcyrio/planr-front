@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import styles from "./LinkItem.module.css";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import Slide from "@mui/material/Slide";
 import Tooltip from "@mui/material/Tooltip";
 
 LinkItem.propTypes = {
@@ -17,23 +18,25 @@ LinkItem.propTypes = {
 
 function LinkItem({ self }) {
   return (
-    <Tooltip
-      followCursor={true}
-      title={`Open ${self.name} in new tab`}
-      PopperProps={{ sx: { padding: "0.5rem" } }}
-    >
-      <a
-        className={styles["link-item"]}
-        href={self.url}
-        rel="noreferrer noopener"
-        target="_blank"
+    <Slide in={true} direction="right">
+      <Tooltip
+        followCursor={true}
+        title={`Open ${self.name} in new tab`}
+        PopperProps={{ sx: { padding: "0.5rem" } }}
       >
-        <div className={styles["link-button"]}>
-          <div className={styles["link-item-name"]}>{self.name}</div>
-          <ArrowForwardIcon />
-        </div>
-      </a>
-    </Tooltip>
+        <a
+          className={styles["link-item"]}
+          href={self.url}
+          rel="noreferrer noopener"
+          target="_blank"
+        >
+          <div className={styles["link-button"]}>
+            <div className={styles["link-item-name"]}>{self.name}</div>
+            <ArrowForwardIcon />
+          </div>
+        </a>
+      </Tooltip>
+    </Slide>
   );
 }
 

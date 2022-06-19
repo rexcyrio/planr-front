@@ -7,6 +7,7 @@ import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import TaskEditor from "./TaskEditor";
 import styles from "./TaskItem.module.css";
+import Grow from "@mui/material/Grow";
 
 TaskItem.propTypes = {
   self: PropTypes.shape({
@@ -60,70 +61,72 @@ function TaskItem({ self, _setMatrix, _setTask, matrix, deleteTask }) {
   }, [preview]);
 
   return (
-    <div
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        backgroundColor: "lightblue",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0.5rem",
-        borderRadius: "5px",
-        opacity: isDragging ? "0.75" : "1",
-      }}
-    >
+    <Grow in={true}>
       <div
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         style={{
+          backgroundColor: "lightblue",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-between",
+          padding: "0.5rem",
+          borderRadius: "5px",
+          opacity: isDragging ? "0.75" : "1",
         }}
       >
         <div
-          title="Drag task onto timetable"
-          ref={drag}
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <DragIndicatorIcon sx={{ cursor: "grab" }} />
-        </div>
-
-        <div style={{ marginLeft: "0.5rem", wordBreak: "break-word" }}>
-          <div>
-            <span className={styles["accent"]}>[{self.moduleCode}]</span>{" "}
-            {self.name} ({self.durationHours} hr)
+          <div
+            title="Drag task onto timetable"
+            ref={drag}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <DragIndicatorIcon sx={{ cursor: "grab" }} />
           </div>
 
-          <div>
-            <span className={styles["accent"]}>due on:</span> {self.dueDate}@
-            {convert_24H_to_12H(self.dueTime)}
+          <div style={{ marginLeft: "0.5rem", wordBreak: "break-word" }}>
+            <div>
+              <span className={styles["accent"]}>[{self.moduleCode}]</span>{" "}
+              {self.name} ({self.durationHours} hr)
+            </div>
+
+            <div>
+              <span className={styles["accent"]}>due on:</span> {self.dueDate}@
+              {convert_24H_to_12H(self.dueTime)}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div
-        style={{
-          visibility: isMouseOver && !isDragging ? "visible" : "hidden",
-        }}
-      >
-        <TaskEditor
-          self={self}
-          _setMatrix={_setMatrix}
-          _setTask={_setTask}
-          matrix={matrix}
-          deleteTask={deleteTask}
-        />
+        <div
+          style={{
+            visibility: isMouseOver && !isDragging ? "visible" : "hidden",
+          }}
+        >
+          <TaskEditor
+            self={self}
+            _setMatrix={_setMatrix}
+            _setTask={_setTask}
+            matrix={matrix}
+            deleteTask={deleteTask}
+          />
 
-        {/* TODO: mark task as completed */}
-        <IconButton size="small">
-          <DoneIcon />
-        </IconButton>
+          {/* TODO: mark task as completed */}
+          <IconButton size="small">
+            <DoneIcon />
+          </IconButton>
+        </div>
       </div>
-    </div>
+    </Grow>
   );
 }
 
