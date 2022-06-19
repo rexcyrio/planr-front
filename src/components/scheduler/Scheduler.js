@@ -1,13 +1,10 @@
-import CloudDoneIcon from "@mui/icons-material/CloudDone";
-import ErrorIcon from "@mui/icons-material/Error";
 import Alert from "@mui/material/Alert";
-import CircularProgress from "@mui/material/CircularProgress";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
 import React, { useContext, useEffect, useState } from "react";
 import generateSkeletons from "../../helper/skeletonHelper";
 import { AuthContext } from "../../store/AuthContext";
+import DataStatus from "../helperComponents/DataStatus";
 import LineMarker from "./LineMarker";
 import MyDragLayer from "./MyDragLayer";
 import styles from "./Scheduler.module.css";
@@ -34,9 +31,8 @@ const EMPTY_TASK = {
 function Scheduler() {
   const [matrix, setMatrix] = useState(defaultMatrix("0"));
   const [tasks, setTasks] = useState([]);
-  const [updating, setUpdating] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [outOfSync, setOutOfSync] = useState(false);
+  // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
+  const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
   const [initialSnackbar, setInitialSnackbar] = useState(false);
   const { userId } = useContext(AuthContext);
@@ -57,7 +53,7 @@ function Scheduler() {
       .then((json) => {
         setTasks(json.tasks);
         setInitialSnackbar(true);
-        setInitialLoad(false);
+        setDataState("IN_SYNC");
       });
   }, []);
 
@@ -152,7 +148,7 @@ function Scheduler() {
   // ==========================================================================
 
   function _setTask(taskID, newTask) {
-    setUpdating(true);
+    setDataState("UPDATING");
 
     setTasks((prev) => {
       const index = prev.findIndex((each) => each._id === taskID);
@@ -188,7 +184,7 @@ function Scheduler() {
   }
 
   function addTask(newTask) {
-    setUpdating(true);
+    setDataState("UPDATING");
     setTasks((prev) => [...prev, newTask]);
     addTaskToDatabase(newTask);
   }
@@ -241,7 +237,7 @@ function Scheduler() {
       return;
     }
 
-    setUpdating(true);
+    setDataState("UPDATING");
 
     // remove from matrix
     for (let i = 0; i < timeUnits; i++) {
@@ -251,6 +247,7 @@ function Scheduler() {
     // remove from tasks array
     setTasks((prev) => {
       const newTasks = prev.filter((each) => each._id !== taskID);
+      console.log(newTasks);
       updateTasksInDatabase(newTasks);
       return newTasks;
     });
@@ -268,13 +265,13 @@ function Scheduler() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
-          setOutOfSync(true);
+          setDataState("OUT_OF_SYNC");
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setUpdating(false);
+        setDataState("IN_SYNC");
       });
   }
 
@@ -290,13 +287,13 @@ function Scheduler() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
-          setOutOfSync(true);
+          setDataState("OUT_OF_SYNC");
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setUpdating(false);
+        setDataState("IN_SYNC");
       });
   }
 
@@ -306,35 +303,6 @@ function Scheduler() {
   const closeInitialSnackbar = () => {
     setInitialSnackbar(false);
   };
-
-  const dataStatus = updating ? (
-    <Tooltip title="Updating Database">
-      <CircularProgress
-        size={24}
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  ) : outOfSync ? (
-    <Tooltip title="Database sync failed">
-      <ErrorIcon
-        color="error"
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  ) : (
-    <Tooltip title="In sync with database">
-      <CloudDoneIcon
-        color="success"
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  );
 
   return (
     <>
@@ -425,11 +393,13 @@ function Scheduler() {
       <div className="tasks-section">
         <div className={styles.title}>
           <h1>Tasks</h1>
-          {dataStatus}
+          <DataStatus status={dataState} />
         </div>
 
         <Stack spacing={1} sx={{ marginX: "0.5rem" }}>
-          {initialLoad ? (
+          {dataState === "LOAD_FAILED" ? (
+            <div className={styles["no-tasks"]}>Unable to retrieve data.</div>
+          ) : dataState === "INITIAL_LOAD" ? (
             generateSkeletons(5, EMPTY_TASK_ITEM)
           ) : tasks.length > 0 ? (
             tasks.map((self) => (

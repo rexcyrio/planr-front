@@ -1,8 +1,6 @@
-import { Alert, CircularProgress, Tooltip } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import Divider from "@mui/material/Divider";
-import ErrorIcon from "@mui/icons-material/Error";
 import List from "@mui/material/List";
 import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
@@ -12,14 +10,14 @@ import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../../store/AuthContext";
 import styles from "./Notes.module.css";
 import NoteItem from "./NoteItem";
+import DataStatus from "../helperComponents/DataStatus";
 
 function Notes() {
   const [notes, setNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
   const { userId } = useContext(AuthContext);
-  const [updating, setUpdating] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [outOfSync, setOutOfSync] = useState(false);
+  // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
+  const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   useEffect(() => {
@@ -27,7 +25,7 @@ function Notes() {
       .then((res) => res.json())
       .then((json) => {
         setNotes(json.notes);
-        setInitialLoad(false);
+        setDataState("IN_SYNC");
       });
   }, []);
 
@@ -41,7 +39,7 @@ function Notes() {
         isEditMode: false,
       };
 
-      setUpdating(true);
+      setDataState("UPDATING");
       addNoteToDatabase(newNote);
       setNotes([...notes, newNote]);
     }
@@ -61,19 +59,19 @@ function Notes() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
-          setOutOfSync(true);
+          setDataState("OUT_OF_SYNC");
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setUpdating(false);
+        setDataState("IN_SYNC");
       });
   }
 
   function deleteNote(self) {
     const newNotes = notes.filter((each) => each._id !== self._id);
-    setUpdating(true);
+    setDataState("UPDATING");
     updateNotesInDatabase(newNotes);
     setNotes(newNotes);
   }
@@ -125,7 +123,7 @@ function Notes() {
       newNote,
       ...notes.slice(index + 1, notes.length),
     ];
-    setUpdating(true);
+    setDataState("UPDATING");
     updateNotesInDatabase(newNotes);
     setNotes(newNotes);
   }
@@ -161,48 +159,19 @@ function Notes() {
       })
       .then((json) => {
         if (json.error) {
-          setOutOfSync(true);
+          setDataState("OUT_OF_SYNC");
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setUpdating(false);
+        setDataState("IN_SYNC");
       });
   }
 
   const closeSnackbar = () => {
     setOpenSyncErrorSnackbar(false);
   };
-
-  const dataStatus = updating ? (
-    <Tooltip title="Updating Database">
-      <CircularProgress
-        size={24}
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  ) : outOfSync ? (
-    <Tooltip title="Database sync failed">
-      <ErrorIcon
-        color="error"
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  ) : (
-    <Tooltip title="In sync with database">
-      <CloudDoneIcon
-        color="success"
-        sx={{
-          padding: "8px",
-        }}
-      />
-    </Tooltip>
-  );
 
   return (
     <>
@@ -217,10 +186,12 @@ function Notes() {
       </Snackbar>
       <div className={styles.title}>
         <h1>Notes</h1>
-        {dataStatus}
+        <DataStatus status={dataState} />
       </div>
       <div className={styles["main-container"]}>
-        {initialLoad ? (
+        {dataState === "LOAD_FAILED" ? (
+          <div className={styles["no-notes"]}>Unable to retrieve data.</div>
+        ) : dataState === "INITIAL_LOAD" ? (
           <Skeleton
             variant="rectangle"
             height="95%"
