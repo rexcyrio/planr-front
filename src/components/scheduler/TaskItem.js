@@ -121,26 +121,26 @@ function TaskItem({
               {convert_24H_to_12H(self.dueTime)}
             </div>
           </div>
+        </div>
 
-          <div
-            style={{
-              visibility: isMouseOver && !isDragging ? "visible" : "hidden",
-            }}
-          >
-            <TaskEditor
-              self={self}
-              _setMatrix={_setMatrix}
-              _setTask={_setTask}
-              matrix={matrix}
-              deleteTask={deleteTask}
-            />
+        <div
+          style={{
+            visibility: isMouseOver && !isDragging ? "visible" : "hidden",
+          }}
+        >
+          <TaskEditor
+            self={self}
+            _setMatrix={_setMatrix}
+            _setTask={_setTask}
+            matrix={matrix}
+            deleteTask={deleteTask}
+          />
 
-            <Tooltip title="Mark Task as Complete">
-              <IconButton size="small" onClick={markTaskAsComplete}>
-                <DoneIcon />
-              </IconButton>
-            </Tooltip>
-          </div>
+          <Tooltip title="Mark Task as Complete">
+            <IconButton size="small" onClick={markTaskAsComplete}>
+              <DoneIcon />
+            </IconButton>
+          </Tooltip>
         </div>
       </div>
     </Grow>
