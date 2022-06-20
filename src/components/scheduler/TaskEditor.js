@@ -84,27 +84,71 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
       isCompleted: self.isCompleted,
     };
 
-    // updating matrix
-    if (newTask.timeUnits < self.timeUnits) {
-      // case 1: user shortened time needed for task
-      const diff = self.timeUnits - newTask.timeUnits;
+    const { _id: taskID, row, col } = newTask;
 
-      for (let i = 0; i < diff; i++) {
-        _setMatrix(self.row + i, self.col, "0");
+    if (row !== -1 && col !== -1) {
+      // updating matrix
+      if (newTask.timeUnits < self.timeUnits) {
+        // case 1: user shortened time needed for task
+        const diff = self.timeUnits - newTask.timeUnits;
+
+        for (let i = 0; i < diff; i++) {
+          _setMatrix(row + newTask.timeUnits + i, col, "0");
+        }
+      } else if (newTask.timeUnits === self.timeUnits) {
+        // do nothing
+      } else if (newTask.timeUnits > self.timeUnits) {
+        // check whether there is enough available time units to expand
+        const diff = newTask.timeUnits - self.timeUnits;
+
+        if (canExpand(row, col, self.timeUnits, diff)) {
+          // case 2: user lengthened time needed for task, enough available time units
+          // ==> update matrix
+          for (let i = 0; i < diff; i++) {
+            _setMatrix(row + self.timeUnits + i, col, taskID);
+          }
+        } else {
+          // case 3: user lengthened time needed for task, NOT enough available time units
+          // ==> unschedule task from timetable
+          for (let i = 0; i < self.timeUnits; i++) {
+            _setMatrix(row + i, col, "0");
+          }
+
+          // we want to update the newTask to be as such:
+          //
+          // newTask = {
+          //   ...
+          //   row: -1,
+          //   col: -1,
+          //   ...
+          // }
+          //
+          // we are NOT using the variable `row` as a dynamic key,
+          // thus the strings "row" and "col"
+          newTask["row"] = -1;
+          newTask["col"] = -1;
+        }
       }
-    } else if (newTask.timeUnits === self.timeUnits) {
-      // do nothing
-    } else if (newTask.timeUnits > self.timeUnits) {
-      // check whether there is enough available time units to expand
-      // case 2: user lengthened time needed for task, enough available time units
-      // case 3: user lengthened time needed for task, NOT enough available time units
     }
 
     // updating tasks array
-    _setTask(self._id, newTask);
+    _setTask(taskID, newTask);
 
     // no need to call `resetState()` here since the fields already represent
     // the correct information even on immediate reopen
+  }
+
+  function canExpand(row, col, timeUnits, diff) {
+    if (row - 1 + timeUnits + diff >= 48) {
+      return false;
+    }
+
+    for (let i = 0; i < diff; i++) {
+      if (matrix[row + timeUnits + i][col] !== "0") {
+        return false;
+      }
+    }
+    return true;
   }
 
   return (
