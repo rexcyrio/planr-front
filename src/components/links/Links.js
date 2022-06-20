@@ -83,6 +83,10 @@ function Links() {
           continue;
         }
 
+        if (link._name === "") {
+          link._name = link._url;
+        }
+
         const newLink = {
           _id: link._id,
           _toBeDeleted: false,
@@ -191,6 +195,11 @@ function Links() {
       url: newURL,
     };
 
+    if (newName === "") {
+      newLink._name = newURL;
+      newLink.name = newURL;
+    }
+
     setDataState("UPDATING");
     addLinkToDatabase(newLink);
     setLinks([...links, newLink]);
@@ -281,7 +290,6 @@ function Links() {
                     label="Link Name"
                     type="text"
                     variant="outlined"
-                    required
                     value={self._name}
                     autoComplete="off"
                     onChange={(e) => updateTempName(self, e.target.value)}
@@ -348,7 +356,6 @@ function Links() {
               label="Link Name"
               type="text"
               variant="outlined"
-              required
               value={newName}
               autoComplete="off"
               onChange={(e) => setNewName(e.target.value)}
