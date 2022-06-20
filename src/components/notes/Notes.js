@@ -1,10 +1,12 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
+import InfoIcon from "@mui/icons-material/Info";
 import List from "@mui/material/List";
 import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import React, { useState, useEffect, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../../store/AuthContext";
@@ -184,10 +186,17 @@ function Notes() {
           Something went wrong! Your notes might not be saved
         </Alert>
       </Snackbar>
+
       <div className={styles.title}>
-        <h1>Notes</h1>
-        <DataStatus status={dataState} />
+        <div className={styles["title-update-container"]}>
+          <h1>Notes</h1>
+          <DataStatus status={dataState} />
+        </div>
+        <Tooltip title="Double click existing notes to edit">
+          <InfoIcon color="info" />
+        </Tooltip>
       </div>
+
       <div className={styles["main-container"]}>
         {dataState === "LOAD_FAILED" ? (
           <div className={styles["no-notes"]}>Unable to retrieve data.</div>
@@ -230,9 +239,9 @@ function Notes() {
       >
         <TextField
           id="New note"
-          label="New note"
+          label="create new note"
           variant="filled"
-          placeholder="Type a new note here..."
+          placeholder="Press enter to add"
           autoComplete="off"
           value={newNoteText}
           onChange={(e) => setNewNoteText(e.target.value)}
