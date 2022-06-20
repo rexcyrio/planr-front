@@ -61,13 +61,15 @@ function NoteItem(props) {
         sx={{ overflowWrap: "break-word" }}
         onDoubleClick={() => handleDoubleClick(self)}
         secondaryAction={
-          <IconButton
-            edge="end"
-            aria-label="delete"
-            onClick={() => deleteNote(self)}
-          >
-            <DeleteIcon />
-          </IconButton>
+          <Tooltip title="Delete">
+            <IconButton
+              edge="end"
+              aria-label="delete"
+              onClick={() => deleteNote(self)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
         }
       >
         {self.isEditMode ? (
