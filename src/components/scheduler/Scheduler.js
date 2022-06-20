@@ -44,6 +44,7 @@ function Scheduler() {
       _setTask={_setTask}
       matrix={matrix}
       deleteTask={deleteTask}
+      setTaskFields={setTaskFields}
     />
   );
 
@@ -189,59 +190,21 @@ function Scheduler() {
     addTaskToDatabase(newTask);
   }
 
-  // function updateTask(newTask) {
-  //   const { _id: taskID, row, col, timeUnits } = newTask;
-
-  //   if (canExpand(row, col, timeUnits, taskID)) {
-  //     // update matrix to reflect the task occupying more timeUnits
-  //     for (let i = 0; i < timeUnits; i++) {
-  //       _setMatrix(row + i, col, taskID);
-  //     }
-  //     _updateTask(newTask);
-  //   } else {
-  //     // user edited the task to occupy more timeUnits, but there is not enough
-  //     // space available for the task to expand
-  //     for (let i = 0; i < timeUnits; i++) {
-  //       _setMatrix(row + i, col, "0");
-  //     }
-
-  //     setTaskFields(taskID, { row: -1, col: -1 });
-  //   }
-  // }
-
-  // function canExpand(row, col, timeUnits, taskID) {
-  //   if (row === -1 || col === -1) {
-  //     return;
-  //   }
-
-  //   if (row + timeUnits >= 48) {
-  //     return false;
-  //   }
-
-  //   for (let i = 0; i < timeUnits; i++) {
-  //     const cell = matrix[row + i][col];
-
-  //     if (cell !== "0" && cell !== taskID) {
-  //       return false;
-  //     }
-  //   }
-
-  //   return true;
-  // }
-
   function deleteTask(task) {
     const { _id: taskID, row, col, timeUnits } = task;
 
     // cannot delete EMPTY_TASK
-    if (row === -1 && col === -1) {
+    if (taskID === "0") {
       return;
     }
 
     setDataState("UPDATING");
 
     // remove from matrix
-    for (let i = 0; i < timeUnits; i++) {
-      _setMatrix(row + i, col, "0");
+    if (row !== -1 && col !== -1) {
+      for (let i = 0; i < timeUnits; i++) {
+        _setMatrix(row + i, col, "0");
+      }
     }
 
     // remove from tasks array
@@ -251,6 +214,41 @@ function Scheduler() {
       updateTasksInDatabase(newTasks);
       return newTasks;
     });
+  }
+
+  function getTaskItems() {
+    const outstandingTasks = tasks.filter((each) => each.isCompleted === false);
+    const doneTasks = tasks.filter((each) => each.isCompleted === true);
+
+    return (
+      <>
+        {outstandingTasks.map((each) => (
+          <React.Fragment key={each._id}>
+            <TaskItem
+              self={each}
+              _setMatrix={_setMatrix}
+              _setTask={_setTask}
+              matrix={matrix}
+              deleteTask={deleteTask}
+              setTaskFields={setTaskFields}
+            />
+          </React.Fragment>
+        ))}
+
+        {doneTasks.map((each) => (
+          <React.Fragment key={each._id}>
+            <TaskItem
+              self={each}
+              _setMatrix={_setMatrix}
+              _setTask={_setTask}
+              matrix={matrix}
+              deleteTask={deleteTask}
+              setTaskFields={setTaskFields}
+            />
+          </React.Fragment>
+        ))}
+      </>
+    );
   }
 
   function addTaskToDatabase(task) {
@@ -300,6 +298,7 @@ function Scheduler() {
   const closeSnackbar = () => {
     setOpenSyncErrorSnackbar(false);
   };
+
   const closeInitialSnackbar = () => {
     setInitialSnackbar(false);
   };
@@ -402,17 +401,7 @@ function Scheduler() {
           ) : dataState === "INITIAL_LOAD" ? (
             generateSkeletons(5, EMPTY_TASK_ITEM)
           ) : tasks.length > 0 ? (
-            tasks.map((self) => (
-              <React.Fragment key={self._id}>
-                <TaskItem
-                  self={self}
-                  _setMatrix={_setMatrix}
-                  _setTask={_setTask}
-                  matrix={matrix}
-                  deleteTask={deleteTask}
-                />
-              </React.Fragment>
-            ))
+            getTaskItems()
           ) : (
             <div className={styles["no-tasks"]}>There are no tasks.</div>
           )}
