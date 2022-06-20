@@ -5,6 +5,17 @@ import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import styles from "./Scheduler.module.css";
 
+const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
+  return (
+    <DragIndicatorIcon
+      fontSize="inherit"
+      sx={{
+        color: "hsl(0, 0%, 75%)",
+      }}
+    />
+  );
+});
+
 TimetableCell.propTypes = {
   self: PropTypes.shape({
     _id: PropTypes.string.isRequired,
@@ -121,7 +132,6 @@ function TimetableCell({
     preview(getEmptyImage(), { captureDraggingState: true });
   }, [preview]);
 
-  // FIXME: performance
   useEffect(() => {
     if (isDragging) {
       if (isMouseOver) {
@@ -147,21 +157,23 @@ function TimetableCell({
       rowSpan={self.timeUnits}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ verticalAlign: "top" }}
+      style={{
+        verticalAlign: "top",
+      }}
     >
-      <div
-        title="Move task around"
-        ref={drag}
-        style={{
-          cursor: "grab",
-          visibility: self._id !== "0" && isMouseOver ? "visible" : "hidden",
-          fontSize: "0.95rem",
-        }}
-      >
-        <DragIndicatorIcon
-          fontSize="inherit"
-          sx={{ color: "hsl(0, 0%, 75%)" }}
-        />
+      <div>
+        <div
+          title="Move task around"
+          ref={drag}
+          style={{
+            width: "fit-content",
+            cursor: "grab",
+            visibility: self._id !== "0" && isMouseOver ? "visible" : "hidden",
+            fontSize: "0.95rem",
+          }}
+        >
+          <MemoDragIndicatorIcon />
+        </div>
       </div>
 
       <div
