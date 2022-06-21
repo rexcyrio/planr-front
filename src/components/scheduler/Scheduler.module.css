@@ -51,9 +51,20 @@
 .title {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   padding-right: 0.5rem;
+}
+
+.title-update-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   margin-left: 0.5rem;
+}
+
+.delete-confirmation-container {
+  display: flex;
 }
 
 .no-tasks {

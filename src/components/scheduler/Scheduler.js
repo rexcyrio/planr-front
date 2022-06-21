@@ -1,4 +1,5 @@
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import React, { useContext, useEffect, useState } from "react";
@@ -35,6 +36,7 @@ function Scheduler() {
   const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
   const [initialSnackbar, setInitialSnackbar] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   const { userId } = useContext(AuthContext);
 
   const EMPTY_TASK_ITEM = (
@@ -303,6 +305,18 @@ function Scheduler() {
     setInitialSnackbar(false);
   };
 
+  const deleteConfirmationHandler = () => {
+    setDeleteConfirmation(true);
+  };
+
+  const deleteConfirmationAgreeHandler = () => {
+    setDeleteConfirmation(false);
+  };
+
+  const deleteConfirmationDisagreeHandler = () => {
+    setDeleteConfirmation(false);
+  };
+
   return (
     <>
       <Snackbar
@@ -391,8 +405,23 @@ function Scheduler() {
 
       <div className="tasks-section">
         <div className={styles.title}>
-          <h1>Tasks</h1>
-          <DataStatus status={dataState} />
+          <div className={styles["title-update-container"]}>
+            <h1>Tasks</h1>
+            <DataStatus status={dataState} />
+          </div>
+          {deleteConfirmation ? (
+            <div className={styles["delete-confirmation-container"]}>
+              <p>Are you sure?</p>
+              <Button onClick={deleteConfirmationAgreeHandler}>Yes</Button>
+              <Button onClick={deleteConfirmationDisagreeHandler}>
+                Return
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outlined" onClick={deleteConfirmationHandler}>
+              DELETE COMPLETED TASKS
+            </Button>
+          )}
         </div>
 
         <Stack spacing={1} sx={{ marginX: "0.5rem" }}>
