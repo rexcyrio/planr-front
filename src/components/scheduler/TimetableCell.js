@@ -1,9 +1,11 @@
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import Popover from "@mui/material/Popover";
+import Box from "@mui/material/Box";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
-import styles from "./Scheduler.module.css";
+import styles from "./TimetableCell.module.css";
 
 const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
   return (
@@ -52,6 +54,8 @@ function TimetableCell({
 }) {
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
   const [isMouseOver, setIsMouseOver] = useState(false);
+  const [openPopover, setOpenPopover] = useState(false);
+  let elRef = useRef(null);
 
   function handleMouseEnter() {
     // if the user is dragging an item around, it shouldn't make the
@@ -81,6 +85,14 @@ function TimetableCell({
     }
     return rowPointer - row + 1;
   }
+
+  const openPopoverHandler = (event) => {
+    setOpenPopover(true);
+  };
+
+  const closePopoverHandler = () => {
+    setOpenPopover(false);
+  };
 
   // ==========================================================================
   // Drag and drop
@@ -151,60 +163,95 @@ function TimetableCell({
   }, [isDragging]);
 
   return (
-    <td
-      ref={drop}
-      className={styles["cell"]}
-      rowSpan={self.timeUnits}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        verticalAlign: "top",
-      }}
-    >
-      <div>
-        <div
-          title="Move task around"
-          ref={drag}
-          style={{
-            width: "fit-content",
-            cursor: "grab",
-            visibility: self._id !== "0" && isMouseOver ? "visible" : "hidden",
-            fontSize: "0.95rem",
-          }}
-        >
-          <MemoDragIndicatorIcon />
-        </div>
-      </div>
-
-      <div
-        title={self.name}
+    <>
+      <td
+        ref={drop}
+        className={styles["cell"]}
+        rowSpan={self.timeUnits}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         style={{
-          display: "-webkit-box",
-          WebkitBoxOrient: "vertical",
-          WebkitLineClamp: `${self.timeUnits - 1}`,
-          overflow: "hidden",
-          width: "5.7rem",
+          verticalAlign: "top",
         }}
       >
-        {self.name}
-      </div>
+        <div className={styles["cell-top"]}>
+          <div
+            title="Move task around"
+            ref={drag}
+            style={{
+              width: "fit-content",
+              cursor: "grab",
+              visibility:
+                self._id !== "0" && isMouseOver ? "visible" : "hidden",
+              fontSize: "0.95rem",
+            }}
+          >
+            <MemoDragIndicatorIcon />
+          </div>
+          {self._id !== "0" && (
+            <div
+              className={styles["details-popup"]}
+              ref={elRef}
+              onClick={openPopoverHandler}
+            >
+              Details
+            </div>
+          )}
+        </div>
 
-      {isOver ? (
         <div
+          title={self.name}
           style={{
-            position: "absolute",
-            top: "0",
-            left: "0",
-            height: getRem(droppingTaskTimeUnits),
-            width: "5.9rem",
-            zIndex: "4",
-            backgroundColor: canDrop ? "green" : "red",
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: `${self.timeUnits - 1}`,
+            overflow: "hidden",
+            width: "5.7rem",
           }}
-        ></div>
-      ) : (
-        <></>
+        >
+          {self.name}
+        </div>
+
+        {isOver ? (
+          <div
+            style={{
+              position: "absolute",
+              top: "0",
+              left: "0",
+              height: getRem(droppingTaskTimeUnits),
+              width: "5.9rem",
+              zIndex: "4",
+              backgroundColor: canDrop ? "green" : "red",
+            }}
+          ></div>
+        ) : (
+          <></>
+        )}
+      </td>
+      {self._id !== "0" && (
+        <Popover
+          open={openPopover}
+          anchorEl={elRef.current}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          onClose={closePopoverHandler}
+        >
+          <Box
+            sx={{
+              border: 1,
+              p: 1,
+              bgcolor: "background.paper",
+            }}
+          >
+            <p>{self.moduleCode}</p>
+            <p>
+              Due on: {self.dueDate} at {self.dueTime}
+            </p>
+            <p>Duration: {self.durationHours} hours</p>
+            <p>Status: {self.isCompleted ? "Completed" : "Not Completed"}</p>
+          </Box>
+        </Popover>
       )}
-    </td>
+    </>
   );
 }
 
