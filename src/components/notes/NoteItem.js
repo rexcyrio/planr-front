@@ -83,6 +83,7 @@ function NoteItem(props) {
               fullWidth
               size="small"
               multiline={true}
+              maxRows={8}
               onChange={(e) => updateText(self, e.target.value)}
             />
             <div>
