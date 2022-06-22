@@ -354,6 +354,10 @@ function Scheduler() {
     setDeleteConfirmation(false);
   };
 
+  const numberOfOutstandingTasks = tasks.filter(
+    (task) => task.isCompleted === false
+  ).length;
+
   return (
     <>
       <Snackbar
@@ -367,8 +371,13 @@ function Scheduler() {
           severity="info"
           sx={{ width: "100%" }}
         >
-          There are {tasks.filter((task) => task.isCompleted === false).length}{" "}
-          outstanding tasks
+          {`There ${
+            numberOfOutstandingTasks === 0
+              ? "is no"
+              : numberOfOutstandingTasks === 1
+              ? "is 1"
+              : `are ${numberOfOutstandingTasks}`
+          } outstanding ${numberOfOutstandingTasks > 1 ? "tasks" : "task"}`}
         </Alert>
       </Snackbar>
       <Snackbar
