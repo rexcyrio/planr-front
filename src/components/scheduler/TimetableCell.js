@@ -105,19 +105,24 @@ function TimetableCell({
         const { _id: taskID, timeUnits } = item.task;
 
         // add task to matrix
+        const values = [];
+
         for (let i = 0; i < timeUnits; i++) {
-          _setMatrix(row + i, col, taskID);
+          values.push([row + i, col, taskID]);
         }
+
+        _setMatrix(values);
 
         // update `row` and `col` fields accordingly
         setTaskFields(taskID, { row: row, col: col });
       },
+      hover: (item) => {
+        // update task silhouette
+        const { timeUnits } = item.task;
+        setDroppingTaskTimeUnits(timeUnits);
+      },
       canDrop: (item) => {
         const { timeUnits } = item.task;
-
-        // update task silhouette
-        setDroppingTaskTimeUnits(timeUnits);
-
         return timeUnits <= getNumberOfAvailableTimeUnits(row, col);
       },
       collect: (monitor) => ({
@@ -150,15 +155,15 @@ function TimetableCell({
         setIsMouseOver(false);
       }
 
+      // temporarily set taskID to "0"
+      const values = [];
+
       for (let i = 0; i < self.timeUnits; i++) {
-        // temporarily set taskID to "0"
-        _setMatrix(row + i, col, "0");
+        values.push([row + i, col, "0"]);
       }
-    } else {
-      for (let i = 0; i < self.timeUnits; i++) {
-        // set taskID back
-        _setMatrix(row + i, col, self._id);
-      }
+
+      _setMatrix(values);
+      setTaskFields(self._id, { row: -1, col: -1 });
     }
   }, [isDragging]);
 

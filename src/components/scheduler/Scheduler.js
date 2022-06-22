@@ -58,6 +58,12 @@ function Scheduler() {
         setInitialSnackbar(true);
         setDataState("IN_SYNC");
       });
+
+    fetch(`/api/private/timetable?id=${userId}`)
+      .then((res) => res.json())
+      .then((json) => {
+        setMatrix(json.timetable);
+      });
   }, []);
 
   // ==========================================================================
@@ -78,34 +84,32 @@ function Scheduler() {
   // Matrix Helper Functions
   // ==========================================================================
 
-  function _setMatrix(row, col, el) {
-    // silently ignore out of range indices
-    if (row < 0 || row >= 48 || col < 0 || col >= 7) {
-      return;
-    }
-
-    // skip unnecessary updates
-    if (matrix[row][col] === el) {
-      return;
-    }
-
+  function _setMatrix(values) {
     setMatrix((prevMatrix) => {
-      const prevRow = prevMatrix[row];
+      const newMatrix = [];
 
-      const newRow = [
-        ...prevRow.slice(0, col),
-        el,
-        ...prevRow.slice(col + 1, 7),
-      ];
+      // deep copy
+      for (const prevRow of prevMatrix) {
+        newMatrix.push([...prevRow]);
+      }
 
-      const newMatrix = [
-        ...prevMatrix.slice(0, row),
-        newRow,
-        ...prevMatrix.slice(row + 1, 48),
-      ];
+      for (const value of values) {
+        const [row, col, el] = value;
 
-      // TODO: update database
+        // silently ignore out of range indices
+        if (row < 0 || row >= 48 || col < 0 || col >= 7) {
+          continue;
+        }
 
+        // skip unnecessary updates
+        if (newMatrix[row][col] === el) {
+          continue;
+        }
+
+        newMatrix[row][col] = el;
+      }
+
+      updateTimetableInDatabase(newMatrix);
       return newMatrix;
     });
   }
@@ -204,15 +208,18 @@ function Scheduler() {
 
     // remove from matrix
     if (row !== -1 && col !== -1) {
+      const values = [];
+
       for (let i = 0; i < timeUnits; i++) {
-        _setMatrix(row + i, col, "0");
+        values.push([row + i, col, "0"]);
       }
+
+      _setMatrix(values);
     }
 
     // remove from tasks array
     setTasks((prev) => {
       const newTasks = prev.filter((each) => each._id !== taskID);
-      console.log(newTasks);
       updateTasksInDatabase(newTasks);
       return newTasks;
     });
@@ -294,6 +301,24 @@ function Scheduler() {
         }
 
         setDataState("IN_SYNC");
+      });
+  }
+
+  function updateTimetableInDatabase(newMatrix) {
+    fetch("/api/private/timetable", {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: userId, timetable: newMatrix }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.error) {
+          alert(json.error);
+          return;
+        }
       });
   }
 
@@ -434,7 +459,19 @@ function Scheduler() {
           )}
         </div>
 
-        <Stack spacing={1} sx={{ marginX: "0.5rem" }}>
+        <Stack
+          spacing={1}
+          sx={{
+            marginX: "0.5rem",
+            overflowY: "auto",
+            marginBottom: "10rem",
+            height: "calc(100% - 5.1rem)",
+            "&::-webkit-scrollbar": {
+              display: "none",
+            } /* Chrome */,
+            scrollbarWidth: "none" /* Firefox */,
+          }}
+        >
           {dataState === "LOAD_FAILED" ? (
             <div className={styles["no-tasks"]}>Unable to retrieve data.</div>
           ) : dataState === "INITIAL_LOAD" ? (
@@ -444,6 +481,8 @@ function Scheduler() {
           ) : (
             <div className={styles["no-tasks"]}>There are no tasks.</div>
           )}
+
+          <div style={{ marginBottom: "4.5rem" }}></div>
         </Stack>
 
         <TaskCreator addTask={addTask} />
