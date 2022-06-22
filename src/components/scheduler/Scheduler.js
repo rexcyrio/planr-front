@@ -365,7 +365,8 @@ function Scheduler() {
           severity="info"
           sx={{ width: "100%" }}
         >
-          There are {tasks.length} tasks
+          There are {tasks.filter((task) => task.isCompleted === false).length}{" "}
+          outstanding tasks
         </Alert>
       </Snackbar>
       <Snackbar
