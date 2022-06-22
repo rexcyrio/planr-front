@@ -14,3 +14,8 @@
   font-size: 0.75rem;
   text-decoration: underline;
 }
+
+.task-name-paragraph {
+  max-height: 15rem;
+  overflow-y: auto;
+}

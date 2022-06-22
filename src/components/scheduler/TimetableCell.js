@@ -238,11 +238,16 @@ function TimetableCell({
           <Box
             sx={{
               border: 1,
+              borderRadius: "5px",
               p: 1,
               bgcolor: "background.paper",
+              maxWidth: "16rem",
             }}
           >
-            <p>{self.moduleCode}</p>
+            <p>
+              <strong>{self.moduleCode}</strong>
+            </p>
+            <p className={styles["task-name-paragraph"]}>{self.name}</p>
             <p>
               Due on: {self.dueDate} at {self.dueTime}
             </p>
