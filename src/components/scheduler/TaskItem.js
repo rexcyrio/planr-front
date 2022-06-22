@@ -8,6 +8,7 @@ import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import TaskEditor from "./TaskEditor";
 import Grow from "@mui/material/Grow";
+import classes from "./TaskItem.module.css";
 
 TaskItem.propTypes = {
   self: PropTypes.shape({
@@ -111,7 +112,7 @@ function TaskItem({
           </div>
 
           <div style={{ marginLeft: "0.5rem", wordBreak: "break-word" }}>
-            <div>
+            <div className={classes["task-paragraph"]}>
               <span style={styles}>[{self.moduleCode}]</span> {self.name} (
               {self.durationHours} hr)
             </div>
