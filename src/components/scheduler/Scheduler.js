@@ -311,6 +311,16 @@ function Scheduler() {
 
   const deleteConfirmationAgreeHandler = () => {
     setDeleteConfirmation(false);
+    const newTasks = tasks.filter((each) => each.isCompleted === false);
+    const doneTasks = tasks.filter((each) => each.isCompleted === true);
+    for (const task of doneTasks) {
+      for (let i = 0; i < task.timeUnits; i++) {
+        _setMatrix(task.row + i, task.col, "0");
+      }
+    }
+    setTasks(newTasks);
+    setDataState("UPDATING");
+    updateTasksInDatabase(newTasks);
   };
 
   const deleteConfirmationDisagreeHandler = () => {
