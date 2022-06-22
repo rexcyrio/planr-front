@@ -460,7 +460,7 @@ function Scheduler() {
               <p>Are you sure?</p>
               <Button onClick={deleteConfirmationAgreeHandler}>Yes</Button>
               <Button onClick={deleteConfirmationDisagreeHandler}>
-                Return
+                CANCEL
               </Button>
             </div>
           ) : (
