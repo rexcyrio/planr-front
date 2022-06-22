@@ -25,15 +25,19 @@ function TaskCreator({ addTask }) {
   const [dueDate, setDueDate] = useState(getDateNowString());
   const [dueTime, setDueTime] = useState("23:59");
   const [durationHours, setDurationHours] = useState("");
-  const [moduleCode, setModuleCode] = useState("");
+  const [moduleCode, setModuleCode] = useState("Others");
   const [open, setOpen] = useState(false);
+
+  const [durationState, setDurationState] = useState("NONE");
 
   function resetState() {
     setName("");
     setDueDate(getDateNowString());
     setDueTime("23:59");
     setDurationHours("");
-    setModuleCode("");
+    setModuleCode("Others");
+
+    setDurationState("NONE");
   }
 
   function handleOpen() {
@@ -45,8 +49,30 @@ function TaskCreator({ addTask }) {
     resetState();
   }
 
+  function handleDurationHoursChange(event) {
+    const newDuration = event.target.value;
+    setDurationHours(newDuration);
+
+    if (!newDuration.match(unsignedFloatRegex)) {
+      setDurationState("ERROR");
+      return;
+    }
+
+    if (Number(newDuration) > 24) {
+      setDurationState("TOO_LARGE");
+      return;
+    }
+
+    setDurationState("NONE");
+  }
+
   function handleSubmit(event) {
     event.preventDefault();
+
+    if (durationState !== "NONE") {
+      return;
+    }
+
     setOpen(false);
 
     const newTask = {
@@ -95,6 +121,7 @@ function TaskCreator({ addTask }) {
                 required
               >
                 {/* TODO: update module codes */}
+                <MenuItem value={"Others"}>Others</MenuItem>
                 <MenuItem value={"CS1101S"}>CS1101S</MenuItem>
                 <MenuItem value={"CS1231S"}>CS1231S</MenuItem>
                 <MenuItem value={"MA1521"}>MA1521</MenuItem>
@@ -118,16 +145,18 @@ function TaskCreator({ addTask }) {
               margin="dense"
               id="durationHours"
               label="Time needed"
-              type="number"
+              type="text"
               variant="outlined"
               required
               value={durationHours}
-              onChange={(e) => setDurationHours(e.target.value)}
+              onChange={handleDurationHoursChange}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">hour(s)</InputAdornment>
                 ),
               }}
+              helperText={durationStates[durationState].helperText}
+              error={durationStates[durationState].error}
             />
             <TextField
               sx={{ mr: "1rem" }}
@@ -139,6 +168,7 @@ function TaskCreator({ addTask }) {
               required
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+              helperText=" "
             />
             <TextField
               margin="dense"
@@ -149,6 +179,7 @@ function TaskCreator({ addTask }) {
               required
               value={dueTime}
               onChange={(e) => setDueTime(e.target.value)}
+              helperText=" "
             />
           </DialogContent>
           <DialogActions>
@@ -174,5 +205,42 @@ function getDateNowString() {
 
   return `${y}-${m2}-${d2}`;
 }
+
+const durationStates = {
+  NONE: {
+    helperText: " ",
+    error: false,
+  },
+  ERROR: {
+    helperText: "Please enter a valid duration",
+    error: true,
+  },
+  TOO_LARGE: {
+    helperText: "Largest valid value is 24 hours",
+    error: true,
+  },
+};
+
+// matches
+// 1
+// 99
+// 0.1
+// 0.99
+// 99.01
+
+// DOES NOT match
+// 0
+// 0000
+// 0.0
+// 0000.0
+// 0.0000
+// 0000.0000
+// 1e1
+// -0.1
+// +0.1
+// .1
+// 00.01
+const unsignedFloatRegex =
+  /(^0\.\d*[1-9]\d*$)|(^[1-9]\d*\.\d+$)|(^[1-9]\d*$)/gm;
 
 export default TaskCreator;

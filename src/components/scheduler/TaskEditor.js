@@ -47,12 +47,16 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
   const [moduleCode, setModuleCode] = useState(self.moduleCode);
   const [open, setOpen] = useState(false);
 
+  const [durationState, setDurationState] = useState("NONE");
+
   function resetState() {
     setName(self.name);
     setDueDate(self.dueDate);
     setDueTime(self.dueTime);
     setDurationHours(self.durationHours);
     setModuleCode(self.moduleCode);
+
+    setDurationState("NONE");
   }
 
   function handleOpen() {
@@ -64,8 +68,30 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
     resetState();
   }
 
+  function handleDurationHoursChange(event) {
+    const newDuration = event.target.value;
+    setDurationHours(newDuration);
+
+    if (!newDuration.match(unsignedFloatRegex)) {
+      setDurationState("ERROR");
+      return;
+    }
+
+    if (Number(newDuration) > 24) {
+      setDurationState("TOO_LARGE");
+      return;
+    }
+
+    setDurationState("NONE");
+  }
+
   function handleSubmit(event) {
     event.preventDefault();
+
+    if (durationState !== "NONE") {
+      return;
+    }
+
     setOpen(false);
 
     const newTask = {
@@ -91,10 +117,13 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
       if (newTask.timeUnits < self.timeUnits) {
         // case 1: user shortened time needed for task
         const diff = self.timeUnits - newTask.timeUnits;
+        const values = [];
 
         for (let i = 0; i < diff; i++) {
-          _setMatrix(row + newTask.timeUnits + i, col, "0");
+          values.push([row + newTask.timeUnits + i, col, "0"]);
         }
+
+        _setMatrix(values);
       } else if (newTask.timeUnits === self.timeUnits) {
         // do nothing
       } else if (newTask.timeUnits > self.timeUnits) {
@@ -104,15 +133,23 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
         if (canExpand(row, col, self.timeUnits, diff)) {
           // case 2: user lengthened time needed for task, enough available time units
           // ==> update matrix
+          const values = [];
+
           for (let i = 0; i < diff; i++) {
-            _setMatrix(row + self.timeUnits + i, col, taskID);
+            values.push([row + self.timeUnits + i, col, taskID]);
           }
+
+          _setMatrix(values);
         } else {
           // case 3: user lengthened time needed for task, NOT enough available time units
           // ==> unschedule task from timetable
+          const values = [];
+
           for (let i = 0; i < self.timeUnits; i++) {
-            _setMatrix(row + i, col, "0");
+            values.push([row + i, col, "0"]);
           }
+          
+          _setMatrix(values);
 
           // we want to update the newTask to be as such:
           //
@@ -174,6 +211,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
                 required
               >
                 {/* TODO: update module codes */}
+                <MenuItem value={"Others"}>Others</MenuItem>
                 <MenuItem value={"CS1101S"}>CS1101S</MenuItem>
                 <MenuItem value={"CS1231S"}>CS1231S</MenuItem>
                 <MenuItem value={"MA1521"}>MA1521</MenuItem>
@@ -197,16 +235,18 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
               margin="dense"
               id="durationHours"
               label="Time needed"
-              type="number"
+              type="text"
               variant="outlined"
               required
               value={durationHours}
-              onChange={(e) => setDurationHours(e.target.value)}
+              onChange={handleDurationHoursChange}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">hour(s)</InputAdornment>
                 ),
               }}
+              helperText={durationStates[durationState].helperText}
+              error={durationStates[durationState].error}
             />
             <TextField
               sx={{ mr: "1rem" }}
@@ -218,6 +258,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
               required
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+              helperText=" "
             />
             <TextField
               margin="dense"
@@ -228,6 +269,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
               required
               value={dueTime}
               onChange={(e) => setDueTime(e.target.value)}
+              helperText=" "
             />
           </DialogContent>
           <DialogActions sx={{ justifyContent: "space-between" }}>
@@ -253,5 +295,42 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
     </>
   );
 }
+
+const durationStates = {
+  NONE: {
+    helperText: " ",
+    error: false,
+  },
+  ERROR: {
+    helperText: "Please enter a valid duration",
+    error: true,
+  },
+  TOO_LARGE: {
+    helperText: "Largest valid value is 24 hours",
+    error: true,
+  },
+};
+
+// matches
+// 1
+// 99
+// 0.1
+// 0.99
+// 99.01
+
+// DOES NOT match
+// 0
+// 0000
+// 0.0
+// 0000.0
+// 0.0000
+// 0000.0000
+// 1e1
+// -0.1
+// +0.1
+// .1
+// 00.01
+const unsignedFloatRegex =
+  /(^0\.\d*[1-9]\d*$)|(^[1-9]\d*\.\d+$)|(^[1-9]\d*$)/gm;
 
 export default TaskEditor;
