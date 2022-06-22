@@ -53,18 +53,28 @@ function Scheduler() {
   );
 
   useEffect(() => {
-    fetch(`/api/private/tasks?id=${userId}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setTasks(json.tasks);
-        setInitialSnackbar(true);
-        setDataState("IN_SYNC");
-        fetch(`/api/private/timetable?id=${userId}`)
+    async function getItemFromDatabase(type) {
+      return new Promise((resolve, reject) => {
+        fetch(`/api/private/${type}?id=${userId}`)
           .then((res) => res.json())
-          .then((json) => {
-            setMatrix(json.timetable);
-          });
+          .then((json) => resolve(json[type]));
       });
+    }
+
+    (async function init() {
+      // wait for both fetch() calls to finish before continuing
+      const items = await Promise.all([
+        getItemFromDatabase("tasks"),
+        getItemFromDatabase("timetable"),
+      ]);
+
+      const [databaseTasks, databaseTimetable] = items;
+
+      setTasks(databaseTasks);
+      setInitialSnackbar(true);
+      setDataState("IN_SYNC");
+      setMatrix(databaseTimetable);
+    })();
   }, []);
 
   // ==========================================================================
