@@ -1,7 +1,9 @@
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
+import InfoIcon from "@mui/icons-material/Info";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
 import React, { useContext, useEffect, useState } from "react";
 import generateSkeletons from "../../helper/skeletonHelper";
 import { AuthContext } from "../../store/AuthContext";
@@ -454,6 +456,9 @@ function Scheduler() {
           <div className={styles["title-update-container"]}>
             <h1>Tasks</h1>
             <DataStatus status={dataState} />
+            <Tooltip title="Drag tasks using the drag icon to schedule them onto the timetable">
+              <InfoIcon color="info" />
+            </Tooltip>
           </div>
           {deleteConfirmation ? (
             <div className={styles["delete-confirmation-container"]}>
