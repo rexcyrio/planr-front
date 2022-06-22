@@ -13,6 +13,11 @@
 .details-popup {
   font-size: 0.75rem;
   text-decoration: underline;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 0.25rem;
+  cursor: pointer;
 }
 
 .task-name-paragraph {

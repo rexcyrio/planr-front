@@ -1,11 +1,13 @@
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import Popover from "@mui/material/Popover";
 import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
 import PropTypes from "prop-types";
 import React, { useEffect, useState, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import styles from "./TimetableCell.module.css";
+import getBackgroundColour from "../../helper/colorHelper";
 
 const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
   return (
@@ -175,48 +177,58 @@ function TimetableCell({
         rowSpan={self.timeUnits}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        style={{
-          verticalAlign: "top",
-        }}
       >
-        <div className={styles["cell-top"]}>
-          <div
-            title="Move task around"
-            ref={drag}
-            style={{
-              width: "fit-content",
-              cursor: "grab",
-              visibility:
-                self._id !== "0" && isMouseOver ? "visible" : "hidden",
-              fontSize: "0.95rem",
+        {self._id !== "0" && (
+          <Card
+            sx={{
+              backgroundColor: `${getBackgroundColour(self)}`,
+              margin: 0,
+              height: `${(1.3125 + 1 / 16) * self.timeUnits - 0.1875}rem`,
             }}
           >
-            <MemoDragIndicatorIcon />
-          </div>
-          {self._id !== "0" && (
-            <div
-              className={styles["details-popup"]}
-              ref={elRef}
-              onClick={openPopoverHandler}
-            >
-              Details
+            <div className={styles["cell-top"]}>
+              <div
+                title="Move task around"
+                ref={drag}
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "fit-content",
+                  cursor: "grab",
+                  visibility:
+                    self._id !== "0" && isMouseOver ? "visible" : "hidden",
+                  fontSize: "0.95rem",
+                }}
+              >
+                <MemoDragIndicatorIcon />
+              </div>
+              {self._id !== "0" && (
+                <div
+                  className={styles["details-popup"]}
+                  ref={elRef}
+                  onClick={openPopoverHandler}
+                >
+                  Details
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div
-          title={self.name}
-          style={{
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            WebkitLineClamp: `${self.timeUnits - 1}`,
-            overflow: "hidden",
-            width: "5.7rem",
-          }}
-        >
-          {self.name}
-        </div>
-
+            <div
+              title={self.name}
+              style={{
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: `${self.timeUnits - 1}`,
+                overflow: "hidden",
+                width: "auto",
+                maxWidth: "5.55rem",
+                paddingLeft: "0.25rem",
+              }}
+            >
+              {self.name}
+            </div>
+          </Card>
+        )}
         {isOver ? (
           <div
             style={{
