@@ -4,6 +4,8 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import Grow from "@mui/material/Grow";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
@@ -11,6 +13,7 @@ import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import TaskEditor from "./TaskEditor";
 import classes from "./TaskItem.module.css";
+import getBackgroundColour from "../../helper/colorHelper";
 
 TaskItem.propTypes = {
   self: PropTypes.shape({
@@ -65,23 +68,6 @@ function TaskItem({
 
   function markTaskAsIncomplete() {
     setTaskFields(self._id, { isCompleted: false });
-  }
-
-  function getBackgroundColour() {
-    if (self.isCompleted) {
-      return "lightgrey";
-    }
-
-    switch (self.moduleCode) {
-      case "CS1101S":
-        return eightiesColourScheme["lightRed"];
-      case "CS1231S":
-        return eightiesColourScheme["lightYellow"];
-      case "MA1521":
-        return eightiesColourScheme["lightGreen"];
-      default:
-        return "pink";
-    }
   }
 
   function getAccentColour() {
@@ -142,7 +128,7 @@ function TaskItem({
       <Paper onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <div
           style={{
-            backgroundColor: getBackgroundColour(),
+            backgroundColor: getBackgroundColour(self),
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -176,7 +162,13 @@ function TaskItem({
                 cursor: getDraggableState().cursor,
               }}
             >
-              <DragIndicatorIcon />
+              {self.isCompleted ? (
+                <AssignmentTurnedInIcon />
+              ) : self.row !== -1 ? (
+                <StickyNote2Icon />
+              ) : (
+                <DragIndicatorIcon />
+              )}
             </div>
 
             {/* =========================================================== */}
