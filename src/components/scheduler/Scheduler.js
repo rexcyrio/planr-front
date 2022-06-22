@@ -57,12 +57,11 @@ function Scheduler() {
         setTasks(json.tasks);
         setInitialSnackbar(true);
         setDataState("IN_SYNC");
-      });
-
-    fetch(`/api/private/timetable?id=${userId}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setMatrix(json.timetable);
+        fetch(`/api/private/timetable?id=${userId}`)
+          .then((res) => res.json())
+          .then((json) => {
+            setMatrix(json.timetable);
+          });
       });
   }, []);
 
