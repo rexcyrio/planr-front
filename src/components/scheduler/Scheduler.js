@@ -338,11 +338,13 @@ function Scheduler() {
     setDeleteConfirmation(false);
     const newTasks = tasks.filter((each) => each.isCompleted === false);
     const doneTasks = tasks.filter((each) => each.isCompleted === true);
+    let values = [];
     for (const task of doneTasks) {
       for (let i = 0; i < task.timeUnits; i++) {
-        _setMatrix(task.row + i, task.col, "0");
+        values.push([task.row + i, task.col, "0"]);
       }
     }
+    _setMatrix(values);
     setTasks(newTasks);
     setDataState("UPDATING");
     updateTasksInDatabase(newTasks);
