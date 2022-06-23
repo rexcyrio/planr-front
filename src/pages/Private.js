@@ -1,28 +1,26 @@
 import React from "react";
-import Links from "../components/Links";
-import Notes from "../components/Notes";
-import Tasks from "../components/Tasks";
-import Timetable from "../components/Timetable";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import Links from "../components/links/Links";
+import Notes from "../components/notes/Notes";
+import Scheduler from "../components/scheduler/Scheduler";
 
 function Private() {
   return (
     <>
-      <div className="background">
-        <div className="grid">
-          <div className="links-section">
-            <Links />
-          </div>
-          <div className="notes-section">
-            <Notes />
-          </div>
-          <div className="tasks-section">
-            <Tasks />
-          </div>
-          <div className="timetable-section">
-            <Timetable />
+      <DndProvider backend={HTML5Backend}>
+        <div className="background">
+          <div className="grid">
+            <div className="links-section">
+              <Links />
+            </div>
+            <div className="notes-section">
+              <Notes />
+            </div>
+            <Scheduler />
           </div>
         </div>
-      </div>
+      </DndProvider>
     </>
   );
 }

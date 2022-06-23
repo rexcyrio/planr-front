@@ -1,3 +1,7 @@
+html {
+  background-color: #ffffff;
+}
+
 :root {
   --navbar-height: 3rem;
 }
@@ -8,6 +12,7 @@ body {
     Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-y: hidden;
 }
 
 code {
@@ -34,7 +39,7 @@ Navbar
 .navbar {
   height: var(--navbar-height);
   width: 100vw;
-  background-color: hsl(0, 0%, 95%);
+  background-color: #fff4e4;
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid hsl(0, 0%, 80%);
@@ -60,23 +65,6 @@ Navbar
   vertical-align: middle;
 }
 
-.navbar-buttons-container {
-  display: flex;
-  align-items: center;
-}
-
-.navbar-buttons {
-  padding: 0.5rem;
-  margin: auto 0.5rem;
-  border-radius: 3px;
-  cursor: pointer;
-  background-color: lightskyblue;
-}
-
-.navbar-buttons:hover {
-  background-color: rgb(107, 198, 255);
-}
-
 /*
 ===============================================================================
 Private
@@ -87,7 +75,7 @@ Private
   /* 1px is for the bottom border of the navbar */
   height: calc(100vh - var(--navbar-height) - 1px);
   width: 100vw;
-  background-color: hsl(0, 0%, 85%);
+  background-color: #e6e2dc;
 }
 
 .grid {
@@ -117,7 +105,7 @@ Private
 
 .timetable-section {
   grid-area: timetable;
-  padding: 1rem;
+  padding: 1rem 1rem 0;
 }
 
 .tasks-section {

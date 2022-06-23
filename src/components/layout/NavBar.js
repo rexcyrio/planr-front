@@ -3,15 +3,17 @@ import Button from "@mui/material/Button";
 import React, { useContext } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../store/AuthContext";
+import Settings from "../settings/Settings";
 import logo from "./../../icons/logo.svg";
+import styles from "./NavBar.module.css";
 
 function NavBar() {
   const { isAuthenticated, setIsAuthenticated, setLoggedInUsername } =
     useContext(AuthContext);
   const navigate = useNavigate();
 
-  function logoutNow(e) {
-    e.preventDefault();
+  function logoutNow(event) {
+    event.preventDefault();
 
     fetch("/api/logout", {
       method: "DELETE",
@@ -23,11 +25,14 @@ function NavBar() {
     })
       .then((res) => res.json())
       .then((json) => {
-        if (json.logout_success) {
-          setIsAuthenticated(false);
-          setLoggedInUsername(null);
-          navigate("/login", { replace: true });
+        if (json.error) {
+          alert(json.error);
+          return;
         }
+
+        setIsAuthenticated(false);
+        setLoggedInUsername(null);
+        navigate("/login", { replace: true });
       });
   }
 
@@ -41,19 +46,23 @@ function NavBar() {
           </div>
         </Link>
 
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {isAuthenticated ? (
-            <Button sx={{ mr: "1rem" }} onClick={logoutNow}>
-              Log out
-            </Button>
-          ) : (
-            <Link to="/signup">
-              <Button sx={{ mr: "1rem" }} variant="contained">
-                Sign up
+        <div className={styles.utility}>
+          {isAuthenticated && <Settings />}
+
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            {isAuthenticated ? (
+              <Button sx={{ mr: "1rem" }} onClick={logoutNow}>
+                Log out
               </Button>
-            </Link>
-          )}
-        </Box>
+            ) : (
+              <Link to="/signup">
+                <Button sx={{ mr: "1rem" }} variant="contained">
+                  Sign up
+                </Button>
+              </Link>
+            )}
+          </Box>
+        </div>
       </nav>
 
       <Outlet />

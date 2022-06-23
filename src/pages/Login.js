@@ -10,7 +10,7 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
-  const { setIsAuthenticated, setLoggedInUsername, setUserData } =
+  const { setIsAuthenticated, setLoggedInUsername, setUserId } =
     useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -44,7 +44,7 @@ function Login() {
           setError(false);
           setIsAuthenticated(true);
           setLoggedInUsername(json.loggedInUsername);
-          setUserData(json.userData);
+          setUserId(json.userId);
           navigate("/private", { replace: true });
         } else {
           setError(true);
@@ -61,6 +61,7 @@ function Login() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          height: "100%",
         }}
       >
         <h1>Welcome back!</h1>
@@ -108,9 +109,7 @@ function Login() {
         </p>
 
         {error ? (
-          <Alert severity="error" fullWidth>
-            Username or password is incorrect.
-          </Alert>
+          <Alert severity="error">Username or password is incorrect.</Alert>
         ) : (
           <></>
         )}

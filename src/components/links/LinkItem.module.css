@@ -1,0 +1,22 @@
+.link-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: hsl(265, 100%, 91%);
+  border-radius: 5px;
+  padding: 0.5rem;
+}
+
+.link-button:hover {
+  background-color: hsl(265, 100%, 88%);
+}
+
+.link-item {
+  scroll-snap-align: start;
+}
+
+.link-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 75%;
+}

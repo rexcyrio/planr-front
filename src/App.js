@@ -7,19 +7,37 @@ import Private from "./pages/Private";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
 import { AuthContext } from "./store/AuthContext";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+const theme = createTheme({
+  palette: {
+    medium: {
+      main: "#fce5c4",
+    },
+    light: {
+      main: "#FFF4E4",
+    },
+    success: {
+      main: "#64dd17",
+    },
+    textBox: {
+      main: "#fff",
+    },
+  },
+});
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loggedInUsername, setLoggedInUsername] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const value = {
     isAuthenticated: isAuthenticated,
     loggedInUsername: loggedInUsername,
-    userData: userData,
+    userId,
     setLoggedInUsername: setLoggedInUsername,
     setIsAuthenticated: setIsAuthenticated,
-    setUserData: setUserData,
+    setUserId,
   };
 
   useEffect(() => {
@@ -34,7 +52,7 @@ function App() {
       .then((json) => {
         setIsAuthenticated(json.isAuthenticated);
         setLoggedInUsername(json.loggedInUsername);
-        setUserData(json.userData);
+        setUserId(json.userId);
       })
       .then(() => setIsLoading(false));
   }, []);
@@ -59,30 +77,32 @@ function App() {
     <></>
   ) : (
     <AuthContext.Provider value={value}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" exact element={<NavBar />}>
-            <Route
-              path="/"
-              element={
-                isAuthenticated ? (
-                  <Navigate replace to="/private" />
-                ) : (
-                  <Navigate replace to="/login" />
-                )
-              }
-            />
-            <Route path="/private" element={makePrivate(<Private />)} />
-            <Route path="/login" element={makePublic(<Login />)} />
-            <Route path="/signup" element={makePublic(<Signup />)} />
-            <Route
-              path="/reset-password/:_id/:token"
-              element={makePublic(<ResetPassword />)}
-            />
-            <Route path="*" element={<NoMatch />} status={404} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" exact element={<NavBar />}>
+              <Route
+                path="/"
+                element={
+                  isAuthenticated ? (
+                    <Navigate replace to="/private" />
+                  ) : (
+                    <Navigate replace to="/login" />
+                  )
+                }
+              />
+              <Route path="/private" element={makePrivate(<Private />)} />
+              <Route path="/login" element={makePublic(<Login />)} />
+              <Route path="/signup" element={makePublic(<Signup />)} />
+              <Route
+                path="/reset-password/:_id/:token"
+                element={makePublic(<ResetPassword />)}
+              />
+              <Route path="*" element={<NoMatch />} status={404} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </AuthContext.Provider>
   );
 }

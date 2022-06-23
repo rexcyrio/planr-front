@@ -12,127 +12,100 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import styles from "./Tasks.module.css";
 
-function Tasks() {
-  const [tasks, setTasks] = useState([]);
+TaskCreator.propTypes = {
+  addTask: PropTypes.func.isRequired,
+};
+
+function TaskCreator({ addTask }) {
   const [name, setName] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [dueTime, setDueTime] = useState("");
-  const [duration, setDuration] = useState("");
-  const [moduleCode, setModuleCode] = useState("");
+  const [dueDate, setDueDate] = useState(getDateNowString());
+  const [dueTime, setDueTime] = useState("23:59");
+  const [durationHours, setDurationHours] = useState("");
+  const [moduleCode, setModuleCode] = useState("Others");
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    setTasks([
-      {
-        _id: uuidv4(),
-        name: "Weekly assignment",
-        dueDate: "2023-01-01",
-        dueTime: "00:00",
-        duration: "2",
-        moduleCode: "CS3230",
-      },
-    ]);
-  }, []);
+  const [durationState, setDurationState] = useState("NONE");
 
   function resetState() {
     setName("");
     setDueDate(getDateNowString());
     setDueTime("23:59");
-    setDuration("");
-    setModuleCode("");
+    setDurationHours("");
+    setModuleCode("Others");
+
+    setDurationState("NONE");
   }
 
-  const handleClickOpen = () => {
-    resetState();
+  function handleOpen() {
     setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  function convert_24H_to_12H(str) {
-    const [hour, min] = str.split(":");
-    const int_hour = Number(hour);
-
-    if (int_hour === 0) {
-      return `12:${min}am`;
-    }
-
-    if (int_hour >= 1 && int_hour <= 11) {
-      return `${str}am`;
-    }
-
-    return `${(int_hour - 12).toString()}:${min}pm`;
   }
 
-  function getDateNowString() {
-    const date = new Date();
-
-    const y = date.getFullYear().toString();
-    // converting from 0-based indexing to 1-based indexing
-    const m = (date.getMonth() + 1).toString();
-    const d = date.getDate().toString();
-
-    const m2 = m.length === 2 ? m : "0" + m;
-    const d2 = d.length === 2 ? d : "0" + d;
-
-    return `${y}-${m2}-${d2}`;
+  function handleClose() {
+    setOpen(false);
+    resetState();
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  function handleDurationHoursChange(event) {
+    const newDuration = event.target.value;
+    setDurationHours(newDuration);
+
+    if (!newDuration.match(unsignedFloatRegex)) {
+      setDurationState("ERROR");
+      return;
+    }
+
+    if (Number(newDuration) > 24) {
+      setDurationState("TOO_LARGE");
+      return;
+    }
+
+    setDurationState("NONE");
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    if (durationState !== "NONE") {
+      return;
+    }
+
     setOpen(false);
 
-    const t = {
+    const newTask = {
       _id: uuidv4(),
+
       name: name,
       dueDate: dueDate,
       dueTime: dueTime,
-      duration: duration,
+      durationHours: durationHours,
       moduleCode: moduleCode,
+
+      row: -1,
+      col: -1,
+      timeUnits: Math.ceil(Number(durationHours) * 2),
+
+      isCompleted: false,
     };
 
-    setTasks([...tasks, t]);
+    addTask(newTask);
     resetState();
   }
 
   return (
     <>
-      <h1>Tasks</h1>
-      {tasks.length > 0 ? (
-        tasks.map((each) => (
-          <React.Fragment key={each._id}>
-            <div className={styles["outer-container"]}>
-              <div>
-                <div>
-                  <span className={styles["grey"]}>[{each.moduleCode}]</span>{" "}
-                  {each.name} ({each.duration} hr)
-                </div>
-
-                <div>
-                  <span className={styles["grey"]}>due on:</span> {each.dueDate}
-                  @{convert_24H_to_12H(each.dueTime)}
-                </div>
-              </div>
-            </div>
-          </React.Fragment>
-        ))
-      ) : (
-        <div>There are no tasks.</div>
-      )}
       <Fab
         color="primary"
         aria-label="add"
         style={{ position: "absolute", right: "1.5rem", bottom: "1rem" }}
-        onClick={handleClickOpen}
+        onClick={handleOpen}
       >
         <AddIcon />
       </Fab>
+
       <Dialog open={open} onClose={handleClose} maxWidth="md">
         <DialogTitle>Add a new Task</DialogTitle>
         <Box component="form" onSubmit={handleSubmit}>
@@ -147,6 +120,8 @@ function Tasks() {
                 onChange={(e) => setModuleCode(e.target.value)}
                 required
               >
+                {/* TODO: update module codes */}
+                <MenuItem value={"Others"}>Others</MenuItem>
                 <MenuItem value={"CS1101S"}>CS1101S</MenuItem>
                 <MenuItem value={"CS1231S"}>CS1231S</MenuItem>
                 <MenuItem value={"MA1521"}>MA1521</MenuItem>
@@ -168,18 +143,20 @@ function Tasks() {
             <TextField
               sx={{ width: "15rem", mr: "1rem" }}
               margin="dense"
-              id="duration"
+              id="durationHours"
               label="Time needed"
-              type="number"
+              type="text"
               variant="outlined"
               required
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
+              value={durationHours}
+              onChange={handleDurationHoursChange}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">hour(s)</InputAdornment>
                 ),
               }}
+              helperText={durationStates[durationState].helperText}
+              error={durationStates[durationState].error}
             />
             <TextField
               sx={{ mr: "1rem" }}
@@ -191,6 +168,7 @@ function Tasks() {
               required
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+              helperText=" "
             />
             <TextField
               margin="dense"
@@ -201,6 +179,7 @@ function Tasks() {
               required
               value={dueTime}
               onChange={(e) => setDueTime(e.target.value)}
+              helperText=" "
             />
           </DialogContent>
           <DialogActions>
@@ -213,9 +192,55 @@ function Tasks() {
   );
 }
 
-export default Tasks;
+function getDateNowString() {
+  const date = new Date();
 
-// <div>
-//   <span className={styles["grey"]}>due on: </span>
-//   {each.dueDate}
-// </div>;
+  const y = date.getFullYear().toString();
+  // converting from 0-based indexing to 1-based indexing
+  const m = (date.getMonth() + 1).toString();
+  const d = date.getDate().toString();
+
+  const m2 = m.length === 2 ? m : "0" + m;
+  const d2 = d.length === 2 ? d : "0" + d;
+
+  return `${y}-${m2}-${d2}`;
+}
+
+const durationStates = {
+  NONE: {
+    helperText: " ",
+    error: false,
+  },
+  ERROR: {
+    helperText: "Please enter a valid duration",
+    error: true,
+  },
+  TOO_LARGE: {
+    helperText: "Largest valid value is 24 hours",
+    error: true,
+  },
+};
+
+// matches
+// 1
+// 99
+// 0.1
+// 0.99
+// 99.01
+
+// DOES NOT match
+// 0
+// 0000
+// 0.0
+// 0000.0
+// 0.0000
+// 0000.0000
+// 1e1
+// -0.1
+// +0.1
+// .1
+// 00.01
+const unsignedFloatRegex =
+  /(^0\.\d*[1-9]\d*$)|(^[1-9]\d*\.\d+$)|(^[1-9]\d*$)/gm;
+
+export default TaskCreator;
