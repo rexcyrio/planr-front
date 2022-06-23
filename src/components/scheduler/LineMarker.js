@@ -27,7 +27,7 @@ const mappingDayToLeft = {
 
 function getTop(hour, min) {
   // 2 hours = 5.55rem
-  const sizeOfOneHour = 5.55 / 2;
+  const sizeOfOneHour = 2.75;
   const base = -0.2;
   return `${base + hour * sizeOfOneHour + (min / 60) * sizeOfOneHour}rem`;
 }
