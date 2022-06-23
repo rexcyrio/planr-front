@@ -98,7 +98,9 @@ function TaskItem({
 
     if (self.row !== -1 && self.col !== -1) {
       return {
-        title: "Task is already scheduled",
+        title: `Task is already scheduled on ${
+          mappingColumnToDay[self.col]
+        } at ${getTime(self.row)}`,
         ref: null,
         cursor: "not-allowed",
       };
@@ -251,6 +253,22 @@ function convert_24H_to_12H(time24H) {
 
   const hourPM = (hourNumber - 12).toString();
   return `${hourPM}:${min}pm`;
+}
+
+const mappingColumnToDay = {
+  0: "Monday",
+  1: "Tuesday",
+  2: "Wednesday",
+  3: "Thursday",
+  4: "Friday",
+  5: "Saturday",
+  6: "Sunday",
+};
+
+function getTime(row) {
+  const hour = Math.floor(row / 2);
+  const min = row % 2 === 0 ? "00" : "30";
+  return `${hour}:${min}`;
 }
 
 const eightiesColourScheme = {
