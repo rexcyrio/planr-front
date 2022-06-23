@@ -14,7 +14,7 @@ const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
     <DragIndicatorIcon
       fontSize="inherit"
       sx={{
-        color: "hsl(0, 0%, 75%)",
+        color: "hsl(0, 0%, 25%)",
       }}
     />
   );
