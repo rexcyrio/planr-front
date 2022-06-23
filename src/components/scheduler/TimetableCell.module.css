@@ -1,6 +1,6 @@
 .cell {
   width: 5.8rem;
-  border: 1px solid hsl(0, 0%, 75%);
+  border: 0.01px solid hsl(0, 0%, 75%);
   position: relative;
   z-index: 5;
 }
