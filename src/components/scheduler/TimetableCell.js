@@ -1,7 +1,11 @@
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import Popover from "@mui/material/Popover";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
+import DoneIcon from "@mui/icons-material/Done";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import IconButton from "@mui/material/IconButton";
+import Popover from "@mui/material/Popover";
+import RestoreIcon from "@mui/icons-material/Restore";
+import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useEffect, useState, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
@@ -95,6 +99,14 @@ function TimetableCell({
   const closePopoverHandler = () => {
     setOpenPopover(false);
   };
+
+  function markTaskAsComplete() {
+    setTaskFields(self._id, { isCompleted: true });
+  }
+
+  function markTaskAsIncomplete() {
+    setTaskFields(self._id, { isCompleted: false });
+  }
 
   // ==========================================================================
   // Drag and drop
@@ -261,9 +273,24 @@ function TimetableCell({
               maxWidth: "16rem",
             }}
           >
-            <p>
-              <strong>{self.moduleCode}</strong>
-            </p>
+            <div className={styles["details-popup-header-container"]}>
+              <p className={styles["details-popup-header"]}>
+                <strong>{self.moduleCode}</strong>
+              </p>
+              {self.isCompleted ? (
+                <Tooltip title="Restore task">
+                  <IconButton size="small" onClick={markTaskAsIncomplete}>
+                    <RestoreIcon />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Mark task as complete">
+                  <IconButton size="small" onClick={markTaskAsComplete}>
+                    <DoneIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </div>
             <p className={styles["task-name-paragraph"]}>{self.name}</p>
             <p>
               Due on: {self.dueDate} at {self.dueTime}

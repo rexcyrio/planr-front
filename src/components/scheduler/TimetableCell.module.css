@@ -20,6 +20,16 @@
   cursor: pointer;
 }
 
+.details-popup-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.details-popup-header {
+  margin: 0;
+}
+
 .task-name-paragraph {
   max-height: 15rem;
   overflow-y: auto;
