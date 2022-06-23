@@ -3,7 +3,6 @@ import Button from "@mui/material/Button";
 import React, { useContext } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../store/AuthContext";
-import Settings from "../settings/Settings";
 import logo from "./../../icons/logo.svg";
 import styles from "./NavBar.module.css";
 
@@ -47,8 +46,6 @@ function NavBar() {
         </Link>
 
         <div className={styles.utility}>
-          {isAuthenticated && <Settings />}
-
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {isAuthenticated ? (
               <Button sx={{ mr: "1rem" }} onClick={logoutNow}>
