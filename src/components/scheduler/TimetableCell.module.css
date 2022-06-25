@@ -33,4 +33,5 @@
 .task-name-paragraph {
   max-height: 15rem;
   overflow-y: auto;
+  word-break: break-word;
 }
