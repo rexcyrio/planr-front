@@ -148,7 +148,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
           for (let i = 0; i < self.timeUnits; i++) {
             values.push([row + i, col, "0"]);
           }
-          
+
           _setMatrix(values);
 
           // we want to update the newTask to be as such:
@@ -190,7 +190,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
 
   return (
     <>
-      <Tooltip title="Edit">
+      <Tooltip title="Edit" disableInteractive={true}>
         <IconButton size="small" onClick={handleOpen}>
           <EditIcon />
         </IconButton>
