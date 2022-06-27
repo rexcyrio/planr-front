@@ -4,19 +4,23 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../store/AuthContext";
+import { useDispatch } from "react-redux";
+import {
+  setIsAuthenticated,
+  setLoggedInUsername,
+  setUserId,
+} from "../store/slices/userSlice";
 
 function Signup() {
+  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [verifyPassword, setVerifyPassword] = useState("");
   const [verifyPasswordGood, setVerifyPasswordGood] = useState(true);
   const [usernameState, setUsernameState] = useState("NONE");
   const [passwordState, setPasswordState] = useState("NONE");
-  const { setIsAuthenticated, setLoggedInUsername, setUserId } =
-    useContext(AuthContext);
   const navigate = useNavigate();
 
   // match A-Z, a-z, 0-9, "_"
@@ -225,9 +229,9 @@ function Signup() {
       .then((res) => res.json())
       .then((json) => {
         if (json.login_success) {
-          setIsAuthenticated(true);
-          setLoggedInUsername(json.loggedInUsername);
-          setUserId(json.userId);
+          dispatch(setIsAuthenticated(true));
+          dispatch(setLoggedInUsername(json.loggedInUsername));
+          dispatch(setUserId(json.userId));
           navigate("/private", { replace: true });
         } else {
           alert(json.error);

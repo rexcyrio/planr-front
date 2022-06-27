@@ -6,8 +6,14 @@ import NoMatch from "./pages/NoMatch";
 import Private from "./pages/Private";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
-import { AuthContext } from "./store/AuthContext";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+import {
+  setIsAuthenticated,
+  setLoggedInUsername,
+  setUserId,
+} from "./store/slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const theme = createTheme({
   palette: {
@@ -27,18 +33,20 @@ const theme = createTheme({
 });
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loggedInUsername, setLoggedInUsername] = useState(null);
-  const [userId, setUserId] = useState(null);
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [loggedInUsername, setLoggedInUsername] = useState(null);
+  // const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const value = {
-    isAuthenticated: isAuthenticated,
-    loggedInUsername: loggedInUsername,
-    userId,
-    setLoggedInUsername: setLoggedInUsername,
-    setIsAuthenticated: setIsAuthenticated,
-    setUserId,
-  };
+  // const value = {
+  //   isAuthenticated: isAuthenticated,
+  //   loggedInUsername: loggedInUsername,
+  //   userId,
+  //   setLoggedInUsername: setLoggedInUsername,
+  //   setIsAuthenticated: setIsAuthenticated,
+  //   setUserId,
+  // };
 
   useEffect(() => {
     fetch("/api/is-authenticated", {
@@ -50,15 +58,15 @@ function App() {
     })
       .then((res) => res.json())
       .then((json) => {
-        setIsAuthenticated(json.isAuthenticated);
-        setLoggedInUsername(json.loggedInUsername);
-        setUserId(json.userId);
+        dispatch(setIsAuthenticated(json.isAuthenticated));
+        dispatch(setLoggedInUsername(json.loggedInUsername));
+        dispatch(setUserId(json.userId));
       })
       .then(() => setIsLoading(false));
   }, []);
 
   function makePrivate(component) {
-    if (isAuthenticated) {
+    if (user.isAuthenticated) {
       return component;
     } else {
       return <Navigate replace to="/" />;
@@ -66,7 +74,7 @@ function App() {
   }
 
   function makePublic(component) {
-    if (!isAuthenticated) {
+    if (!user.isAuthenticated) {
       return component;
     } else {
       return <Navigate replace to="/" />;
@@ -76,34 +84,32 @@ function App() {
   return isLoading ? (
     <></>
   ) : (
-    <AuthContext.Provider value={value}>
-      <ThemeProvider theme={theme}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" exact element={<NavBar />}>
-              <Route
-                path="/"
-                element={
-                  isAuthenticated ? (
-                    <Navigate replace to="/private" />
-                  ) : (
-                    <Navigate replace to="/login" />
-                  )
-                }
-              />
-              <Route path="/private" element={makePrivate(<Private />)} />
-              <Route path="/login" element={makePublic(<Login />)} />
-              <Route path="/signup" element={makePublic(<Signup />)} />
-              <Route
-                path="/reset-password/:_id/:token"
-                element={makePublic(<ResetPassword />)}
-              />
-              <Route path="*" element={<NoMatch />} status={404} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
-    </AuthContext.Provider>
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" exact element={<NavBar />}>
+            <Route
+              path="/"
+              element={
+                user.isAuthenticated ? (
+                  <Navigate replace to="/private" />
+                ) : (
+                  <Navigate replace to="/login" />
+                )
+              }
+            />
+            <Route path="/private" element={makePrivate(<Private />)} />
+            <Route path="/login" element={makePublic(<Login />)} />
+            <Route path="/signup" element={makePublic(<Signup />)} />
+            <Route
+              path="/reset-password/:_id/:token"
+              element={makePublic(<ResetPassword />)}
+            />
+            <Route path="*" element={<NoMatch />} status={404} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
