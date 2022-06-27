@@ -4,9 +4,8 @@ import InfoIcon from "@mui/icons-material/Info";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import generateSkeletons from "../../helper/skeletonHelper";
-import { AuthContext } from "../../store/AuthContext";
 import DataStatus from "../helperComponents/DataStatus";
 import LineMarker from "./LineMarker";
 import MyDragLayer from "./MyDragLayer";
@@ -14,6 +13,7 @@ import styles from "./Scheduler.module.css";
 import TaskCreator from "./TaskCreator";
 import TaskItem from "./TaskItem";
 import TimetableCell from "./TimetableCell";
+import { useSelector } from "react-redux";
 
 const EMPTY_TASK = {
   _id: "0",
@@ -32,6 +32,7 @@ const EMPTY_TASK = {
 };
 
 function Scheduler() {
+  const {userId} = useSelector(state => state.user);
   const [matrix, setMatrix] = useState(defaultMatrix("0"));
   const [tasks, setTasks] = useState([]);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
@@ -39,7 +40,6 @@ function Scheduler() {
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
   const [initialSnackbar, setInitialSnackbar] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
-  const { userId } = useContext(AuthContext);
 
   const EMPTY_TASK_ITEM = (
     <TaskItem

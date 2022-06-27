@@ -2,16 +2,20 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../store/AuthContext";
+import { useDispatch } from "react-redux";
+import {
+  setIsAuthenticated,
+  setLoggedInUsername,
+  setUserId,
+} from "../store/slices/userSlice";
 
 function Login() {
+  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
-  const { setIsAuthenticated, setLoggedInUsername, setUserId } =
-    useContext(AuthContext);
   const navigate = useNavigate();
 
   function handleSubmit(event) {
@@ -42,9 +46,9 @@ function Login() {
 
         if (json.login_success) {
           setError(false);
-          setIsAuthenticated(true);
-          setLoggedInUsername(json.loggedInUsername);
-          setUserId(json.userId);
+          dispatch(setIsAuthenticated(true));
+          dispatch(setLoggedInUsername(json.loggedInUsername));
+          dispatch(setUserId(json.userId));
           navigate("/private", { replace: true });
         } else {
           setError(true);

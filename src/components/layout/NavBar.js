@@ -1,15 +1,20 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import React, { useContext } from "react";
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../store/AuthContext";
+import {
+  setIsAuthenticated,
+  setLoggedInUsername,
+  setUserId,
+} from "../../store/slices/userSlice";
 import Settings from "../settings/Settings";
 import logo from "./../../icons/logo.svg";
 import styles from "./NavBar.module.css";
 
 function NavBar() {
-  const { isAuthenticated, setIsAuthenticated, setLoggedInUsername } =
-    useContext(AuthContext);
+  const { isAuthenticated } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   function logoutNow(event) {
@@ -30,8 +35,9 @@ function NavBar() {
           return;
         }
 
-        setIsAuthenticated(false);
-        setLoggedInUsername(null);
+        dispatch(setIsAuthenticated(false));
+        dispatch(setLoggedInUsername(null));
+        dispatch(setUserId(null));
         navigate("/login", { replace: true });
       });
   }

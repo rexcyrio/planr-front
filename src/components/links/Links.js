@@ -14,19 +14,20 @@ import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { AuthContext } from "../../store/AuthContext";
+//import { AuthContext } from "../../store/AuthContext";
 import styles from "./Links.module.css";
 import { Alert } from "@mui/material";
 import DataStatus from "../helperComponents/DataStatus";
 import LinksList from "./LinksList";
+import { useSelector } from "react-redux";
 
 function Links() {
+  const { userId } = useSelector((state) => state.user);
   const [links, setLinks] = useState([]);
   const [newName, setNewName] = useState("");
   const [newURL, setNewURL] = useState("https://");
-  const { userId } = useContext(AuthContext);
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
@@ -42,6 +43,7 @@ function Links() {
   }
 
   useEffect(() => {
+    console.log(userId);
     fetch(`/api/private/links?id=${userId}`)
       .then((res) => res.json())
       .then((json) => {

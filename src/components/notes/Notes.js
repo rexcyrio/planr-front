@@ -7,17 +7,17 @@ import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { AuthContext } from "../../store/AuthContext";
 import styles from "./Notes.module.css";
 import NoteItem from "./NoteItem";
 import DataStatus from "../helperComponents/DataStatus";
+import { useSelector } from "react-redux";
 
 function Notes() {
+  const { userId } = useSelector((state) => state.user);
   const [notes, setNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
-  const { userId } = useContext(AuthContext);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
   const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
