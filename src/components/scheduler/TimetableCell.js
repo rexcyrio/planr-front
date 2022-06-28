@@ -12,6 +12,7 @@ import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import styles from "./TimetableCell.module.css";
 import getBackgroundColour from "../../helper/colorHelper";
+import { useSelector } from "react-redux";
 
 const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
   return (
@@ -44,20 +45,12 @@ TimetableCell.propTypes = {
   row: PropTypes.number.isRequired,
   col: PropTypes.number.isRequired,
   matrix: PropTypes.array.isRequired,
-  tasks: PropTypes.array.isRequired,
   _setMatrix: PropTypes.func.isRequired,
   setTaskFields: PropTypes.func.isRequired,
 };
 
-function TimetableCell({
-  self,
-  row,
-  col,
-  matrix,
-  tasks,
-  _setMatrix,
-  setTaskFields,
-}) {
+function TimetableCell({ self, row, col, matrix, _setMatrix, setTaskFields }) {
+  const tasks = useSelector((state) => state.tasks);
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [openPopover, setOpenPopover] = useState(false);
