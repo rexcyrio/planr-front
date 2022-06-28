@@ -43,7 +43,6 @@ function Links() {
   }
 
   useEffect(() => {
-    console.log(userId);
     fetch(`/api/private/links?id=${userId}`)
       .then((res) => res.json())
       .then((json) => {
