@@ -13,7 +13,9 @@ import styles from "./Scheduler.module.css";
 import TaskCreator from "./TaskCreator";
 import TaskItem from "./TaskItem";
 import TimetableCell from "./TimetableCell";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addTask } from "../../store/slices/tasksSlice";
+import { setTasks } from "../../store/slices/tasksSlice";
 
 const EMPTY_TASK = {
   _id: "0",
@@ -32,9 +34,10 @@ const EMPTY_TASK = {
 };
 
 function Scheduler() {
-  const {userId} = useSelector(state => state.user);
+  const { userId } = useSelector((state) => state.user);
+  const tasks = useSelector((state) => state.tasks);
+  const dispatch = useDispatch();
   const [matrix, setMatrix] = useState(defaultMatrix("0"));
-  const [tasks, setTasks] = useState([]);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
   const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
@@ -70,7 +73,7 @@ function Scheduler() {
 
       const [databaseTasks, databaseTimetable] = items;
 
-      setTasks(databaseTasks);
+      dispatch(setTasks(databaseTasks));
       setInitialSnackbar(true);
       setDataState("IN_SYNC");
       setMatrix(databaseTimetable);
@@ -135,7 +138,6 @@ function Scheduler() {
           row={row}
           col={col}
           matrix={matrix}
-          tasks={tasks}
           _setMatrix={_setMatrix}
           setTaskFields={setTaskFields}
         />
@@ -154,7 +156,6 @@ function Scheduler() {
         row={row}
         col={col}
         matrix={matrix}
-        tasks={tasks}
         _setMatrix={_setMatrix}
         setTaskFields={setTaskFields}
       />
@@ -168,17 +169,15 @@ function Scheduler() {
   function _setTask(taskID, newTask) {
     setDataState("UPDATING");
 
-    setTasks((prev) => {
-      const index = prev.findIndex((each) => each._id === taskID);
-      const newTasks = [
-        ...prev.slice(0, index),
-        newTask,
-        ...prev.slice(index + 1),
-      ];
+    const index = tasks.findIndex((each) => each._id === taskID);
+    const newTasks = [
+      ...tasks.slice(0, index),
+      newTask,
+      ...tasks.slice(index + 1),
+    ];
 
-      updateTasksInDatabase(newTasks);
-      return newTasks;
-    });
+    dispatch(setTasks(newTasks));
+    updateTasksInDatabase(newTasks);
   }
 
   function setTaskFields(taskID, newKeyValuePairs) {
@@ -201,9 +200,9 @@ function Scheduler() {
     _setTask(taskID, newTask);
   }
 
-  function addTask(newTask) {
+  function _addTask(newTask) {
     setDataState("UPDATING");
-    setTasks((prev) => [...prev, newTask]);
+    dispatch(addTask(newTask));
     addTaskToDatabase(newTask);
   }
 
@@ -229,11 +228,9 @@ function Scheduler() {
     }
 
     // remove from tasks array
-    setTasks((prev) => {
-      const newTasks = prev.filter((each) => each._id !== taskID);
-      updateTasksInDatabase(newTasks);
-      return newTasks;
-    });
+    const newTasks = tasks.filter((each) => each._id !== taskID);
+    dispatch(setTasks(newTasks));
+    updateTasksInDatabase(newTasks);
   }
 
   function getTaskItems() {
@@ -356,7 +353,7 @@ function Scheduler() {
       }
     }
     _setMatrix(values);
-    setTasks(newTasks);
+    dispatch(setTasks(newTasks));
     setDataState("UPDATING");
     updateTasksInDatabase(newTasks);
   };
@@ -511,7 +508,7 @@ function Scheduler() {
           <div style={{ marginBottom: "4.5rem" }}></div>
         </Stack>
 
-        <TaskCreator addTask={addTask} />
+        <TaskCreator addTask={_addTask} />
       </div>
     </>
   );
