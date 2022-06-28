@@ -14,8 +14,7 @@ import TaskCreator from "./TaskCreator";
 import TaskItem from "./TaskItem";
 import TimetableCell from "./TimetableCell";
 import { useDispatch, useSelector } from "react-redux";
-import { addTask } from "../../store/slices/tasksSlice";
-import { setTasks } from "../../store/slices/tasksSlice";
+import { setTasks, addTask } from "../../store/slices/tasksSlice";
 
 const EMPTY_TASK = {
   _id: "0",
