@@ -34,6 +34,7 @@ TimetableCell.propTypes = {
     dueTime: PropTypes.string.isRequired,
     durationHours: PropTypes.string.isRequired,
     moduleCode: PropTypes.string.isRequired,
+    links: PropTypes.array.isRequired,
 
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
@@ -290,6 +291,18 @@ function TimetableCell({ self, row, col, matrix, _setMatrix, setTaskFields }) {
             </p>
             <p>Duration: {self.durationHours} hours</p>
             <p>Status: {self.isCompleted ? "Completed" : "Not Completed"}</p>
+            {self.links.map((link) => {
+              return (
+                <a
+                  key={link._id}
+                  href={link.url}
+                  rel="noreferrer noopener"
+                  target="_blank"
+                >
+                  {link.name}
+                </a>
+              );
+            })}
           </Box>
         </Popover>
       )}

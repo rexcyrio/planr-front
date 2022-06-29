@@ -15,6 +15,7 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
+import TaskLinksCreator from "./TaskLinksCreator";
 
 TaskEditor.propTypes = {
   self: PropTypes.shape({
@@ -25,6 +26,7 @@ TaskEditor.propTypes = {
     dueTime: PropTypes.string.isRequired,
     durationHours: PropTypes.string.isRequired,
     moduleCode: PropTypes.string.isRequired,
+    links: PropTypes.array.isRequired,
 
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
@@ -46,8 +48,12 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
   const [durationHours, setDurationHours] = useState(self.durationHours);
   const [moduleCode, setModuleCode] = useState(self.moduleCode);
   const [open, setOpen] = useState(false);
+  const [taskLinks, setTaskLinks] = useState(self.links);
+  const [linkName, setLinkName] = useState("");
+  const [linkURL, setLinkURL] = useState("");
 
   const [durationState, setDurationState] = useState("NONE");
+  const [urlState, setUrlState] = useState("NONE");
 
   function resetState() {
     setName(self.name);
@@ -102,6 +108,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
       dueTime: dueTime,
       durationHours: durationHours,
       moduleCode: moduleCode,
+      links: taskLinks,
 
       row: self.row,
       col: self.col,
@@ -270,6 +277,16 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
               value={dueTime}
               onChange={(e) => setDueTime(e.target.value)}
               helperText=" "
+            />
+            <TaskLinksCreator
+              taskLinks={taskLinks}
+              setTaskLinks={setTaskLinks}
+              linkName={linkName}
+              setLinkName={setLinkName}
+              linkURL={linkURL}
+              setLinkURL={setLinkURL}
+              urlState={urlState}
+              setUrlState={setUrlState}
             />
           </DialogContent>
           <DialogActions sx={{ justifyContent: "space-between" }}>

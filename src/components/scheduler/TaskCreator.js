@@ -15,6 +15,7 @@ import TextField from "@mui/material/TextField";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import TaskLinksCreator from "./TaskLinksCreator";
 
 TaskCreator.propTypes = {
   addTask: PropTypes.func.isRequired,
@@ -27,8 +28,12 @@ function TaskCreator({ addTask }) {
   const [durationHours, setDurationHours] = useState("");
   const [moduleCode, setModuleCode] = useState("Others");
   const [open, setOpen] = useState(false);
+  const [taskLinks, setTaskLinks] = useState([]);
+  const [linkName, setLinkName] = useState("");
+  const [linkURL, setLinkURL] = useState("");
 
   const [durationState, setDurationState] = useState("NONE");
+  const [urlState, setUrlState] = useState("NONE");
 
   function resetState() {
     setName("");
@@ -36,6 +41,10 @@ function TaskCreator({ addTask }) {
     setDueTime("23:59");
     setDurationHours("");
     setModuleCode("Others");
+    setTaskLinks([]);
+    setLinkName("");
+    setLinkURL("");
+    setUrlState("NONE");
 
     setDurationState("NONE");
   }
@@ -83,6 +92,7 @@ function TaskCreator({ addTask }) {
       dueTime: dueTime,
       durationHours: durationHours,
       moduleCode: moduleCode,
+      links: taskLinks,
 
       row: -1,
       col: -1,
@@ -180,6 +190,16 @@ function TaskCreator({ addTask }) {
               value={dueTime}
               onChange={(e) => setDueTime(e.target.value)}
               helperText=" "
+            />
+            <TaskLinksCreator
+              taskLinks={taskLinks}
+              setTaskLinks={setTaskLinks}
+              linkName={linkName}
+              setLinkName={setLinkName}
+              linkURL={linkURL}
+              setLinkURL={setLinkURL}
+              urlState={urlState}
+              setUrlState={setUrlState}
             />
           </DialogContent>
           <DialogActions>

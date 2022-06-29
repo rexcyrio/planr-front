@@ -24,6 +24,7 @@ TaskItem.propTypes = {
     dueTime: PropTypes.string.isRequired,
     durationHours: PropTypes.string.isRequired,
     moduleCode: PropTypes.string.isRequired,
+    links: PropTypes.array.isRequired,
 
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
