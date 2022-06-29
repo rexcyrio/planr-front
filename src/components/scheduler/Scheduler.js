@@ -24,6 +24,7 @@ const EMPTY_TASK = {
   dueTime: "",
   durationHours: "",
   moduleCode: "",
+  links: [],
 
   row: -1,
   col: -1,
