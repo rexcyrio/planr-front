@@ -68,6 +68,8 @@ function TaskLinksCreator({
       }
       return [...prev, newLink];
     });
+    setLinkName("");
+    setLinkURL("");
   };
 
   const deleteTaskLinkHandler = (linkId) => {
