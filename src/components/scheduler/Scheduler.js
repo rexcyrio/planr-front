@@ -139,7 +139,9 @@ function Scheduler() {
           col={col}
           matrix={matrix}
           _setMatrix={_setMatrix}
+          _setTask={_setTask}
           setTaskFields={setTaskFields}
+          deleteTask={deleteTask}
         />
       );
     }
@@ -157,7 +159,9 @@ function Scheduler() {
         col={col}
         matrix={matrix}
         _setMatrix={_setMatrix}
+        _setTask={_setTask}
         setTaskFields={setTaskFields}
+        deleteTask={deleteTask}
       />
     );
   }
