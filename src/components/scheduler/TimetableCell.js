@@ -314,14 +314,17 @@ function TimetableCell({
             <p>Status: {self.isCompleted ? "Completed" : "Not Completed"}</p>
             {self.links.map((link) => {
               return (
-                <a
-                  key={link._id}
-                  href={link.url}
-                  rel="noreferrer noopener"
-                  target="_blank"
-                >
-                  {link.name}
-                </a>
+                <>
+                  <a
+                    key={link._id}
+                    href={link.url}
+                    rel="noreferrer noopener"
+                    target="_blank"
+                  >
+                    {link.name}
+                  </a>
+                  <br />
+                </>
               );
             })}
           </Box>
