@@ -13,6 +13,7 @@ import { getEmptyImage } from "react-dnd-html5-backend";
 import styles from "./TimetableCell.module.css";
 import getBackgroundColour from "../../helper/colorHelper";
 import { useSelector } from "react-redux";
+import TaskEditor from "./TaskEditor";
 
 const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
   return (
@@ -47,10 +48,21 @@ TimetableCell.propTypes = {
   col: PropTypes.number.isRequired,
   matrix: PropTypes.array.isRequired,
   _setMatrix: PropTypes.func.isRequired,
+  _setTask: PropTypes.func.isRequired,
   setTaskFields: PropTypes.func.isRequired,
+  deleteTask: PropTypes.func.isRequired,
 };
 
-function TimetableCell({ self, row, col, matrix, _setMatrix, setTaskFields }) {
+function TimetableCell({
+  self,
+  row,
+  col,
+  matrix,
+  _setMatrix,
+  _setTask,
+  setTaskFields,
+  deleteTask,
+}) {
   const tasks = useSelector((state) => state.tasks);
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
   const [isMouseOver, setIsMouseOver] = useState(false);
@@ -271,19 +283,28 @@ function TimetableCell({ self, row, col, matrix, _setMatrix, setTaskFields }) {
               <p className={styles["details-popup-header"]}>
                 <strong>{self.moduleCode}</strong>
               </p>
-              {self.isCompleted ? (
-                <Tooltip title="Restore task">
-                  <IconButton size="small" onClick={markTaskAsIncomplete}>
-                    <RestoreIcon />
-                  </IconButton>
-                </Tooltip>
-              ) : (
-                <Tooltip title="Mark task as complete">
-                  <IconButton size="small" onClick={markTaskAsComplete}>
-                    <DoneIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
+              <div>
+                <TaskEditor
+                  self={self}
+                  _setMatrix={_setMatrix}
+                  _setTask={_setTask}
+                  matrix={matrix}
+                  deleteTask={deleteTask}
+                />
+                {self.isCompleted ? (
+                  <Tooltip title="Restore task">
+                    <IconButton size="small" onClick={markTaskAsIncomplete}>
+                      <RestoreIcon />
+                    </IconButton>
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Mark task as complete">
+                    <IconButton size="small" onClick={markTaskAsComplete}>
+                      <DoneIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </div>
             </div>
             <p className={styles["task-name-paragraph"]}>{self.name}</p>
             <p>
