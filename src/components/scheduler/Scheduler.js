@@ -39,7 +39,7 @@ function Scheduler() {
   const { userId } = useSelector((state) => state.user);
   const tasks = useSelector((state) => state.tasks);
   const dispatch = useDispatch();
-  
+
   const [matrix, setMatrix] = useState(defaultMatrix("0"));
   const [modules, setModules] = useState([]);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
@@ -182,9 +182,10 @@ function Scheduler() {
           row={row}
           col={col}
           matrix={matrix}
-          tasks={tasks}
           _setMatrix={_setMatrix}
+          _setTask={_setTask}
           setTaskFields={setTaskFields}
+          deleteTask={deleteTask}
         />
       );
     }
@@ -454,6 +455,7 @@ function Scheduler() {
                   dueTime: "--",
                   durationHours: durationHours,
                   moduleCode: NUSMods_moduleCode,
+                  links: [],
 
                   row: getRow(startHour, startMin),
                   col: mappingDayToColumn[lesson.day],
