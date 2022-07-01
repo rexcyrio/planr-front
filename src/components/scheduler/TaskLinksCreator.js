@@ -136,7 +136,7 @@ function TaskLinksCreator({
             margin="dense"
             id="url"
             label="URL"
-            type="url"
+            type="text"
             variant="outlined"
             value={linkURL}
             autoComplete="off"

@@ -26,7 +26,7 @@ function Links() {
   const { userId } = useSelector((state) => state.user);
   const [links, setLinks] = useState([]);
   const [newName, setNewName] = useState("");
-  const [newURL, setNewURL] = useState("https://");
+  const [newURL, setNewURL] = useState("");
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
@@ -63,7 +63,7 @@ function Links() {
   const add_closeDialog = () => {
     add_setOpen(false);
     setNewName("");
-    setNewURL("https://");
+    setNewURL("");
   };
 
   const edit_openDialog = () => {
@@ -87,13 +87,21 @@ function Links() {
           link._name = link._url;
         }
 
+        let finalURL = link._urlL;
+        if (
+          !link._url.startsWith("https://") &&
+          !link._url.startsWith("http://")
+        ) {
+          finalURL = "http://".concat(link._url);
+        }
+
         const newLink = {
           _id: link._id,
           _toBeDeleted: false,
           _name: link._name,
-          _url: link._url,
+          _url: finalURL,
           name: link._name,
-          url: link._url,
+          url: finalURL,
         };
         newLinks.push(newLink);
       }
@@ -186,13 +194,18 @@ function Links() {
   }
 
   function addNewLink() {
+    let finalURL = newURL;
+    if (!newURL.startsWith("https://") && !newURL.startsWith("http://")) {
+      finalURL = "http://".concat(newURL);
+    }
+
     const newLink = {
       _id: uuidv4(),
       _toBeDeleted: false,
       _name: newName,
-      _url: newURL,
+      _url: finalURL,
       name: newName,
-      url: newURL,
+      url: finalURL,
     };
 
     if (newName === "") {
@@ -304,7 +317,7 @@ function Links() {
                     margin="dense"
                     id="url"
                     label="URL"
-                    type="url"
+                    type="text"
                     variant="outlined"
                     required
                     value={self._url}
@@ -365,7 +378,7 @@ function Links() {
               margin="dense"
               id="url"
               label="URL"
-              type="url"
+              type="text"
               variant="outlined"
               required
               value={newURL}
