@@ -1,21 +1,4 @@
-export default function getBackgroundColour(self) {
-  if (self.isCompleted) {
-    return "lightgrey";
-  }
-
-  switch (self.moduleCode) {
-    case "CS1101S":
-      return eightiesColourScheme["lightRed"];
-    case "CS1231S":
-      return eightiesColourScheme["lightYellow"];
-    case "MA1521":
-      return eightiesColourScheme["lightGreen"];
-    default:
-      return "pink";
-  }
-}
-
-const eightiesColourScheme = {
+const eightiesTheme = {
   red: "#e91a1f",
   lightRed: "#f2777a",
   darkRed: "#8f0e11",
@@ -47,4 +30,102 @@ const eightiesColourScheme = {
   brown: "#974b28",
   lightBrown: "#d27b53",
   darkBrown: "#472312",
+
+  // self-created
+  pink: "#ff91a4",
+  lightPink: "#ffc0cb",
+  darkPink: "#a93b4f",
 };
+
+const paraisoTheme = {
+  red: "#cb2113",
+  lightRed: "#ef6155",
+  darkRed: "#6e120a",
+
+  orange: "#a46204",
+  lightOrange: "#f99b15",
+  darkOrange: "#402702",
+
+  yellow: "#af8301",
+  lightYellow: "#fec418",
+  darkYellow: "#4a3700",
+
+  green: "#2b6d50",
+  lightGreen: "#48b685",
+  darkGreen: "#0e241a",
+
+  cyan: "#318884",
+  lightCyan: "#5bc4bf",
+  darkCyan: "#163d3b",
+
+  blue: "#046a8b",
+  lightBlue: "#06b6ef",
+  darkBlue: "#011e28",
+
+  purple: "#4d3762",
+  lightPurple: "#815ba4",
+  darkPurple: "#1a1221",
+
+  // self-created
+  brown: "#8c3802",
+  lightBrown: "#ca6220",
+  darkBrown: "#3f1800",
+
+  pink: "#cf1f74",
+  lightPink: "#e96ba8",
+  darkPink: "#761242",
+};
+
+const allThemes = {
+  Eighties: eightiesTheme,
+  Paraiso: paraisoTheme,
+};
+
+function getBackgroundColour(themeState, self) {
+  // check for EMPTY_TASK ==> used in <Skeleton>
+  if (self._id === "0") {
+    return "white";
+  }
+
+  if (self.isCompleted) {
+    return "lightgrey";
+  }
+
+  const { mappingModuleCodeToColourName } = themeState;
+  const { moduleCode } = self;
+  const colourName = mappingModuleCodeToColourName[moduleCode];
+
+  return getHexColour(themeState, colourName);
+}
+
+function getAccentColour(themeState, self) {
+  // check for EMPTY_TASK ==> used in <Skeleton>
+  if (self._id === "0") {
+    return "white";
+  }
+
+  if (self.isCompleted) {
+    return "grey";
+  }
+
+  const { mappingModuleCodeToColourName } = themeState;
+  const { moduleCode } = self;
+  const colourName = mappingModuleCodeToColourName[moduleCode];
+
+  // "lightPink" ==> "darkPink"
+  const accentColourName = "dark" + colourName.slice(5);
+
+  return getHexColour(themeState, accentColourName);
+}
+
+function getHexColour(themeState, colourName) {
+  const { themeName } = themeState;
+  return allThemes[themeName][colourName];
+}
+
+function getCurrentTheme(themeState) {
+  const { themeName } = themeState;
+  return allThemes[themeName];
+}
+
+export { getBackgroundColour, getAccentColour, getHexColour, getCurrentTheme };

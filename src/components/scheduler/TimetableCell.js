@@ -1,19 +1,19 @@
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
 import DoneIcon from "@mui/icons-material/Done";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import RestoreIcon from "@mui/icons-material/Restore";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
-import RestoreIcon from "@mui/icons-material/Restore";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
-import styles from "./TimetableCell.module.css";
-import getBackgroundColour from "../../helper/colorHelper";
 import { useSelector } from "react-redux";
+import { getBackgroundColour } from "../../helper/colorHelper";
 import TaskEditor from "./TaskEditor";
+import styles from "./TimetableCell.module.css";
 
 const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
   return (
@@ -64,6 +64,7 @@ function TimetableCell({
   deleteTask,
 }) {
   const tasks = useSelector((state) => state.tasks);
+  const themeState = useSelector((state) => state.theme);
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [openPopover, setOpenPopover] = useState(false);
@@ -199,7 +200,7 @@ function TimetableCell({
         {self._id !== "0" && (
           <Card
             sx={{
-              backgroundColor: `${getBackgroundColour(self)}`,
+              backgroundColor: getBackgroundColour(themeState, self),
               margin: 0,
               height: `${(1.3125 + 1 / 16) * self.timeUnits - 0.1875}rem`,
             }}
