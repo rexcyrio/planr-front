@@ -61,7 +61,11 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
     setDueTime(self.dueTime);
     setDurationHours(self.durationHours);
     setModuleCode(self.moduleCode);
+    setTaskLinks(self.links);
+    setLinkName("");
+    setLinkURL("");
 
+    setUrlState("NONE");
     setDurationState("NONE");
   }
 
