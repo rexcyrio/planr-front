@@ -12,7 +12,7 @@ import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useSelector } from "react-redux";
-import { getAccentColour, getBackgroundColour } from "../../helper/colorHelper";
+import { getAccentColour, getBackgroundColour } from "../../helper/colourHelper";
 import TaskEditor from "./TaskEditor";
 import classes from "./TaskItem.module.css";
 
