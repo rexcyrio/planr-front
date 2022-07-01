@@ -44,8 +44,8 @@ function TaskCreator({ addTask }) {
     setTaskLinks([]);
     setLinkName("");
     setLinkURL("");
-    setUrlState("NONE");
 
+    setUrlState("NONE");
     setDurationState("NONE");
   }
 
