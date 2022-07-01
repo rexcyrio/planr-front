@@ -1,11 +1,15 @@
+import InfoIcon from "@mui/icons-material/Info";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import InfoIcon from "@mui/icons-material/Info";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 import generateSkeletons from "../../helper/skeletonHelper";
+import { addTask, setTasks } from "../../store/slices/tasksSlice";
+import { addModules } from "../../store/slices/themeSlice";
 import DataStatus from "../helperComponents/DataStatus";
 import LineMarker from "./LineMarker";
 import MyDragLayer from "./MyDragLayer";
@@ -13,8 +17,6 @@ import styles from "./Scheduler.module.css";
 import TaskCreator from "./TaskCreator";
 import TaskItem from "./TaskItem";
 import TimetableCell from "./TimetableCell";
-import { useDispatch, useSelector } from "react-redux";
-import { setTasks, addTask } from "../../store/slices/tasksSlice";
 
 const EMPTY_TASK = {
   _id: "0",
@@ -37,7 +39,9 @@ function Scheduler() {
   const { userId } = useSelector((state) => state.user);
   const tasks = useSelector((state) => state.tasks);
   const dispatch = useDispatch();
+  
   const [matrix, setMatrix] = useState(defaultMatrix("0"));
+  const [modules, setModules] = useState([]);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
   const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
@@ -76,7 +80,14 @@ function Scheduler() {
       dispatch(setTasks(databaseTasks));
       setInitialSnackbar(true);
       setDataState("IN_SYNC");
-      setMatrix(databaseTimetable);
+      // setMatrix(databaseTimetable);
+
+      console.log("databaseTimetable");
+      console.log(databaseTimetable);
+
+      await getNUSModsTimetable(
+        "https://nusmods.com/timetable/sem-1/share?CM1102=LEC:1,TUT:1&CS2101=&CS2103T=LEC:G15&CS2105=TUT:13,LEC:1V&ES2660=SEC:G03"
+      );
     })();
   }, []);
 
@@ -92,6 +103,19 @@ function Scheduler() {
     const taskID = getTaskID(row, col);
     const task = tasks.find((each) => each._id === taskID);
     return task;
+  }
+
+  function isModuleLesson(row, col) {
+    return matrix[row][col].slice(0, 2) === "__";
+  }
+
+  function getModuleObject(row, col) {
+    const moduleID = matrix[row][col];
+    const module = modules.find((each) => each._id === moduleID);
+    if (module === undefined) {
+      throw Error();
+    }
+    return module;
   }
 
   // ==========================================================================
@@ -149,6 +173,20 @@ function Scheduler() {
     if (row > 0 && getTaskID(row - 1, col) === getTaskID(row, col)) {
       // render nothing to enable the cell to span multiple rows
       return <></>;
+    }
+
+    if (isModuleLesson(row, col)) {
+      return (
+        <TimetableCell
+          self={getModuleObject(row, col)}
+          row={row}
+          col={col}
+          matrix={matrix}
+          tasks={tasks}
+          _setMatrix={_setMatrix}
+          setTaskFields={setTaskFields}
+        />
+      );
     }
 
     // render rowSpan cell
@@ -334,6 +372,122 @@ function Scheduler() {
       });
   }
 
+  // ==========================================================================
+  // Modules
+  // ==========================================================================
+
+  async function getNUSModsTimetable(NUSModsURL) {
+    const details = parseNUSModsURL(NUSModsURL);
+    const NUSMods_moduleCodes = Object.keys(details);
+    const semester = Number(NUSModsURL.split("/")[4].slice(-1));
+
+    // hard code 15 June as the split between the previous academic year and
+    // the new academic year
+    const splitDate = new Date();
+    // dates are 1-indexed
+    splitDate.setDate(15);
+    // months are 0-indexed
+    splitDate.setMonth(5);
+
+    const isPreviousAcademicYear = new Date() < splitDate;
+    const year = Number(new Date().getFullYear());
+
+    const academicYear = isPreviousAcademicYear
+      ? `${year - 1}-${year}`
+      : `${year}-${year + 1}`;
+
+    dispatch(addModules(NUSMods_moduleCodes));
+
+    const promises = NUSMods_moduleCodes.map((NUSMods_moduleCode) => {
+      return new Promise((resolve, reject) => {
+        const lessonType_classCode_pairs = details[NUSMods_moduleCode];
+
+        // check whether this module has lessons
+        if (isEmpty(lessonType_classCode_pairs)) {
+          resolve();
+          return;
+        }
+
+        // fetch module information from NUSMods API
+        fetch(
+          `https://api.nusmods.com/v2/${academicYear}/modules/${NUSMods_moduleCode}.json`
+        )
+          .then((res) => res.json())
+          .then((json) => {
+            // getting correct semester data
+            const semesterData = json.semesterData.find(
+              (each) => each.semester === semester
+            );
+
+            // getting correct timetable data
+            const timetableData = semesterData.timetable;
+
+            // lessonTypes refer to "Lecture", "Tutorial", "Laboratory", "Sectional Teaching", etc.
+            const lessonTypes = Object.keys(lessonType_classCode_pairs);
+
+            for (const lessonType of lessonTypes) {
+              const classNo = details[NUSMods_moduleCode][lessonType];
+              const lessons = timetableData.filter(
+                (each) =>
+                  each.lessonType === lessonType && each.classNo === classNo
+              );
+
+              for (const lesson of lessons) {
+                const startHour = lesson.startTime.slice(0, 2);
+                const startMin = lesson.startTime.slice(2);
+
+                const endHour = lesson.endTime.slice(0, 2);
+                const endMin = lesson.endTime.slice(2);
+
+                const durationHours = getDurationHours(
+                  startHour,
+                  startMin,
+                  endHour,
+                  endMin
+                ).toString();
+
+                const newModule = {
+                  _id: `__${NUSMods_moduleCode}_${uuidv4()}`,
+
+                  name: `${NUSMods_moduleCode} ${lessonType}`,
+                  dueDate: "--",
+                  dueTime: "--",
+                  durationHours: durationHours,
+                  moduleCode: NUSMods_moduleCode,
+
+                  row: getRow(startHour, startMin),
+                  col: mappingDayToColumn[lesson.day],
+                  timeUnits: Math.ceil(Number(durationHours) * 2),
+
+                  isCompleted: false,
+                };
+
+                const { row, col, _id } = newModule;
+                const values = [];
+
+                for (let i = 0; i < newModule.timeUnits; i++) {
+                  values.push([row + i, col, _id]);
+                }
+
+                setModules((prev) => [...prev, newModule]);
+                _setMatrix(values);
+              }
+            }
+
+            resolve();
+            return;
+          });
+      });
+    });
+
+    await Promise.all(promises);
+    console.log("===== all done =====");
+  }
+
+  // ==========================================================================
+  // Miscellaneous
+  // ==========================================================================
+
   const closeSnackbar = () => {
     setOpenSyncErrorSnackbar(false);
   };
@@ -377,6 +531,7 @@ function Scheduler() {
         onClose={closeInitialSnackbar}
         message={`There are ${tasks.length} tasks`}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{ backgroundColor: "rgb(0, 0, 0, 0)" }}
       >
         <Alert
           onClose={closeInitialSnackbar}
@@ -556,30 +711,78 @@ function zeroPad(num, places) {
   return String(num).padStart(places, "0");
 }
 
+const mappingLessonType = {
+  LEC: "Lecture",
+  TUT: "Tutorial",
+  LAB: "Laboratory",
+  SEC: "Sectional Teaching",
+};
+
+const mappingDayToColumn = {
+  Monday: 0,
+  Tuesday: 1,
+  Wednesday: 2,
+  Thursday: 3,
+  Friday: 4,
+  Saturday: 5,
+  Sunday: 6,
+};
+
+function parseNUSModsURL(NUSModsURL) {
+  const url = new URL(NUSModsURL);
+  const queryString = url.search;
+  // `slice(1)` is to remove the "?" at the beginning
+  const keyValueSegments = queryString.slice(1).split("&");
+  const keyValuePairs = keyValueSegments.map((each) => each.split("="));
+  const result = {};
+
+  for (const [key, value] of keyValuePairs) {
+    result[key] = convertStringToObject(value);
+  }
+
+  return result;
+}
+
+function convertStringToObject(str) {
+  if (!str) {
+    return {};
+  }
+
+  const properties = str.split(",");
+  const obj = {};
+
+  for (const property of properties) {
+    const [key, value] = property.split(":");
+    const lessonType = mappingLessonType[key];
+    obj[lessonType] = value;
+  }
+
+  return obj;
+}
+
+function getDurationHours(startHour, startMin, endHour, endMin) {
+  if (startMin === endMin) {
+    return Number(endHour) - Number(startHour);
+  } else if (startMin === "00" && endMin === "30") {
+    return Number(endHour) - Number(startHour) + 0.5;
+  } else if (startMin === "30" && endMin === "00") {
+    return Number(endHour) - Number(startHour) - 0.5;
+  }
+}
+
+function getRow(hour, min) {
+  let count = 0;
+
+  count += Number(hour) * 2;
+  if (min === "30") {
+    count += 1;
+  }
+
+  return count;
+}
+
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
+
 export default Scheduler;
-
-// ============================================================================
-// unused
-// ============================================================================
-
-// const mappingDayToColumn = {
-//   Monday: 0,
-//   Tuesday: 1,
-//   Wednesday: 2,
-//   Thursday: 3,
-//   Friday: 4,
-//   Saturday: 5,
-//   Sunday: 6,
-// };
-
-// function getRow(time24H) {
-//   const [hour, min] = time24H.split(":");
-//   let count = 0;
-
-//   count += Number(hour) * 2;
-//   if (min === "30") {
-//     count += 1;
-//   }
-
-//   return count;
-// }

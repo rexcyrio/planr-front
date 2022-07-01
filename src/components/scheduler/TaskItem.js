@@ -1,19 +1,20 @@
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import DoneIcon from "@mui/icons-material/Done";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import RestoreIcon from "@mui/icons-material/Restore";
+import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import Grow from "@mui/material/Grow";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
+import { useSelector } from "react-redux";
+import { getAccentColour, getBackgroundColour } from "../../helper/colorHelper";
 import TaskEditor from "./TaskEditor";
 import classes from "./TaskItem.module.css";
-import getBackgroundColour from "../../helper/colorHelper";
 
 TaskItem.propTypes = {
   self: PropTypes.shape({
@@ -48,6 +49,7 @@ function TaskItem({
   deleteTask,
   setTaskFields,
 }) {
+  const themeState = useSelector((state) => state.theme);
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
@@ -69,23 +71,6 @@ function TaskItem({
 
   function markTaskAsIncomplete() {
     setTaskFields(self._id, { isCompleted: false });
-  }
-
-  function getAccentColour() {
-    if (self.isCompleted) {
-      return "grey";
-    }
-
-    switch (self.moduleCode) {
-      case "CS1101S":
-        return eightiesColourScheme["darkRed"];
-      case "CS1231S":
-        return eightiesColourScheme["darkYellow"];
-      case "MA1521":
-        return eightiesColourScheme["darkGreen"];
-      default:
-        return "#cd6373";
-    }
   }
 
   function getDraggableState() {
@@ -131,7 +116,7 @@ function TaskItem({
       <Paper onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <div
           style={{
-            backgroundColor: getBackgroundColour(self),
+            backgroundColor: getBackgroundColour(themeState, self),
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -182,7 +167,7 @@ function TaskItem({
               <div className={classes["task-paragraph"]}>
                 <span
                   style={{
-                    color: getAccentColour(),
+                    color: getAccentColour(themeState, self),
                   }}
                 >
                   [{self.moduleCode}]
@@ -193,7 +178,7 @@ function TaskItem({
               <div>
                 <span
                   style={{
-                    color: getAccentColour(),
+                    color: getAccentColour(themeState, self),
                   }}
                 >
                   due on:
@@ -271,39 +256,5 @@ function getTime(row) {
   const min = row % 2 === 0 ? "00" : "30";
   return `${hour}:${min}`;
 }
-
-const eightiesColourScheme = {
-  red: "#e91a1f",
-  lightRed: "#f2777a",
-  darkRed: "#8f0e11",
-
-  orange: "#e25608",
-  lightOrange: "#f99157",
-  darkOrange: "#7f3105",
-
-  yellow: "#fa0",
-  lightYellow: "#fc6",
-  darkYellow: "#960",
-
-  green: "#5a5",
-  lightGreen: "#9c9",
-  darkGreen: "#363",
-
-  cyan: "#399",
-  lightCyan: "#6cc",
-  darkCyan: "#1a4d4d",
-
-  blue: "#369",
-  lightBlue: "#69c",
-  darkBlue: "#1a334d",
-
-  purple: "#a5a",
-  lightPurple: "#c9c",
-  darkPurple: "#636",
-
-  brown: "#974b28",
-  lightBrown: "#d27b53",
-  darkBrown: "#472312",
-};
 
 export default TaskItem;
