@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
+import AddLinkIcon from "@mui/icons-material/AddLink";
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import { v4 as uuidv4 } from "uuid";
-import styles from "./TaskLinksCreator.module.css";
 
 TaskLinksCreator.propTypes = {
   taskLinks: PropTypes.array,
@@ -42,6 +44,8 @@ function TaskLinksCreator({
   urlState,
   setUrlState,
 }) {
+  const [isAddingLink, setIsAddingLink] = useState(false);
+
   const addTaskLinkHandler = () => {
     if (linkName === "" && linkURL === "") {
       return;
@@ -52,14 +56,20 @@ function TaskLinksCreator({
       return;
     }
 
+    let finalURL = linkURL;
+    if (!linkURL.startsWith("https://") && !linkURL.startsWith("http://")) {
+      finalURL = "http://".concat(linkURL);
+    }
+
+    setIsAddingLink(false);
     setTaskLinks((prev) => {
       const newLink = {
         _id: uuidv4(),
         _toBeDeleted: false,
         _name: linkName,
-        _url: linkURL,
+        _url: finalURL,
         name: linkName,
-        url: linkURL,
+        url: finalURL,
       };
 
       if (linkName === "") {
@@ -81,60 +91,71 @@ function TaskLinksCreator({
   function generateTaskLinks() {
     return taskLinks.map((link) => {
       return (
-        <ListItem
-          key={link._id}
-          divider={true}
-          secondaryAction={
-            <IconButton onClick={() => deleteTaskLinkHandler(link._id)}>
-              <DeleteIcon />
-            </IconButton>
-          }
-        >
-          <ListItemText
-            primary={link.name}
-            secondary={link.url}
-            sx={{ margin: 0 }}
-          />
-        </ListItem>
+        <>
+          <ListItem
+            key={link._id}
+            divider={true}
+            secondaryAction={
+              <Tooltip title="Remove link">
+                <IconButton onClick={() => deleteTaskLinkHandler(link._id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            }
+          >
+            <ListItemText
+              primary={link.name}
+              secondary={link.url}
+              sx={{ margin: 0 }}
+            />
+          </ListItem>
+          <Divider />
+        </>
       );
     });
   }
 
   return (
     <>
-      <div className={styles["links-section"]}>
-        <TextField
-          sx={{ marginRight: "1rem", width: "13rem" }}
-          margin="dense"
-          id="name"
-          label="Link Name"
-          type="text"
-          variant="outlined"
-          value={linkName}
-          autoComplete="off"
-          onChange={(e) => setLinkName(e.target.value)}
-        />
-        <TextField
-          sx={{ width: "27rem" }}
-          margin="dense"
-          id="url"
-          label="URL"
-          type="url"
-          variant="outlined"
-          value={linkURL}
-          autoComplete="off"
-          onChange={(e) => setLinkURL(e.target.value)}
-          onFocus={() => setUrlState("NONE")}
-          helperText={urlStates[urlState].helperText}
-          error={urlStates[urlState].error}
-        />
-        <Button onClick={addTaskLinkHandler} sx={{ marginTop: "1rem" }}>
-          Add Link
-        </Button>
-      </div>
-      <List disablePadding={true} sx={{ overflowY: "auto" }}>
-        {generateTaskLinks()}
-      </List>
+      <List disablePadding={true}>{generateTaskLinks()}</List>
+      {isAddingLink ? (
+        <>
+          <TextField
+            sx={{ marginRight: "1rem", width: "10rem" }}
+            margin="dense"
+            id="name"
+            label="Link Name"
+            type="text"
+            variant="outlined"
+            value={linkName}
+            autoComplete="off"
+            onChange={(e) => setLinkName(e.target.value)}
+          />
+          <TextField
+            sx={{ width: "20rem" }}
+            margin="dense"
+            id="url"
+            label="URL"
+            type="url"
+            variant="outlined"
+            value={linkURL}
+            autoComplete="off"
+            onChange={(e) => setLinkURL(e.target.value)}
+            onFocus={() => setUrlState("NONE")}
+            helperText={urlStates[urlState].helperText}
+            error={urlStates[urlState].error}
+          />
+          <Button onClick={addTaskLinkHandler} sx={{ marginTop: "1rem" }}>
+            Add Link
+          </Button>
+        </>
+      ) : (
+        <Tooltip title="Add link (optional)">
+          <IconButton onClick={() => setIsAddingLink(true)}>
+            <AddLinkIcon />
+          </IconButton>
+        </Tooltip>
+      )}
     </>
   );
 }
