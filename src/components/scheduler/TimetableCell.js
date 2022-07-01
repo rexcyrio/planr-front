@@ -11,7 +11,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useSelector } from "react-redux";
-import { getBackgroundColour } from "../../helper/colorHelper";
+import { getBackgroundColour } from "../../helper/colourHelper";
 import TaskEditor from "./TaskEditor";
 import styles from "./TimetableCell.module.css";
 

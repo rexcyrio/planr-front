@@ -10,7 +10,7 @@ import Select from "@mui/material/Select";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getHexColour } from "../../helper/colorHelper";
+import { getHexColour } from "../../helper/colourHelper";
 import { updateModuleColour } from "../../store/slices/themeSlice";
 
 function Settings() {
