@@ -48,23 +48,9 @@ TimetableCell.propTypes = {
 
   row: PropTypes.number.isRequired,
   col: PropTypes.number.isRequired,
-  // matrix: PropTypes.array.isRequired,
-  // _setMatrix: PropTypes.func.isRequired,
-  // _setTask: PropTypes.func.isRequired,
-  // setTaskFields: PropTypes.func.isRequired,
-  // deleteTask: PropTypes.func.isRequired,
 };
 
-function TimetableCell({
-  self,
-  row,
-  col,
-  // matrix,
-  // _setMatrix,
-  // _setTask,
-  // setTaskFields,
-  // deleteTask,
-}) {
+function TimetableCell({ self, row, col }) {
   const dispatch = useDispatch();
   const matrix = useSelector((state) => state.matrix);
   const tasks = useSelector((state) => state.tasks);
@@ -112,12 +98,10 @@ function TimetableCell({
   };
 
   function markTaskAsComplete() {
-    //setTaskFields(self._id, { isCompleted: true });
     dispatch(updateTaskFields(self._id, { isCompleted: true }));
   }
 
   function markTaskAsIncomplete() {
-    //setTaskFields(self._id, { isCompleted: false });
     dispatch(updateTaskFields(self._id, { isCompleted: true }));
   }
 
@@ -138,11 +122,9 @@ function TimetableCell({
           values.push([row + i, col, taskID]);
         }
 
-        //_setMatrix(values);
         dispatch(rebuildMatrix(values));
 
         // update `row` and `col` fields accordingly
-        //setTaskFields(taskID, { row: row, col: col });
         dispatch(updateTaskFields(taskID, { row: row, col: col }));
       },
       hover: (item) => {

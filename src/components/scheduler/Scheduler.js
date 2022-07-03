@@ -41,24 +41,12 @@ function Scheduler() {
   const matrix = useSelector((state) => state.matrix);
   const dispatch = useDispatch();
 
-  //const [matrix, setMatrix] = useState(defaultMatrix("0"));
   //const [modules, setModules] = useState([]);
-  // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
-  //const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
   const [initialSnackbar, setInitialSnackbar] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
 
-  const EMPTY_TASK_ITEM = (
-    <TaskItem
-      self={EMPTY_TASK}
-      //_setMatrix={_setMatrix}
-      //_setTask={_setTask}
-      //matrix={matrix}
-      //deleteTask={deleteTask}
-      //setTaskFields={setTaskFields}
-    />
-  );
+  const EMPTY_TASK_ITEM = <TaskItem self={EMPTY_TASK} />;
 
   useEffect(() => {
     dispatch(fetchTasks());
@@ -128,52 +116,11 @@ function Scheduler() {
   // Matrix Helper Functions
   // ==========================================================================
 
-  // function _setMatrix(values) {
-  //   setMatrix((prevMatrix) => {
-  //     const newMatrix = [];
-
-  //     // deep copy
-  //     for (const prevRow of prevMatrix) {
-  //       newMatrix.push([...prevRow]);
-  //     }
-
-  //     for (const value of values) {
-  //       const [row, col, el] = value;
-
-  //       // silently ignore out of range indices
-  //       if (row < 0 || row >= 48 || col < 0 || col >= 7) {
-  //         continue;
-  //       }
-
-  //       // skip unnecessary updates
-  //       if (newMatrix[row][col] === el) {
-  //         continue;
-  //       }
-
-  //       newMatrix[row][col] = el;
-  //     }
-
-  //     updateTimetableInDatabase(newMatrix);
-  //     return newMatrix;
-  //   });
-  // }
-
   function createTimetableCell(row, col) {
     if (getTaskID(row, col) === "0") {
       // render empty cell
 
-      return (
-        <TimetableCell
-          self={EMPTY_TASK}
-          row={row}
-          col={col}
-          // matrix={matrix}
-          // _setMatrix={_setMatrix}
-          // _setTask={_setTask}
-          // setTaskFields={setTaskFields}
-          // deleteTask={deleteTask}
-        />
-      );
+      return <TimetableCell self={EMPTY_TASK} row={row} col={col} />;
     }
 
     if (row > 0 && getTaskID(row - 1, col) === getTaskID(row, col)) {
@@ -197,90 +144,12 @@ function Scheduler() {
     // }
 
     // render rowSpan cell
-    return (
-      <TimetableCell
-        self={getTaskObject(row, col)}
-        row={row}
-        col={col}
-        // matrix={matrix}
-        // _setMatrix={_setMatrix}
-        // _setTask={_setTask}
-        // setTaskFields={setTaskFields}
-        // deleteTask={deleteTask}
-      />
-    );
+    return <TimetableCell self={getTaskObject(row, col)} row={row} col={col} />;
   }
 
   // ==========================================================================
   // Task Helper Functions
   // ==========================================================================
-
-  // function _setTask(taskID, newTask) {
-  //   setDataState("UPDATING");
-
-  //   const index = tasks.findIndex((each) => each._id === taskID);
-  //   const newTasks = [
-  //     ...tasks.slice(0, index),
-  //     newTask,
-  //     ...tasks.slice(index + 1),
-  //   ];
-
-  //   dispatch(setTasks(newTasks));
-  //   updateTasksInDatabase(newTasks);
-  // }
-
-  // function setTaskFields(taskID, newKeyValuePairs) {
-  //   // cannot update fields of EMPTY_TASK
-  //   if (taskID === "0") {
-  //     return;
-  //   }
-
-  //   const task = tasks.find((each) => each._id === taskID);
-  //   const newTask = {};
-
-  //   for (const [key, value] of Object.entries(task)) {
-  //     if (key in newKeyValuePairs) {
-  //       newTask[key] = newKeyValuePairs[key];
-  //     } else {
-  //       newTask[key] = value;
-  //     }
-  //   }
-
-  //   dispatch(updateTasks(taskID, newTask));
-  // }
-
-  // function _addTask(newTask) {
-  //   setDataState("UPDATING");
-  //   dispatch(addTask(newTask));
-  //   addTaskToDatabase(newTask);
-  // }
-
-  // function deleteTask(task) {
-  //   const { _id: taskID, row, col, timeUnits } = task;
-
-  //   // cannot delete EMPTY_TASK
-  //   if (taskID === "0") {
-  //     return;
-  //   }
-
-  //   setDataState("UPDATING");
-
-  //   // remove from matrix
-  //   if (row !== -1 && col !== -1) {
-  //     const values = [];
-
-  //     for (let i = 0; i < timeUnits; i++) {
-  //       values.push([row + i, col, "0"]);
-  //     }
-
-  //     _setMatrix(values);
-  //   }
-
-  //   // remove from tasks array
-  //   const newTasks = tasks.filter((each) => each._id !== taskID);
-  //   dispatch(setTasks(newTasks));
-  //   updateTasksInDatabase(newTasks);
-  // }
 
   function getTaskItems() {
     const outstandingTasks = tasks.filter((each) => each.isCompleted === false);
@@ -290,94 +159,18 @@ function Scheduler() {
       <>
         {outstandingTasks.map((each) => (
           <React.Fragment key={each._id}>
-            <TaskItem
-              self={each}
-              // _setMatrix={_setMatrix}
-              // _setTask={_setTask}
-              // matrix={matrix}
-              // deleteTask={deleteTask}
-              // setTaskFields={setTaskFields}
-            />
+            <TaskItem self={each} />
           </React.Fragment>
         ))}
 
         {doneTasks.map((each) => (
           <React.Fragment key={each._id}>
-            <TaskItem
-              self={each}
-              // _setMatrix={_setMatrix}
-              // _setTask={_setTask}
-              // matrix={matrix}
-              // deleteTask={deleteTask}
-              // setTaskFields={setTaskFields}
-            />
+            <TaskItem self={each} />
           </React.Fragment>
         ))}
       </>
     );
   }
-
-  // function addTaskToDatabase(task) {
-  //   fetch("/api/private/tasks", {
-  //     method: "POST",
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ userId: userId, task }),
-  //   })
-  //     .then((res) => res.json())
-  //     .then((json) => {
-  //       if (json.error) {
-  //         setDataState("OUT_OF_SYNC");
-  //         setOpenSyncErrorSnackbar(true);
-  //         alert(json.error);
-  //         return;
-  //       }
-
-  //       setDataState("IN_SYNC");
-  //     });
-  // }
-
-  // function updateTasksInDatabase(tasks) {
-  //   fetch("/api/private/tasks", {
-  //     method: "PUT",
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ userId: userId, tasks }),
-  //   })
-  //     .then((res) => res.json())
-  //     .then((json) => {
-  //       if (json.error) {
-  //         setDataState("OUT_OF_SYNC");
-  //         setOpenSyncErrorSnackbar(true);
-  //         alert(json.error);
-  //         return;
-  //       }
-
-  //       setDataState("IN_SYNC");
-  //     });
-  // }
-
-  // function updateTimetableInDatabase(newMatrix) {
-  //   fetch("/api/private/timetable", {
-  //     method: "PUT",
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ userId: userId, timetable: newMatrix }),
-  //   })
-  //     .then((res) => res.json())
-  //     .then((json) => {
-  //       if (json.error) {
-  //         alert(json.error);
-  //         return;
-  //       }
-  //     });
-  // }
 
   // ==========================================================================
   // Modules
@@ -669,15 +462,6 @@ function Scheduler() {
     </>
   );
 }
-
-// function defaultMatrix(val) {
-//   const arr = [];
-//   for (let i = 0; i < 48; i++) {
-//     const row = [val, val, val, val, val, val, val];
-//     arr.push(row);
-//   }
-//   return arr;
-// }
 
 function getTimePairArray() {
   const arr = [];

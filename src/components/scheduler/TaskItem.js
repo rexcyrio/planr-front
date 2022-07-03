@@ -202,13 +202,7 @@ function TaskItem({
               visibility: isMouseOver && !isDragging ? "visible" : "hidden",
             }}
           >
-            <TaskEditor
-              self={self}
-              // _setMatrix={_setMatrix}
-              // _setTask={_setTask}
-              // matrix={matrix}
-              // deleteTask={deleteTask}
-            />
+            <TaskEditor self={self} />
 
             {self.isCompleted ? (
               <Tooltip title="Restore task">
