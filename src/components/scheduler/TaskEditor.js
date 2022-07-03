@@ -37,17 +37,9 @@ TaskEditor.propTypes = {
 
     isCompleted: PropTypes.bool.isRequired,
   }).isRequired,
-
-  // _setMatrix: PropTypes.func.isRequired,
-  // _setTask: PropTypes.func.isRequired,
-  // matrix: PropTypes.array.isRequired,
-  // deleteTask: PropTypes.func.isRequired,
 };
 
-function TaskEditor({
-  self,
-  //setMatrix, _setTask, matrix, deleteTask
-}) {
+function TaskEditor({ self }) {
   const dispatch = useDispatch();
   const matrix = useSelector((state) => state.matrix);
   const [name, setName] = useState(self.name);

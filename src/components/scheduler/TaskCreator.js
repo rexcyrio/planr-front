@@ -12,16 +12,11 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-//import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { taskAddition } from "../../store/slices/tasksSlice";
 import TaskLinksCreator from "./TaskLinksCreator";
-
-// TaskCreator.propTypes = {
-//   addTask: PropTypes.func.isRequired,
-// };
 
 function TaskCreator() {
   const dispatch = useDispatch();
@@ -104,8 +99,7 @@ function TaskCreator() {
       isCompleted: false,
     };
 
-    //addTask(newTask);
-    dispatch(taskAddition(newTask))
+    dispatch(taskAddition(newTask));
     resetState();
   }
 
