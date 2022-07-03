@@ -29,6 +29,7 @@ function Links() {
   const [newURL, setNewURL] = useState("");
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
+  const [tempLinks, setTempLinks] = useState([]);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
   const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
@@ -68,6 +69,7 @@ function Links() {
 
   const edit_openDialog = () => {
     if (links.length > 0) {
+      setTempLinks([...links]);
       edit_setOpen(true);
     }
   };
@@ -78,29 +80,27 @@ function Links() {
     const newLinks = [];
 
     if (saveChanges) {
-      for (const link of links) {
+      for (const link of tempLinks) {
         if (link._toBeDeleted) {
           continue;
         }
 
-        if (link._name === "") {
-          link._name = link._url;
+        if (link.name === "") {
+          link.name = link.url;
         }
 
-        let finalURL = link._urlL;
+        let finalURL = link.url;
         if (
-          !link._url.startsWith("https://") &&
-          !link._url.startsWith("http://")
+          !link.url.startsWith("https://") &&
+          !link.url.startsWith("http://")
         ) {
-          finalURL = "http://".concat(link._url);
+          finalURL = "http://".concat(link.url);
         }
 
         const newLink = {
           _id: link._id,
           _toBeDeleted: false,
-          _name: link._name,
-          _url: finalURL,
-          name: link._name,
+          name: link.name,
           url: finalURL,
         };
         newLinks.push(newLink);
@@ -108,21 +108,9 @@ function Links() {
 
       setDataState("UPDATING");
       updateLinksInDatabase(newLinks);
-    } else {
-      for (const link of links) {
-        const newLink = {
-          _id: link._id,
-          _toBeDeleted: false,
-          _name: link.name,
-          _url: link.url,
-          name: link.name,
-          url: link.url,
-        };
-        newLinks.push(newLink);
-      }
+      setLinks(newLinks);
     }
-    await sleep(150);
-    setLinks(newLinks);
+    //await sleep(150);
   };
 
   function updateLinksInDatabase(links) {
@@ -147,8 +135,8 @@ function Links() {
       });
   }
 
-  function _updateLink(newLink) {
-    setLinks((prev) => {
+  function updateTempLink(newLink) {
+    setTempLinks((prev) => {
       const index = prev.findIndex((each) => each._id === newLink._id);
       return [...prev.slice(0, index), newLink, ...prev.slice(index + 1)];
     });
@@ -158,39 +146,33 @@ function Links() {
     const newLink = {
       _id: self._id,
       _toBeDeleted: !self._toBeDeleted,
-      _name: self._name,
-      _url: self._url,
       name: self.name,
       url: self.url,
     };
 
-    _updateLink(newLink);
+    updateTempLink(newLink);
   }
 
-  function updateTempName(self, _name) {
+  function updateTempName(self, name) {
     const newLink = {
       _id: self._id,
       _toBeDeleted: self._toBeDeleted,
-      _name: _name,
-      _url: self._url,
-      name: self.name,
+      name: name,
       url: self.url,
     };
 
-    _updateLink(newLink);
+    updateTempLink(newLink);
   }
 
-  function updateTempURL(self, _url) {
+  function updateTempURL(self, url) {
     const newLink = {
       _id: self._id,
       _toBeDeleted: self._toBeDeleted,
-      _name: self._name,
-      _url: _url,
       name: self.name,
-      url: self.url,
+      url: url,
     };
 
-    _updateLink(newLink);
+    updateTempLink(newLink);
   }
 
   function addNewLink() {
@@ -202,14 +184,11 @@ function Links() {
     const newLink = {
       _id: uuidv4(),
       _toBeDeleted: false,
-      _name: newName,
-      _url: finalURL,
       name: newName,
       url: finalURL,
     };
 
     if (newName === "") {
-      newLink._name = newURL;
       newLink.name = newURL;
     }
 
@@ -288,7 +267,7 @@ function Links() {
           }}
         >
           <DialogContent>
-            {links.map((self) => (
+            {tempLinks.map((self) => (
               <React.Fragment key={self._id}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <TextField
@@ -303,7 +282,7 @@ function Links() {
                     label="Link Name"
                     type="text"
                     variant="outlined"
-                    value={self._name}
+                    value={self.name}
                     autoComplete="off"
                     onChange={(e) => updateTempName(self, e.target.value)}
                   />
@@ -320,7 +299,7 @@ function Links() {
                     type="text"
                     variant="outlined"
                     required
-                    value={self._url}
+                    value={self.url}
                     autoComplete="off"
                     onChange={(e) => updateTempURL(self, e.target.value)}
                   />

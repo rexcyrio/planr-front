@@ -9,8 +9,6 @@ LinkItem.propTypes = {
   self: PropTypes.shape({
     _id: PropTypes.string,
     _toBeDeleted: PropTypes.bool,
-    _name: PropTypes.string,
-    _url: PropTypes.string,
     name: PropTypes.string,
     url: PropTypes.string,
   }),

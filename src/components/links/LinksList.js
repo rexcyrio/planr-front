@@ -11,8 +11,6 @@ const DUMMY_LINK_ITEM = (
     self={{
       _id: "1",
       _toBeDeleted: false,
-      _name: "dummy",
-      _url: "https://google.com",
       name: "dummy",
       url: "https://google.com",
     }}

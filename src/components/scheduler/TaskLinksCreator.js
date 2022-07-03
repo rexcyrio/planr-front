@@ -66,8 +66,6 @@ function TaskLinksCreator({
       const newLink = {
         _id: uuidv4(),
         _toBeDeleted: false,
-        _name: linkName,
-        _url: finalURL,
         name: linkName,
         url: finalURL,
       };
