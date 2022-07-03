@@ -91,9 +91,8 @@ function TaskLinksCreator({
   function generateTaskLinks() {
     return taskLinks.map((link) => {
       return (
-        <>
+        <React.Fragment key={link._id}>
           <ListItem
-            key={link._id}
             divider={true}
             secondaryAction={
               <Tooltip title="Remove link">
@@ -110,7 +109,7 @@ function TaskLinksCreator({
             />
           </ListItem>
           <Divider />
-        </>
+        </React.Fragment>
       );
     });
   }

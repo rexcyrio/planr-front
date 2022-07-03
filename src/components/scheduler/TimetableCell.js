@@ -10,8 +10,10 @@ import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getBackgroundColour } from "../../helper/colourHelper";
+import { rebuildMatrix } from "../../store/slices/matrixSlice";
+import { updateTaskFields } from "../../store/slices/tasksSlice";
 import TaskEditor from "./TaskEditor";
 import styles from "./TimetableCell.module.css";
 
@@ -46,23 +48,25 @@ TimetableCell.propTypes = {
 
   row: PropTypes.number.isRequired,
   col: PropTypes.number.isRequired,
-  matrix: PropTypes.array.isRequired,
-  _setMatrix: PropTypes.func.isRequired,
-  _setTask: PropTypes.func.isRequired,
-  setTaskFields: PropTypes.func.isRequired,
-  deleteTask: PropTypes.func.isRequired,
+  // matrix: PropTypes.array.isRequired,
+  // _setMatrix: PropTypes.func.isRequired,
+  // _setTask: PropTypes.func.isRequired,
+  // setTaskFields: PropTypes.func.isRequired,
+  // deleteTask: PropTypes.func.isRequired,
 };
 
 function TimetableCell({
   self,
   row,
   col,
-  matrix,
-  _setMatrix,
-  _setTask,
-  setTaskFields,
-  deleteTask,
+  // matrix,
+  // _setMatrix,
+  // _setTask,
+  // setTaskFields,
+  // deleteTask,
 }) {
+  const dispatch = useDispatch();
+  const matrix = useSelector((state) => state.matrix);
   const tasks = useSelector((state) => state.tasks);
   const themeState = useSelector((state) => state.theme);
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
@@ -108,11 +112,13 @@ function TimetableCell({
   };
 
   function markTaskAsComplete() {
-    setTaskFields(self._id, { isCompleted: true });
+    //setTaskFields(self._id, { isCompleted: true });
+    dispatch(updateTaskFields(self._id, { isCompleted: true }));
   }
 
   function markTaskAsIncomplete() {
-    setTaskFields(self._id, { isCompleted: false });
+    //setTaskFields(self._id, { isCompleted: false });
+    dispatch(updateTaskFields(self._id, { isCompleted: true }));
   }
 
   // ==========================================================================
@@ -132,10 +138,12 @@ function TimetableCell({
           values.push([row + i, col, taskID]);
         }
 
-        _setMatrix(values);
+        //_setMatrix(values);
+        dispatch(rebuildMatrix(values));
 
         // update `row` and `col` fields accordingly
-        setTaskFields(taskID, { row: row, col: col });
+        //setTaskFields(taskID, { row: row, col: col });
+        dispatch(updateTaskFields(taskID, { row: row, col: col }));
       },
       hover: (item) => {
         // update task silhouette
@@ -183,8 +191,8 @@ function TimetableCell({
         values.push([row + i, col, "0"]);
       }
 
-      _setMatrix(values);
-      setTaskFields(self._id, { row: -1, col: -1 });
+      dispatch(rebuildMatrix(values));
+      dispatch(updateTaskFields(self._id, { row: -1, col: -1 }));
     }
   }, [isDragging]);
 
@@ -287,10 +295,10 @@ function TimetableCell({
               <div>
                 <TaskEditor
                   self={self}
-                  _setMatrix={_setMatrix}
-                  _setTask={_setTask}
-                  matrix={matrix}
-                  deleteTask={deleteTask}
+                  // _setMatrix={_setMatrix}
+                  // _setTask={_setTask}
+                  // matrix={matrix}
+                  // deleteTask={deleteTask}
                 />
                 {self.isCompleted ? (
                   <Tooltip title="Restore task">
@@ -315,17 +323,12 @@ function TimetableCell({
             <p>Status: {self.isCompleted ? "Completed" : "Not Completed"}</p>
             {self.links.map((link) => {
               return (
-                <>
-                  <a
-                    key={link._id}
-                    href={link.url}
-                    rel="noreferrer noopener"
-                    target="_blank"
-                  >
+                <React.Fragment key={link._id}>
+                  <a href={link.url} rel="noreferrer noopener" target="_blank">
                     {link.name}
                   </a>
                   <br />
-                </>
+                </React.Fragment>
               );
             })}
           </Box>

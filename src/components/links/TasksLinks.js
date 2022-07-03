@@ -13,7 +13,7 @@ function TasksLinks(props) {
 
   // links from tasks that are scheduled today
   const tasksLinks = useSelector((state) => {
-    return state.tasks
+    return state.tasks.data
       .filter((task) => task.col === col)
       .flatMap((task) => task.links);
   });

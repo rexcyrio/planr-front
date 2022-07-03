@@ -6,10 +6,10 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { v4 as uuidv4 } from "uuid";
+//import { v4 as uuidv4 } from "uuid";
 import generateSkeletons from "../../helper/skeletonHelper";
-import { addTask, setTasks } from "../../store/slices/tasksSlice";
-import { addModules } from "../../store/slices/themeSlice";
+import { deleteCompletedTask, fetchTasks } from "../../store/slices/tasksSlice";
+//import { addModules } from "../../store/slices/themeSlice";
 import DataStatus from "../helperComponents/DataStatus";
 import LineMarker from "./LineMarker";
 import MyDragLayer from "./MyDragLayer";
@@ -36,14 +36,15 @@ const EMPTY_TASK = {
 };
 
 function Scheduler() {
-  const { userId } = useSelector((state) => state.user);
-  const tasks = useSelector((state) => state.tasks);
+  const status = useSelector((state) => state.tasks.status);
+  const tasks = useSelector((state) => state.tasks.data);
+  const matrix = useSelector((state) => state.matrix);
   const dispatch = useDispatch();
 
-  const [matrix, setMatrix] = useState(defaultMatrix("0"));
-  const [modules, setModules] = useState([]);
+  //const [matrix, setMatrix] = useState(defaultMatrix("0"));
+  //const [modules, setModules] = useState([]);
   // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
-  const [dataState, setDataState] = useState("INITIAL_LOAD");
+  //const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
   const [initialSnackbar, setInitialSnackbar] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
@@ -51,44 +52,45 @@ function Scheduler() {
   const EMPTY_TASK_ITEM = (
     <TaskItem
       self={EMPTY_TASK}
-      _setMatrix={_setMatrix}
-      _setTask={_setTask}
-      matrix={matrix}
-      deleteTask={deleteTask}
-      setTaskFields={setTaskFields}
+      //_setMatrix={_setMatrix}
+      //_setTask={_setTask}
+      //matrix={matrix}
+      //deleteTask={deleteTask}
+      //setTaskFields={setTaskFields}
     />
   );
 
   useEffect(() => {
-    async function getItemFromDatabase(type) {
-      return new Promise((resolve, reject) => {
-        fetch(`/api/private/${type}?id=${userId}`)
-          .then((res) => res.json())
-          .then((json) => resolve(json[type]));
-      });
-    }
+    dispatch(fetchTasks());
+    //   async function getItemFromDatabase(type) {
+    //     return new Promise((resolve, reject) => {
+    //       fetch(`/api/private/${type}?id=${userId}`)
+    //         .then((res) => res.json())
+    //         .then((json) => resolve(json[type]));
+    //     });
+    //   }
 
-    (async function init() {
-      // wait for both fetch() calls to finish before continuing
-      const items = await Promise.all([
-        getItemFromDatabase("tasks"),
-        getItemFromDatabase("timetable"),
-      ]);
+    //   (async function init() {
+    //     // wait for both fetch() calls to finish before continuing
+    //     const items = await Promise.all([
+    //       getItemFromDatabase("tasks"),
+    //       getItemFromDatabase("timetable"),
+    //     ]);
 
-      const [databaseTasks, databaseTimetable] = items;
+    //     const [databaseTasks, databaseTimetable] = items;
 
-      dispatch(setTasks(databaseTasks));
-      setInitialSnackbar(true);
-      setDataState("IN_SYNC");
-      // setMatrix(databaseTimetable);
+    //     dispatch(setTasks(databaseTasks));
+    //     setInitialSnackbar(true);
+    //     setDataState("IN_SYNC");
+    //     // setMatrix(databaseTimetable);
 
-      console.log("databaseTimetable");
-      console.log(databaseTimetable);
+    //     console.log("databaseTimetable");
+    //     console.log(databaseTimetable);
 
-      await getNUSModsTimetable(
-        "https://nusmods.com/timetable/sem-1/share?CM1102=LEC:1,TUT:1&CS2101=&CS2103T=LEC:G15&CS2105=TUT:13,LEC:1V&ES2660=SEC:G03"
-      );
-    })();
+    //     await getNUSModsTimetable(
+    //       "https://nusmods.com/timetable/sem-1/share?CM1102=LEC:1,TUT:1&CS2101=&CS2103T=LEC:G15&CS2105=TUT:13,LEC:1V&ES2660=SEC:G03"
+    //     );
+    //   })();
   }, []);
 
   // ==========================================================================
@@ -102,55 +104,59 @@ function Scheduler() {
   function getTaskObject(row, col) {
     const taskID = getTaskID(row, col);
     const task = tasks.find((each) => each._id === taskID);
+    if (task === undefined) {
+      console.log(taskID);
+      console.log(tasks);
+    }
     return task;
   }
 
-  function isModuleLesson(row, col) {
-    return matrix[row][col].slice(0, 2) === "__";
-  }
+  // function isModuleLesson(row, col) {
+  //   return matrix[row][col].slice(0, 2) === "__";
+  // }
 
-  function getModuleObject(row, col) {
-    const moduleID = matrix[row][col];
-    const module = modules.find((each) => each._id === moduleID);
-    if (module === undefined) {
-      throw Error();
-    }
-    return module;
-  }
+  // function getModuleObject(row, col) {
+  //   const moduleID = matrix[row][col];
+  //   const module = modules.find((each) => each._id === moduleID);
+  //   if (module === undefined) {
+  //     throw Error();
+  //   }
+  //   return module;
+  // }
 
   // ==========================================================================
   // Matrix Helper Functions
   // ==========================================================================
 
-  function _setMatrix(values) {
-    setMatrix((prevMatrix) => {
-      const newMatrix = [];
+  // function _setMatrix(values) {
+  //   setMatrix((prevMatrix) => {
+  //     const newMatrix = [];
 
-      // deep copy
-      for (const prevRow of prevMatrix) {
-        newMatrix.push([...prevRow]);
-      }
+  //     // deep copy
+  //     for (const prevRow of prevMatrix) {
+  //       newMatrix.push([...prevRow]);
+  //     }
 
-      for (const value of values) {
-        const [row, col, el] = value;
+  //     for (const value of values) {
+  //       const [row, col, el] = value;
 
-        // silently ignore out of range indices
-        if (row < 0 || row >= 48 || col < 0 || col >= 7) {
-          continue;
-        }
+  //       // silently ignore out of range indices
+  //       if (row < 0 || row >= 48 || col < 0 || col >= 7) {
+  //         continue;
+  //       }
 
-        // skip unnecessary updates
-        if (newMatrix[row][col] === el) {
-          continue;
-        }
+  //       // skip unnecessary updates
+  //       if (newMatrix[row][col] === el) {
+  //         continue;
+  //       }
 
-        newMatrix[row][col] = el;
-      }
+  //       newMatrix[row][col] = el;
+  //     }
 
-      updateTimetableInDatabase(newMatrix);
-      return newMatrix;
-    });
-  }
+  //     updateTimetableInDatabase(newMatrix);
+  //     return newMatrix;
+  //   });
+  // }
 
   function createTimetableCell(row, col) {
     if (getTaskID(row, col) === "0") {
@@ -161,11 +167,11 @@ function Scheduler() {
           self={EMPTY_TASK}
           row={row}
           col={col}
-          matrix={matrix}
-          _setMatrix={_setMatrix}
-          _setTask={_setTask}
-          setTaskFields={setTaskFields}
-          deleteTask={deleteTask}
+          // matrix={matrix}
+          // _setMatrix={_setMatrix}
+          // _setTask={_setTask}
+          // setTaskFields={setTaskFields}
+          // deleteTask={deleteTask}
         />
       );
     }
@@ -175,20 +181,20 @@ function Scheduler() {
       return <></>;
     }
 
-    if (isModuleLesson(row, col)) {
-      return (
-        <TimetableCell
-          self={getModuleObject(row, col)}
-          row={row}
-          col={col}
-          matrix={matrix}
-          _setMatrix={_setMatrix}
-          _setTask={_setTask}
-          setTaskFields={setTaskFields}
-          deleteTask={deleteTask}
-        />
-      );
-    }
+    // if (isModuleLesson(row, col)) {
+    //   return (
+    //     <TimetableCell
+    //       self={getModuleObject(row, col)}
+    //       row={row}
+    //       col={col}
+    //       // matrix={matrix}
+    //       // _setMatrix={_setMatrix}
+    //       // _setTask={_setTask}
+    //       // setTaskFields={setTaskFields}
+    //       // deleteTask={deleteTask}
+    //     />
+    //   );
+    // }
 
     // render rowSpan cell
     return (
@@ -196,11 +202,11 @@ function Scheduler() {
         self={getTaskObject(row, col)}
         row={row}
         col={col}
-        matrix={matrix}
-        _setMatrix={_setMatrix}
-        _setTask={_setTask}
-        setTaskFields={setTaskFields}
-        deleteTask={deleteTask}
+        // matrix={matrix}
+        // _setMatrix={_setMatrix}
+        // _setTask={_setTask}
+        // setTaskFields={setTaskFields}
+        // deleteTask={deleteTask}
       />
     );
   }
@@ -209,72 +215,72 @@ function Scheduler() {
   // Task Helper Functions
   // ==========================================================================
 
-  function _setTask(taskID, newTask) {
-    setDataState("UPDATING");
+  // function _setTask(taskID, newTask) {
+  //   setDataState("UPDATING");
 
-    const index = tasks.findIndex((each) => each._id === taskID);
-    const newTasks = [
-      ...tasks.slice(0, index),
-      newTask,
-      ...tasks.slice(index + 1),
-    ];
+  //   const index = tasks.findIndex((each) => each._id === taskID);
+  //   const newTasks = [
+  //     ...tasks.slice(0, index),
+  //     newTask,
+  //     ...tasks.slice(index + 1),
+  //   ];
 
-    dispatch(setTasks(newTasks));
-    updateTasksInDatabase(newTasks);
-  }
+  //   dispatch(setTasks(newTasks));
+  //   updateTasksInDatabase(newTasks);
+  // }
 
-  function setTaskFields(taskID, newKeyValuePairs) {
-    // cannot update fields of EMPTY_TASK
-    if (taskID === "0") {
-      return;
-    }
+  // function setTaskFields(taskID, newKeyValuePairs) {
+  //   // cannot update fields of EMPTY_TASK
+  //   if (taskID === "0") {
+  //     return;
+  //   }
 
-    const task = tasks.find((each) => each._id === taskID);
-    const newTask = {};
+  //   const task = tasks.find((each) => each._id === taskID);
+  //   const newTask = {};
 
-    for (const [key, value] of Object.entries(task)) {
-      if (key in newKeyValuePairs) {
-        newTask[key] = newKeyValuePairs[key];
-      } else {
-        newTask[key] = value;
-      }
-    }
+  //   for (const [key, value] of Object.entries(task)) {
+  //     if (key in newKeyValuePairs) {
+  //       newTask[key] = newKeyValuePairs[key];
+  //     } else {
+  //       newTask[key] = value;
+  //     }
+  //   }
 
-    _setTask(taskID, newTask);
-  }
+  //   dispatch(updateTasks(taskID, newTask));
+  // }
 
-  function _addTask(newTask) {
-    setDataState("UPDATING");
-    dispatch(addTask(newTask));
-    addTaskToDatabase(newTask);
-  }
+  // function _addTask(newTask) {
+  //   setDataState("UPDATING");
+  //   dispatch(addTask(newTask));
+  //   addTaskToDatabase(newTask);
+  // }
 
-  function deleteTask(task) {
-    const { _id: taskID, row, col, timeUnits } = task;
+  // function deleteTask(task) {
+  //   const { _id: taskID, row, col, timeUnits } = task;
 
-    // cannot delete EMPTY_TASK
-    if (taskID === "0") {
-      return;
-    }
+  //   // cannot delete EMPTY_TASK
+  //   if (taskID === "0") {
+  //     return;
+  //   }
 
-    setDataState("UPDATING");
+  //   setDataState("UPDATING");
 
-    // remove from matrix
-    if (row !== -1 && col !== -1) {
-      const values = [];
+  //   // remove from matrix
+  //   if (row !== -1 && col !== -1) {
+  //     const values = [];
 
-      for (let i = 0; i < timeUnits; i++) {
-        values.push([row + i, col, "0"]);
-      }
+  //     for (let i = 0; i < timeUnits; i++) {
+  //       values.push([row + i, col, "0"]);
+  //     }
 
-      _setMatrix(values);
-    }
+  //     _setMatrix(values);
+  //   }
 
-    // remove from tasks array
-    const newTasks = tasks.filter((each) => each._id !== taskID);
-    dispatch(setTasks(newTasks));
-    updateTasksInDatabase(newTasks);
-  }
+  //   // remove from tasks array
+  //   const newTasks = tasks.filter((each) => each._id !== taskID);
+  //   dispatch(setTasks(newTasks));
+  //   updateTasksInDatabase(newTasks);
+  // }
 
   function getTaskItems() {
     const outstandingTasks = tasks.filter((each) => each.isCompleted === false);
@@ -286,11 +292,11 @@ function Scheduler() {
           <React.Fragment key={each._id}>
             <TaskItem
               self={each}
-              _setMatrix={_setMatrix}
-              _setTask={_setTask}
-              matrix={matrix}
-              deleteTask={deleteTask}
-              setTaskFields={setTaskFields}
+              // _setMatrix={_setMatrix}
+              // _setTask={_setTask}
+              // matrix={matrix}
+              // deleteTask={deleteTask}
+              // setTaskFields={setTaskFields}
             />
           </React.Fragment>
         ))}
@@ -299,11 +305,11 @@ function Scheduler() {
           <React.Fragment key={each._id}>
             <TaskItem
               self={each}
-              _setMatrix={_setMatrix}
-              _setTask={_setTask}
-              matrix={matrix}
-              deleteTask={deleteTask}
-              setTaskFields={setTaskFields}
+              // _setMatrix={_setMatrix}
+              // _setTask={_setTask}
+              // matrix={matrix}
+              // deleteTask={deleteTask}
+              // setTaskFields={setTaskFields}
             />
           </React.Fragment>
         ))}
@@ -311,180 +317,180 @@ function Scheduler() {
     );
   }
 
-  function addTaskToDatabase(task) {
-    fetch("/api/private/tasks", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: userId, task }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.error) {
-          setDataState("OUT_OF_SYNC");
-          setOpenSyncErrorSnackbar(true);
-          alert(json.error);
-          return;
-        }
+  // function addTaskToDatabase(task) {
+  //   fetch("/api/private/tasks", {
+  //     method: "POST",
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ userId: userId, task }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((json) => {
+  //       if (json.error) {
+  //         setDataState("OUT_OF_SYNC");
+  //         setOpenSyncErrorSnackbar(true);
+  //         alert(json.error);
+  //         return;
+  //       }
 
-        setDataState("IN_SYNC");
-      });
-  }
+  //       setDataState("IN_SYNC");
+  //     });
+  // }
 
-  function updateTasksInDatabase(tasks) {
-    fetch("/api/private/tasks", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: userId, tasks }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.error) {
-          setDataState("OUT_OF_SYNC");
-          setOpenSyncErrorSnackbar(true);
-          alert(json.error);
-          return;
-        }
+  // function updateTasksInDatabase(tasks) {
+  //   fetch("/api/private/tasks", {
+  //     method: "PUT",
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ userId: userId, tasks }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((json) => {
+  //       if (json.error) {
+  //         setDataState("OUT_OF_SYNC");
+  //         setOpenSyncErrorSnackbar(true);
+  //         alert(json.error);
+  //         return;
+  //       }
 
-        setDataState("IN_SYNC");
-      });
-  }
+  //       setDataState("IN_SYNC");
+  //     });
+  // }
 
-  function updateTimetableInDatabase(newMatrix) {
-    fetch("/api/private/timetable", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: userId, timetable: newMatrix }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.error) {
-          alert(json.error);
-          return;
-        }
-      });
-  }
+  // function updateTimetableInDatabase(newMatrix) {
+  //   fetch("/api/private/timetable", {
+  //     method: "PUT",
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ userId: userId, timetable: newMatrix }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((json) => {
+  //       if (json.error) {
+  //         alert(json.error);
+  //         return;
+  //       }
+  //     });
+  // }
 
   // ==========================================================================
   // Modules
   // ==========================================================================
 
-  async function getNUSModsTimetable(NUSModsURL) {
-    const details = parseNUSModsURL(NUSModsURL);
-    const NUSMods_moduleCodes = Object.keys(details);
-    const semester = Number(NUSModsURL.split("/")[4].slice(-1));
+  // async function getNUSModsTimetable(NUSModsURL) {
+  //   const details = parseNUSModsURL(NUSModsURL);
+  //   const NUSMods_moduleCodes = Object.keys(details);
+  //   const semester = Number(NUSModsURL.split("/")[4].slice(-1));
 
-    // hard code 15 June as the split between the previous academic year and
-    // the new academic year
-    const splitDate = new Date();
-    // dates are 1-indexed
-    splitDate.setDate(15);
-    // months are 0-indexed
-    splitDate.setMonth(5);
+  //   // hard code 15 June as the split between the previous academic year and
+  //   // the new academic year
+  //   const splitDate = new Date();
+  //   // dates are 1-indexed
+  //   splitDate.setDate(15);
+  //   // months are 0-indexed
+  //   splitDate.setMonth(5);
 
-    const isPreviousAcademicYear = new Date() < splitDate;
-    const year = Number(new Date().getFullYear());
+  //   const isPreviousAcademicYear = new Date() < splitDate;
+  //   const year = Number(new Date().getFullYear());
 
-    const academicYear = isPreviousAcademicYear
-      ? `${year - 1}-${year}`
-      : `${year}-${year + 1}`;
+  //   const academicYear = isPreviousAcademicYear
+  //     ? `${year - 1}-${year}`
+  //     : `${year}-${year + 1}`;
 
-    dispatch(addModules(NUSMods_moduleCodes));
+  //   dispatch(addModules(NUSMods_moduleCodes));
 
-    const promises = NUSMods_moduleCodes.map((NUSMods_moduleCode) => {
-      return new Promise((resolve, reject) => {
-        const lessonType_classCode_pairs = details[NUSMods_moduleCode];
+  //   const promises = NUSMods_moduleCodes.map((NUSMods_moduleCode) => {
+  //     return new Promise((resolve, reject) => {
+  //       const lessonType_classCode_pairs = details[NUSMods_moduleCode];
 
-        // check whether this module has lessons
-        if (isEmpty(lessonType_classCode_pairs)) {
-          resolve();
-          return;
-        }
+  //       // check whether this module has lessons
+  //       if (isEmpty(lessonType_classCode_pairs)) {
+  //         resolve();
+  //         return;
+  //       }
 
-        // fetch module information from NUSMods API
-        fetch(
-          `https://api.nusmods.com/v2/${academicYear}/modules/${NUSMods_moduleCode}.json`
-        )
-          .then((res) => res.json())
-          .then((json) => {
-            // getting correct semester data
-            const semesterData = json.semesterData.find(
-              (each) => each.semester === semester
-            );
+  //       // fetch module information from NUSMods API
+  //       fetch(
+  //         `https://api.nusmods.com/v2/${academicYear}/modules/${NUSMods_moduleCode}.json`
+  //       )
+  //         .then((res) => res.json())
+  //         .then((json) => {
+  //           // getting correct semester data
+  //           const semesterData = json.semesterData.find(
+  //             (each) => each.semester === semester
+  //           );
 
-            // getting correct timetable data
-            const timetableData = semesterData.timetable;
+  //           // getting correct timetable data
+  //           const timetableData = semesterData.timetable;
 
-            // lessonTypes refer to "Lecture", "Tutorial", "Laboratory", "Sectional Teaching", etc.
-            const lessonTypes = Object.keys(lessonType_classCode_pairs);
+  //           // lessonTypes refer to "Lecture", "Tutorial", "Laboratory", "Sectional Teaching", etc.
+  //           const lessonTypes = Object.keys(lessonType_classCode_pairs);
 
-            for (const lessonType of lessonTypes) {
-              const classNo = details[NUSMods_moduleCode][lessonType];
-              const lessons = timetableData.filter(
-                (each) =>
-                  each.lessonType === lessonType && each.classNo === classNo
-              );
+  //           for (const lessonType of lessonTypes) {
+  //             const classNo = details[NUSMods_moduleCode][lessonType];
+  //             const lessons = timetableData.filter(
+  //               (each) =>
+  //                 each.lessonType === lessonType && each.classNo === classNo
+  //             );
 
-              for (const lesson of lessons) {
-                const startHour = lesson.startTime.slice(0, 2);
-                const startMin = lesson.startTime.slice(2);
+  //             for (const lesson of lessons) {
+  //               const startHour = lesson.startTime.slice(0, 2);
+  //               const startMin = lesson.startTime.slice(2);
 
-                const endHour = lesson.endTime.slice(0, 2);
-                const endMin = lesson.endTime.slice(2);
+  //               const endHour = lesson.endTime.slice(0, 2);
+  //               const endMin = lesson.endTime.slice(2);
 
-                const durationHours = getDurationHours(
-                  startHour,
-                  startMin,
-                  endHour,
-                  endMin
-                ).toString();
+  //               const durationHours = getDurationHours(
+  //                 startHour,
+  //                 startMin,
+  //                 endHour,
+  //                 endMin
+  //               ).toString();
 
-                const newModule = {
-                  _id: `__${NUSMods_moduleCode}_${uuidv4()}`,
+  //               const newModule = {
+  //                 _id: `__${NUSMods_moduleCode}_${uuidv4()}`,
 
-                  name: `${NUSMods_moduleCode} ${lessonType}`,
-                  dueDate: "--",
-                  dueTime: "--",
-                  durationHours: durationHours,
-                  moduleCode: NUSMods_moduleCode,
-                  links: [],
+  //                 name: `${NUSMods_moduleCode} ${lessonType}`,
+  //                 dueDate: "--",
+  //                 dueTime: "--",
+  //                 durationHours: durationHours,
+  //                 moduleCode: NUSMods_moduleCode,
+  //                 links: [],
 
-                  row: getRow(startHour, startMin),
-                  col: mappingDayToColumn[lesson.day],
-                  timeUnits: Math.ceil(Number(durationHours) * 2),
+  //                 row: getRow(startHour, startMin),
+  //                 col: mappingDayToColumn[lesson.day],
+  //                 timeUnits: Math.ceil(Number(durationHours) * 2),
 
-                  isCompleted: false,
-                };
+  //                 isCompleted: false,
+  //               };
 
-                const { row, col, _id } = newModule;
-                const values = [];
+  //               const { row, col, _id } = newModule;
+  //               const values = [];
 
-                for (let i = 0; i < newModule.timeUnits; i++) {
-                  values.push([row + i, col, _id]);
-                }
+  //               for (let i = 0; i < newModule.timeUnits; i++) {
+  //                 values.push([row + i, col, _id]);
+  //               }
 
-                setModules((prev) => [...prev, newModule]);
-                _setMatrix(values);
-              }
-            }
+  //               setModules((prev) => [...prev, newModule]);
+  //               _setMatrix(values);
+  //             }
+  //           }
 
-            resolve();
-            return;
-          });
-      });
-    });
+  //           resolve();
+  //           return;
+  //         });
+  //     });
+  //   });
 
-    await Promise.all(promises);
-    console.log("===== all done =====");
-  }
+  //   await Promise.all(promises);
+  //   console.log("===== all done =====");
+  // }
 
   // ==========================================================================
   // Miscellaneous
@@ -503,19 +509,7 @@ function Scheduler() {
   };
 
   const deleteConfirmationAgreeHandler = () => {
-    setDeleteConfirmation(false);
-    const newTasks = tasks.filter((each) => each.isCompleted === false);
-    const doneTasks = tasks.filter((each) => each.isCompleted === true);
-    let values = [];
-    for (const task of doneTasks) {
-      for (let i = 0; i < task.timeUnits; i++) {
-        values.push([task.row + i, task.col, "0"]);
-      }
-    }
-    _setMatrix(values);
-    dispatch(setTasks(newTasks));
-    setDataState("UPDATING");
-    updateTasksInDatabase(newTasks);
+    dispatch(deleteCompletedTask());
   };
 
   const deleteConfirmationDisagreeHandler = () => {
@@ -623,7 +617,7 @@ function Scheduler() {
         <div className={styles.title}>
           <div className={styles["title-update-container"]}>
             <h1>Tasks</h1>
-            <DataStatus status={dataState} />
+            <DataStatus status={status} />
             <Tooltip title="Drag tasks using the drag icon to schedule them onto the timetable">
               <InfoIcon color="info" />
             </Tooltip>
@@ -656,9 +650,9 @@ function Scheduler() {
             scrollbarWidth: "none" /* Firefox */,
           }}
         >
-          {dataState === "LOAD_FAILED" ? (
+          {status === "LOAD_FAILED" ? (
             <div className={styles["no-tasks"]}>Unable to retrieve data.</div>
-          ) : dataState === "INITIAL_LOAD" ? (
+          ) : status === "INITIAL_LOAD" ? (
             generateSkeletons(5, EMPTY_TASK_ITEM)
           ) : tasks.length > 0 ? (
             getTaskItems()
@@ -669,20 +663,21 @@ function Scheduler() {
           <div style={{ marginBottom: "4.5rem" }}></div>
         </Stack>
 
-        <TaskCreator addTask={_addTask} />
+        <TaskCreator //addTask={_addTask}
+        />
       </div>
     </>
   );
 }
 
-function defaultMatrix(val) {
-  const arr = [];
-  for (let i = 0; i < 48; i++) {
-    const row = [val, val, val, val, val, val, val];
-    arr.push(row);
-  }
-  return arr;
-}
+// function defaultMatrix(val) {
+//   const arr = [];
+//   for (let i = 0; i < 48; i++) {
+//     const row = [val, val, val, val, val, val, val];
+//     arr.push(row);
+//   }
+//   return arr;
+// }
 
 function getTimePairArray() {
   const arr = [];
@@ -713,78 +708,78 @@ function zeroPad(num, places) {
   return String(num).padStart(places, "0");
 }
 
-const mappingLessonType = {
-  LEC: "Lecture",
-  TUT: "Tutorial",
-  LAB: "Laboratory",
-  SEC: "Sectional Teaching",
-};
+// const mappingLessonType = {
+//   LEC: "Lecture",
+//   TUT: "Tutorial",
+//   LAB: "Laboratory",
+//   SEC: "Sectional Teaching",
+// };
 
-const mappingDayToColumn = {
-  Monday: 0,
-  Tuesday: 1,
-  Wednesday: 2,
-  Thursday: 3,
-  Friday: 4,
-  Saturday: 5,
-  Sunday: 6,
-};
+// const mappingDayToColumn = {
+//   Monday: 0,
+//   Tuesday: 1,
+//   Wednesday: 2,
+//   Thursday: 3,
+//   Friday: 4,
+//   Saturday: 5,
+//   Sunday: 6,
+// };
 
-function parseNUSModsURL(NUSModsURL) {
-  const url = new URL(NUSModsURL);
-  const queryString = url.search;
-  // `slice(1)` is to remove the "?" at the beginning
-  const keyValueSegments = queryString.slice(1).split("&");
-  const keyValuePairs = keyValueSegments.map((each) => each.split("="));
-  const result = {};
+// function parseNUSModsURL(NUSModsURL) {
+//   const url = new URL(NUSModsURL);
+//   const queryString = url.search;
+//   // `slice(1)` is to remove the "?" at the beginning
+//   const keyValueSegments = queryString.slice(1).split("&");
+//   const keyValuePairs = keyValueSegments.map((each) => each.split("="));
+//   const result = {};
 
-  for (const [key, value] of keyValuePairs) {
-    result[key] = convertStringToObject(value);
-  }
+//   for (const [key, value] of keyValuePairs) {
+//     result[key] = convertStringToObject(value);
+//   }
 
-  return result;
-}
+//   return result;
+//}
 
-function convertStringToObject(str) {
-  if (!str) {
-    return {};
-  }
+// function convertStringToObject(str) {
+//   if (!str) {
+//     return {};
+//   }
 
-  const properties = str.split(",");
-  const obj = {};
+//   const properties = str.split(",");
+//   const obj = {};
 
-  for (const property of properties) {
-    const [key, value] = property.split(":");
-    const lessonType = mappingLessonType[key];
-    obj[lessonType] = value;
-  }
+//   for (const property of properties) {
+//     const [key, value] = property.split(":");
+//     const lessonType = mappingLessonType[key];
+//     obj[lessonType] = value;
+//   }
 
-  return obj;
-}
+//   return obj;
+// }
 
-function getDurationHours(startHour, startMin, endHour, endMin) {
-  if (startMin === endMin) {
-    return Number(endHour) - Number(startHour);
-  } else if (startMin === "00" && endMin === "30") {
-    return Number(endHour) - Number(startHour) + 0.5;
-  } else if (startMin === "30" && endMin === "00") {
-    return Number(endHour) - Number(startHour) - 0.5;
-  }
-}
+// function getDurationHours(startHour, startMin, endHour, endMin) {
+//   if (startMin === endMin) {
+//     return Number(endHour) - Number(startHour);
+//   } else if (startMin === "00" && endMin === "30") {
+//     return Number(endHour) - Number(startHour) + 0.5;
+//   } else if (startMin === "30" && endMin === "00") {
+//     return Number(endHour) - Number(startHour) - 0.5;
+//   }
+// }
 
-function getRow(hour, min) {
-  let count = 0;
+// function getRow(hour, min) {
+//   let count = 0;
 
-  count += Number(hour) * 2;
-  if (min === "30") {
-    count += 1;
-  }
+//   count += Number(hour) * 2;
+//   if (min === "30") {
+//     count += 1;
+//   }
 
-  return count;
-}
+//   return count;
+// }
 
-function isEmpty(obj) {
-  return Object.keys(obj).length === 0;
-}
+// function isEmpty(obj) {
+//   return Object.keys(obj).length === 0;
+// }
 
 export default Scheduler;

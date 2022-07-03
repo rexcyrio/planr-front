@@ -24,12 +24,12 @@ const matrixSlice = createSlice({
       return state;
     },
   },
-  extraReducers: (builder) => {
-    builder.addCase(updateTimetableInDatabase.fulfilled, (state, action) => {
-      state = action.payload;
-      return state;
-    });
-  },
+  // extraReducers: (builder) => {
+  //   builder.addCase(updateTimetableInDatabase.rejected, (state, action) => {
+  //     console.log(action.payload);
+
+  //   });
+  // },
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,6 +88,7 @@ const updateTimetableInDatabase = createAsyncThunk(
       alert(json.error);
       throw new Error(json.error);
     }
+
     return json;
   }
 );

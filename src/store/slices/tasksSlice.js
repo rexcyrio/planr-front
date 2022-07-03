@@ -46,8 +46,7 @@ const tasksSlice = createSlice({
       .addCase(fetchTasks.pending, (state) => {
         state.status = "INITIAL_LOAD";
       })
-      .addCase(fetchTasks.fulfilled, (state, action) => {
-        state.data = action.payload;
+      .addCase(fetchTasks.fulfilled, (state) => {
         state.status = "IN_SYNC";
       })
       .addCase(fetchTasks.rejected, (state) => {
@@ -63,6 +62,28 @@ const tasksSlice = createSlice({
 ////////////////////////////////////////////////////////////////////////////////
 // Tasks state thunks
 ////////////////////////////////////////////////////////////////////////////////
+
+export const updateTaskFields = (taskID, newKeyValuePairs) => {
+  return (dispatch, getState) => {
+    dispatch(startUpdate());
+    if (taskID === "0") {
+      return;
+    }
+
+    const task = getState().tasks.data.find((each) => each._id === taskID);
+    const newTask = {};
+
+    for (const [key, value] of Object.entries(task)) {
+      if (key in newKeyValuePairs) {
+        newTask[key] = newKeyValuePairs[key];
+      } else {
+        newTask[key] = value;
+      }
+    }
+
+    dispatch(updateTasks(taskID, newTask));
+  };
+};
 
 export const taskAddition = (newTask) => {
   return (dispatch) => {
@@ -90,7 +111,7 @@ export const deleteTask = (task) => {
         values.push([row + i, col, "0"]);
       }
 
-      dispatch(rebuildMatrix(values)); 
+      dispatch(rebuildMatrix(values));
     }
 
     // remove from tasks array
@@ -113,7 +134,7 @@ export const deleteCompletedTask = () => {
         values.push([task.row + i, task.col, "0"]);
       }
     }
-    dispatch(rebuildMatrix(values)); 
+    dispatch(rebuildMatrix(values));
     dispatch(setTasks(newTasks));
     dispatch(updateTasksInDatabase(newTasks));
   };
@@ -150,8 +171,8 @@ export const fetchTasks = createAsyncThunk(
     const [databaseTasks, databaseTimetable] = items;
 
     // need add error?
+    dispatch(setTasks(databaseTasks));
     dispatch(setMatrix(databaseTimetable));
-    return databaseTasks;
   }
 );
 
