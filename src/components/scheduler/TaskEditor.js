@@ -70,12 +70,12 @@ function TaskEditor({ self }) {
   }
 
   function handleOpen() {
+    resetState();
     setOpen(true);
   }
 
   function handleClose() {
     setOpen(false);
-    resetState();
   }
 
   function handleDurationHoursChange(event) {
