@@ -11,8 +11,12 @@ import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
-import { useSelector } from "react-redux";
-import { getAccentColour, getBackgroundColour } from "../../helper/colourHelper";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getAccentColour,
+  getBackgroundColour,
+} from "../../helper/colourHelper";
+import { updateTaskFields } from "../../store/slices/tasksSlice";
 import TaskEditor from "./TaskEditor";
 import classes from "./TaskItem.module.css";
 
@@ -34,21 +38,22 @@ TaskItem.propTypes = {
     isCompleted: PropTypes.bool.isRequired,
   }).isRequired,
 
-  _setMatrix: PropTypes.func.isRequired,
-  _setTask: PropTypes.func.isRequired,
-  matrix: PropTypes.array.isRequired,
-  deleteTask: PropTypes.func.isRequired,
-  setTaskFields: PropTypes.func.isRequired,
+  // _setMatrix: PropTypes.func.isRequired,
+  // _setTask: PropTypes.func.isRequired,
+  // matrix: PropTypes.array.isRequired,
+  // deleteTask: PropTypes.func.isRequired,
+  // setTaskFields: PropTypes.func.isRequired,
 };
 
 function TaskItem({
   self,
-  _setMatrix,
-  _setTask,
-  matrix,
-  deleteTask,
-  setTaskFields,
+  // _setMatrix,
+  // _setTask,
+  // matrix,
+  // deleteTask,
+  // setTaskFields,
 }) {
+  const dispatch = useDispatch();
   const themeState = useSelector((state) => state.theme);
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [{ isDragging }, drag, preview] = useDrag(
@@ -66,11 +71,11 @@ function TaskItem({
   );
 
   function markTaskAsComplete() {
-    setTaskFields(self._id, { isCompleted: true });
+    dispatch(updateTaskFields(self._id, { isCompleted: true }));
   }
 
   function markTaskAsIncomplete() {
-    setTaskFields(self._id, { isCompleted: false });
+    dispatch(updateTaskFields(self._id, { isCompleted: false }));
   }
 
   function getDraggableState() {
@@ -199,10 +204,10 @@ function TaskItem({
           >
             <TaskEditor
               self={self}
-              _setMatrix={_setMatrix}
-              _setTask={_setTask}
-              matrix={matrix}
-              deleteTask={deleteTask}
+              // _setMatrix={_setMatrix}
+              // _setTask={_setTask}
+              // matrix={matrix}
+              // deleteTask={deleteTask}
             />
 
             {self.isCompleted ? (

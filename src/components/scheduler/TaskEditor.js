@@ -15,6 +15,9 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { rebuildMatrix } from "../../store/slices/matrixSlice";
+import { deleteTask, updateTasks } from "../../store/slices/tasksSlice";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 TaskEditor.propTypes = {
@@ -35,13 +38,18 @@ TaskEditor.propTypes = {
     isCompleted: PropTypes.bool.isRequired,
   }).isRequired,
 
-  _setMatrix: PropTypes.func.isRequired,
-  _setTask: PropTypes.func.isRequired,
-  matrix: PropTypes.array.isRequired,
-  deleteTask: PropTypes.func.isRequired,
+  // _setMatrix: PropTypes.func.isRequired,
+  // _setTask: PropTypes.func.isRequired,
+  // matrix: PropTypes.array.isRequired,
+  // deleteTask: PropTypes.func.isRequired,
 };
 
-function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
+function TaskEditor({
+  self,
+  //setMatrix, _setTask, matrix, deleteTask
+}) {
+  const dispatch = useDispatch();
+  const matrix = useSelector((state) => state.matrix);
   const [name, setName] = useState(self.name);
   const [dueDate, setDueDate] = useState(self.dueDate);
   const [dueTime, setDueTime] = useState(self.dueTime);
@@ -134,7 +142,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
           values.push([row + newTask.timeUnits + i, col, "0"]);
         }
 
-        _setMatrix(values);
+        dispatch(rebuildMatrix(values));
       } else if (newTask.timeUnits === self.timeUnits) {
         // do nothing
       } else if (newTask.timeUnits > self.timeUnits) {
@@ -150,7 +158,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
             values.push([row + self.timeUnits + i, col, taskID]);
           }
 
-          _setMatrix(values);
+          dispatch(rebuildMatrix(values));
         } else {
           // case 3: user lengthened time needed for task, NOT enough available time units
           // ==> unschedule task from timetable
@@ -160,7 +168,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
             values.push([row + i, col, "0"]);
           }
 
-          _setMatrix(values);
+          dispatch(rebuildMatrix(values));
 
           // we want to update the newTask to be as such:
           //
@@ -180,7 +188,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
     }
 
     // updating tasks array
-    _setTask(taskID, newTask);
+    dispatch(updateTasks(taskID, newTask));
 
     // no need to call `resetState()` here since the fields already represent
     // the correct information even on immediate reopen
@@ -301,6 +309,7 @@ function TaskEditor({ self, _setMatrix, _setTask, matrix, deleteTask }) {
                   e.preventDefault();
                   handleClose();
                   deleteTask(self);
+                  dispatch(deleteTask(self));
                 }}
               >
                 Delete
