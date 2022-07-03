@@ -34,14 +34,6 @@ function Links() {
   const [dataState, setDataState] = useState("INITIAL_LOAD");
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
-  async function sleep(ms) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, ms);
-    });
-  }
-
   useEffect(() => {
     fetch(`/api/private/links?id=${userId}`)
       .then((res) => res.json())
@@ -74,7 +66,7 @@ function Links() {
     }
   };
 
-  const edit_closeDialog = async (saveChanges) => {
+  const edit_closeDialog = (saveChanges) => {
     edit_setOpen(false);
 
     const newLinks = [];
@@ -110,7 +102,6 @@ function Links() {
       updateLinksInDatabase(newLinks);
       setLinks(newLinks);
     }
-    //await sleep(150);
   };
 
   function updateLinksInDatabase(links) {
