@@ -15,38 +15,31 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import styles from "./Links.module.css";
 import { Alert } from "@mui/material";
-import DataStatus, {
-  FETCHING,
-  FETCH_SUCCESS,
-  UPDATE_FAILURE,
-  UPDATE_SUCCESS,
-  UPDATING,
-} from "../helperComponents/DataStatus";
+import DataStatus from "../helperComponents/DataStatus";
 import LinksList from "./LinksList";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addNewPermLink,
+  fetchPermLinks,
+  saveEditedPermLinks,
+} from "../../store/slices/linksSlice";
 
 function Links() {
-  const { userId } = useSelector((state) => state.user);
-  const [links, setLinks] = useState([]);
+  const dispatch = useDispatch();
+  const links = useSelector((state) => state.links.permLinks);
+  const status = useSelector((state) => state.links.status);
   const [newName, setNewName] = useState("");
   const [newURL, setNewURL] = useState("");
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
   const [tempLinks, setTempLinks] = useState([]);
-  const [dataState, setDataState] = useState(FETCHING);
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/private/links?id=${userId}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setLinks(json.links);
-        setDataState(FETCH_SUCCESS);
-      });
-  }, [userId]);
+    dispatch(fetchPermLinks);
+  }, [dispatch]);
 
   function openAllLinks() {
     for (const link of links) {
@@ -74,62 +67,10 @@ function Links() {
   const edit_closeDialog = (saveChanges) => {
     edit_setOpen(false);
 
-    const newLinks = [];
-
     if (saveChanges) {
-      for (const link of tempLinks) {
-        if (link._toBeDeleted) {
-          continue;
-        }
-
-        if (link.name === "") {
-          link.name = link.url;
-        }
-
-        let finalURL = link.url;
-        if (
-          !link.url.startsWith("https://") &&
-          !link.url.startsWith("http://")
-        ) {
-          finalURL = "http://".concat(link.url);
-        }
-
-        const newLink = {
-          _id: link._id,
-          _toBeDeleted: false,
-          name: link.name,
-          url: finalURL,
-        };
-        newLinks.push(newLink);
-      }
-
-      setDataState(UPDATING);
-      updateLinksInDatabase(newLinks);
-      setLinks(newLinks);
+      dispatch(saveEditedPermLinks(tempLinks));
     }
   };
-
-  function updateLinksInDatabase(links) {
-    fetch("/api/private/links", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: userId, links }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.error) {
-          setDataState(UPDATE_FAILURE);
-          setOpenSyncErrorSnackbar(true);
-          alert(json.error);
-          return;
-        }
-
-        setDataState(UPDATE_SUCCESS);
-      });
-  }
 
   function updateTempLink(newLink) {
     setTempLinks((prev) => {
@@ -140,10 +81,8 @@ function Links() {
 
   function toggleToBeDeleted(self) {
     const newLink = {
-      _id: self._id,
+      ...self,
       _toBeDeleted: !self._toBeDeleted,
-      name: self.name,
-      url: self.url,
     };
 
     updateTempLink(newLink);
@@ -151,10 +90,8 @@ function Links() {
 
   function updateTempName(self, name) {
     const newLink = {
-      _id: self._id,
-      _toBeDeleted: self._toBeDeleted,
+      ...self,
       name: name,
-      url: self.url,
     };
 
     updateTempLink(newLink);
@@ -162,9 +99,7 @@ function Links() {
 
   function updateTempURL(self, url) {
     const newLink = {
-      _id: self._id,
-      _toBeDeleted: self._toBeDeleted,
-      name: self.name,
+      ...self,
       url: url,
     };
 
@@ -172,47 +107,7 @@ function Links() {
   }
 
   function addNewLink() {
-    let finalURL = newURL;
-    if (!newURL.startsWith("https://") && !newURL.startsWith("http://")) {
-      finalURL = "http://".concat(newURL);
-    }
-
-    const newLink = {
-      _id: uuidv4(),
-      _toBeDeleted: false,
-      name: newName,
-      url: finalURL,
-    };
-
-    if (newName === "") {
-      newLink.name = newURL;
-    }
-
-    setDataState(UPDATING);
-    addLinkToDatabase(newLink);
-    setLinks([...links, newLink]);
-  }
-
-  function addLinkToDatabase(link) {
-    fetch("/api/private/links", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId, link }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.error) {
-          setDataState(UPDATE_FAILURE);
-          setOpenSyncErrorSnackbar(true);
-          alert(json.error);
-          return;
-        }
-
-        setDataState(UPDATE_SUCCESS);
-      });
+    dispatch(addNewPermLink(newURL, newName));
   }
 
   const closeSnackbar = () => {
@@ -233,7 +128,7 @@ function Links() {
       <div className={styles.title}>
         <div className={styles["title-update-container"]}>
           <h1>Links</h1>
-          <DataStatus status={dataState} />
+          <DataStatus status={status} />
         </div>
         <div>
           <Tooltip title="Edit">
@@ -368,7 +263,7 @@ function Links() {
         </Box>
       </Dialog>
 
-      <LinksList dataState={dataState} links={links} />
+      <LinksList />
 
       <Stack justifyContent="flex-end" direction="row" padding="0.5em">
         <Button
