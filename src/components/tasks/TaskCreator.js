@@ -13,9 +13,9 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import React, { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { taskAddition } from "../../store/slices/tasksSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
+import { addTask } from "../../store/slices/tasksSlice";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 function TaskCreator() {
@@ -104,7 +104,7 @@ function TaskCreator() {
       isCompleted: false,
     };
 
-    dispatch(taskAddition(newTask));
+    dispatch(addTask(newTask));
     resetState();
   }
 

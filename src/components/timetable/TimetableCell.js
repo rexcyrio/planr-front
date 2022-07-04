@@ -12,8 +12,12 @@ import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
 import { getBackgroundColour } from "../../helper/colourHelper";
-import { rebuildMatrix } from "../../store/slices/matrixSlice";
-import { updateTaskFields } from "../../store/slices/tasksSlice";
+import { setMatrix } from "../../store/slices/matrixSlice";
+import {
+  markTaskAsComplete,
+  markTaskAsIncomplete,
+  updateTaskFields
+} from "../../store/slices/tasksSlice";
 import TaskEditor from "../tasks/TaskEditor";
 import styles from "./TimetableCell.module.css";
 
@@ -96,14 +100,6 @@ function TimetableCell({ self, row, col }) {
     setOpenPopover(false);
   };
 
-  function markTaskAsComplete() {
-    dispatch(updateTaskFields(self._id, { isCompleted: true }));
-  }
-
-  function markTaskAsIncomplete() {
-    dispatch(updateTaskFields(self._id, { isCompleted: true }));
-  }
-
   // ==========================================================================
   // Drag and drop
   // ==========================================================================
@@ -112,7 +108,7 @@ function TimetableCell({ self, row, col }) {
     () => ({
       accept: "TASK",
       drop: (item) => {
-        const { _id:taskID, timeUnits } = item.task;
+        const { _id: taskID, timeUnits } = item.task;
 
         // add task to matrix
         const values = [];
@@ -121,7 +117,7 @@ function TimetableCell({ self, row, col }) {
           values.push([row + i, col, taskID]);
         }
 
-        dispatch(rebuildMatrix(values));
+        dispatch(setMatrix(values));
 
         // update `row` and `col` fields accordingly
         dispatch(updateTaskFields(taskID, { row: row, col: col }));
@@ -156,7 +152,7 @@ function TimetableCell({ self, row, col }) {
           for (let i = 0; i < self.timeUnits; i++) {
             values.push([row + i, col, "0"]);
           }
-          dispatch(rebuildMatrix(values));
+          dispatch(setMatrix(values));
 
           dispatch(
             updateTaskFields(self._id, {
@@ -280,13 +276,19 @@ function TimetableCell({ self, row, col }) {
                 <TaskEditor self={self} />
                 {self.isCompleted ? (
                   <Tooltip title="Restore task">
-                    <IconButton size="small" onClick={markTaskAsIncomplete}>
+                    <IconButton
+                      size="small"
+                      onClick={() => dispatch(markTaskAsIncomplete(self._id))}
+                    >
                       <RestoreIcon />
                     </IconButton>
                   </Tooltip>
                 ) : (
                   <Tooltip title="Mark task as complete">
-                    <IconButton size="small" onClick={markTaskAsComplete}>
+                    <IconButton
+                      size="small"
+                      onClick={() => dispatch(markTaskAsComplete(self._id))}
+                    >
                       <DoneIcon />
                     </IconButton>
                   </Tooltip>

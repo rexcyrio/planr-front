@@ -32,8 +32,8 @@ const theme = createTheme({
 });
 
 function App() {
-  const { isAuthenticated } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
