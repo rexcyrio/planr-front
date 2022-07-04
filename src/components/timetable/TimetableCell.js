@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getBackgroundColour } from "../../helper/colourHelper";
 import { rebuildMatrix } from "../../store/slices/matrixSlice";
 import { updateTaskFields } from "../../store/slices/tasksSlice";
-import TaskEditor from "./TaskEditor";
+import TaskEditor from "../tasks/TaskEditor";
 import styles from "./TimetableCell.module.css";
 
 const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
