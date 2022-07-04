@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { addModules } from "./modulesSlice";
 import { addModulesToTheme } from "./themeSlice";
-import { setMatrix } from "./timetableSlice";
+import { setMatrix } from "./matrixSlice";
 
 const NUSModsURLSlice = createSlice({
   name: "NUSModsURL",

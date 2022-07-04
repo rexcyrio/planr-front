@@ -46,7 +46,7 @@ function Links() {
         setLinks(json.links);
         setDataState(FETCH_SUCCESS);
       });
-  }, []);
+  }, [userId]);
 
   function openAllLinks() {
     for (const link of links) {

@@ -51,7 +51,7 @@ function App() {
         dispatch(setUserId(json.userId));
       })
       .then(() => setIsLoading(false));
-  }, []);
+  }, [dispatch]);
 
   function makePrivate(component) {
     if (isAuthenticated) {

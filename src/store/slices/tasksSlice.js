@@ -99,7 +99,7 @@ export function updateTaskFields(taskId, newKeyValuePairs) {
       newKeyValuePairs: newKeyValuePairs,
     };
 
-    dispatch(_upddateTaskFields(payload));
+    dispatch(_updateTaskFields(payload));
     dispatch(updateTasksInDatabase());
   };
 }
