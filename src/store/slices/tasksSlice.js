@@ -1,5 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { inSync, outOfSync } from "../storeHelpers/statusHelpers";
+import { FETCHING } from "../../components/helperComponents/DataStatus";
+import {
+  FETCHING_REDUCER,
+  FETCH_FAILURE_REDUCER,
+  FETCH_SUCCESS_REDUCER,
+  UPDATE_FAILURE_REDUCER,
+  UPDATE_SUCCESS_REDUCER,
+  UPDATING_REDUCER,
+} from "../storeHelpers/statusHelpers";
 import { rebuildMatrix, setMatrix } from "./matrixSlice";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -8,9 +16,7 @@ import { rebuildMatrix, setMatrix } from "./matrixSlice";
 
 const initialState = {
   data: [],
-
-  // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
-  status: "INITIAL_LOAD",
+  status: FETCHING,
 };
 
 const tasksSlice = createSlice({
@@ -25,23 +31,20 @@ const tasksSlice = createSlice({
       state.data.push(action.payload);
       return state;
     },
-    startUpdate: (state) => {
-      state.status = "UPDATING";
-      return state;
-    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTasks.fulfilled, (state) => {
-        state.status = "IN_SYNC";
-      })
-      .addCase(fetchTasks.rejected, (state) => {
-        state.status = "LOAD_FAILED";
-      })
-      .addCase(updateTasksInDatabase.fulfilled, inSync)
-      .addCase(updateTasksInDatabase.rejected, outOfSync)
-      .addCase(addTaskToDatabase.fulfilled, inSync)
-      .addCase(addTaskToDatabase.rejected, outOfSync);
+      .addCase(fetchTasks.pending, FETCHING_REDUCER)
+      .addCase(fetchTasks.fulfilled, FETCH_SUCCESS_REDUCER)
+      .addCase(fetchTasks.rejected, FETCH_FAILURE_REDUCER)
+
+      .addCase(updateTasksInDatabase.pending, UPDATING_REDUCER)
+      .addCase(updateTasksInDatabase.fulfilled, UPDATE_SUCCESS_REDUCER)
+      .addCase(updateTasksInDatabase.rejected, UPDATE_FAILURE_REDUCER)
+
+      .addCase(addTaskToDatabase.pending, UPDATING_REDUCER)
+      .addCase(addTaskToDatabase.fulfilled, UPDATE_SUCCESS_REDUCER)
+      .addCase(addTaskToDatabase.rejected, UPDATE_FAILURE_REDUCER);
   },
 });
 
@@ -327,10 +330,7 @@ export const { setTasks, addTask, startUpdate } = tasksSlice.actions;
 // };
 export default tasksSlice.reducer;
 
-
 // ============
-
-
 
 // setTasks: (state, action) => action.payload,
 // _addTask: (state, action) => {

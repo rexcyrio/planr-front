@@ -1,12 +1,15 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+  FETCHING,
+  FETCH_FAILURE,
+  FETCH_SUCCESS,
+} from "../../components/helperComponents/DataStatus";
 import { inSync, outOfSync } from "../storeHelpers/statusHelpers";
 
 const initialState = {
   permLinks: [],
   tasksLinks: [],
-
-  // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
-  status: "INITIAL_LOAD",
+  status: FETCHING,
 };
 
 const linksSlice = createSlice({
@@ -20,10 +23,10 @@ const linksSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchPermLinks.fulfilled, (state) => {
-        state.status = "IN_SYNC";
+        state.status = FETCH_SUCCESS;
       })
       .addCase(fetchPermLinks.rejected, (state) => {
-        state.status = "LOAD_FAILED";
+        state.status = FETCH_FAILURE;
       })
       .addCase(updateLinksInDatabase.fulfilled, inSync)
       .addCase(updateLinksInDatabase.rejected, outOfSync)

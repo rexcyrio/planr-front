@@ -11,15 +11,21 @@ import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./Notes.module.css";
 import NoteItem from "./NoteItem";
-import DataStatus from "../helperComponents/DataStatus";
+import DataStatus, {
+  FETCHING,
+  FETCH_FAILURE,
+  FETCH_SUCCESS,
+  UPDATE_FAILURE,
+  UPDATE_SUCCESS,
+  UPDATING,
+} from "../helperComponents/DataStatus";
 import { useSelector } from "react-redux";
 
 function Notes() {
   const { userId } = useSelector((state) => state.user);
   const [notes, setNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
-  // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
-  const [dataState, setDataState] = useState("INITIAL_LOAD");
+  const [dataState, setDataState] = useState(FETCHING);
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   useEffect(() => {
@@ -27,7 +33,7 @@ function Notes() {
       .then((res) => res.json())
       .then((json) => {
         setNotes(json.notes);
-        setDataState("IN_SYNC");
+        setDataState(FETCH_SUCCESS);
       });
   }, []);
 
@@ -41,7 +47,7 @@ function Notes() {
         isEditMode: false,
       };
 
-      setDataState("UPDATING");
+      setDataState(UPDATING);
       addNoteToDatabase(newNote);
       setNotes([...notes, newNote]);
     }
@@ -61,19 +67,19 @@ function Notes() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
-          setDataState("OUT_OF_SYNC");
+          setDataState(UPDATE_FAILURE);
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setDataState("IN_SYNC");
+        setDataState(UPDATE_SUCCESS);
       });
   }
 
   function deleteNote(self) {
     const newNotes = notes.filter((each) => each._id !== self._id);
-    setDataState("UPDATING");
+    setDataState(UPDATING);
     updateNotesInDatabase(newNotes);
     setNotes(newNotes);
   }
@@ -125,7 +131,7 @@ function Notes() {
       newNote,
       ...notes.slice(index + 1, notes.length),
     ];
-    setDataState("UPDATING");
+    setDataState(UPDATING);
     updateNotesInDatabase(newNotes);
     setNotes(newNotes);
   }
@@ -161,13 +167,13 @@ function Notes() {
       })
       .then((json) => {
         if (json.error) {
-          setDataState("OUT_OF_SYNC");
+          setDataState(UPDATE_FAILURE);
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setDataState("IN_SYNC");
+        setDataState(UPDATE_SUCCESS);
       });
   }
 
@@ -198,9 +204,9 @@ function Notes() {
       </div>
 
       <div className={styles["main-container"]}>
-        {dataState === "LOAD_FAILED" ? (
+        {dataState === FETCH_FAILURE ? (
           <div className={styles["no-notes"]}>Unable to retrieve data.</div>
-        ) : dataState === "INITIAL_LOAD" ? (
+        ) : dataState === FETCHING ? (
           <Skeleton
             variant="rectangle"
             height="95%"

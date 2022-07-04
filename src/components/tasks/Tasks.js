@@ -8,7 +8,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
 import generateSkeletons from "../../helper/skeletonHelper";
 import { fetchTasks } from "../../store/slices/tasksSlice";
-import DataStatus from "../helperComponents/DataStatus";
+import DataStatus, {
+  FETCHING,
+  FETCH_FAILURE,
+} from "../helperComponents/DataStatus";
 import styles from "./Tasks.module.css";
 import TaskCreator from "./TaskCreator";
 import TaskDeleteCompleted from "./TaskDeleteCompleted";
@@ -99,9 +102,9 @@ function Tasks() {
           scrollbarWidth: "none" /* Firefox */,
         }}
       >
-        {status === "LOAD_FAILED" ? (
+        {status === FETCH_FAILURE ? (
           <div className={styles["no-tasks"]}>Unable to retrieve data.</div>
-        ) : status === "INITIAL_LOAD" ? (
+        ) : status === FETCHING ? (
           generateSkeletons(5, EMPTY_TASK_ITEM)
         ) : tasks.length > 0 ? (
           getTaskItems()
