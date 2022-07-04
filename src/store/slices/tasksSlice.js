@@ -218,4 +218,162 @@ export const addTaskToDatabase = createAsyncThunk(
 
 export const { setTasks, addTask, startUpdate } = tasksSlice.actions;
 
+// // private functions
+// const { _addTask, _updateTaskFields, _deleteTask, _deleteCompletedTasks } =
+//   tasksSlice.actions;
+
+// function addTask(newTask) {
+//   return async function thunk(dispatch, getState) {
+//     dispatch(_addTask(newTask));
+//     // TODO: update database
+//     databaseHelper(dispatch, getState, "POST", "task", newTask);
+//   };
+// }
+
+// function markTaskAsComplete(taskId) {
+//   updateTaskFields(taskId, { isCompleted: true });
+// }
+
+// function markTaskAsIncomplete(taskId) {
+//   updateTaskFields(taskId, { isCompleted: false });
+// }
+
+// function updateTaskFields(taskId, newKeyValuePairs) {
+//   return async function thunk(dispatch, getState) {
+//     const payload = {
+//       taskId: taskId,
+//       newKeyValuePairs: newKeyValuePairs,
+//     };
+
+//     dispatch(_updateTaskFields(payload));
+//     // TODO: update database
+//   };
+// }
+
+// function deleteTask(taskId) {
+//   return async function thunk(dispatch, getState) {
+//     dispatch(_deleteTask(taskId));
+//     // TODO: update database
+//   };
+// }
+
+// function deleteCompletedTasks() {
+//   return async function thunk(dispatch, getState) {
+//     const tasks = getState().tasks;
+//     const completedTasks = tasks.filter((each) => each.isCompleted);
+
+//     // remove completed tasks from timetable matrix
+//     const values = [];
+//     for (const completedTask of completedTasks) {
+//       const { row, col, timeUnits } = completedTask;
+
+//       for (let i = 0; i < timeUnits; i++) {
+//         values.push(row + i, col, "0");
+//       }
+//     }
+
+//     dispatch(setMatrix(values));
+//     dispatch(_deleteCompletedTasks());
+//     // TODO: update database
+//   };
+// }
+
+// function databaseHelper(dispatch, getState, httpVerb, key, value) {
+//   if (
+//     httpVerb !== "GET" &&
+//     httpVerb !== "PUT" &&
+//     httpVerb !== "POST" &&
+//     httpVerb !== "DELETE"
+//   ) {
+//     throw Error("Invalid HTTP verb");
+//   }
+
+//   const { userId } = getState().user;
+//   let pluralType = "";
+
+//   if (key === "link" || key === "note" || key === "task") {
+//     pluralType = key + "s";
+//   } else if (key === "links" || key === "notes" || key === "tasks") {
+//     pluralType = key;
+//   }
+
+//   dispatch(updateDataStatus({ [pluralType]: "UPDATING" }));
+
+//   fetch(`/api/private/${pluralType}`, {
+//     method: httpVerb,
+//     headers: {
+//       Accept: "application/json",
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({ userId: userId, [key]: value }),
+//   })
+//     .then((res) => res.json())
+//     .then((json) => {
+//       if (json.error) {
+//         dispatch(updateDataStatus({ [pluralType]: "OUT_OF_SYNC" }));
+//         alert(json.error);
+//         return;
+//       }
+
+//       dispatch(updateDataStatus({ [pluralType]: "IN_SYNC" }));
+//     });
+// }
+
+// export {
+//   tasksSlice,
+//   addTask,
+//   updateTaskFields,
+//   deleteTask,
+// };
 export default tasksSlice.reducer;
+
+
+// ============
+
+
+
+// setTasks: (state, action) => action.payload,
+// _addTask: (state, action) => {
+//   const newTask = action.payload;
+//   return [...state, newTask];
+// },
+// _updateTaskFields: (state, action) => {
+//   const { taskId, newKeyValuePairs } = action.payload;
+
+//   // cannot update fields of EMPTY_TASK
+//   if (taskId === "0") {
+//     return state;
+//   }
+
+//   // deep copy
+//   const tasks = state;
+//   const newTasks = [];
+//   for (const task of tasks) {
+//     if (task._id !== taskId) {
+//       newTasks.push({ ...task });
+//       continue;
+//     }
+
+//     const newTask = {};
+
+//     for (const [key, value] of Object.entries(task)) {
+//       if (key in newKeyValuePairs) {
+//         newTask[key] = newKeyValuePairs[key];
+//       } else {
+//         newTask[key] = value;
+//       }
+//     }
+
+//     newTasks.push(newTask);
+//   }
+
+//   return newTasks;
+// },
+// _deleteTask: (state, action) => {
+//   const tasks = state;
+//   const taskId = action.payload;
+//   return tasks.filter((each) => each._id !== taskId);
+// },
+// _deleteCompletedTasks: (state, action) => {
+//   const tasks = state;
+//   return tasks.filter((each) => !each.isCompleted);

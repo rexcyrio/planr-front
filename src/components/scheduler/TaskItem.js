@@ -37,22 +37,10 @@ TaskItem.propTypes = {
 
     isCompleted: PropTypes.bool.isRequired,
   }).isRequired,
-
-  // _setMatrix: PropTypes.func.isRequired,
-  // _setTask: PropTypes.func.isRequired,
-  // matrix: PropTypes.array.isRequired,
-  // deleteTask: PropTypes.func.isRequired,
-  // setTaskFields: PropTypes.func.isRequired,
 };
 
-function TaskItem({
-  self,
-  // _setMatrix,
-  // _setTask,
-  // matrix,
-  // deleteTask,
-  // setTaskFields,
-}) {
+
+function TaskItem({ self }) {
   const dispatch = useDispatch();
   const themeState = useSelector((state) => state.theme);
   const [isMouseOver, setIsMouseOver] = useState(false);

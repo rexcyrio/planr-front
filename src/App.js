@@ -1,4 +1,6 @@
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import NavBar from "./components/layout/NavBar";
 import Login from "./pages/Login";
@@ -6,14 +8,11 @@ import NoMatch from "./pages/NoMatch";
 import Private from "./pages/Private";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-
 import {
   setIsAuthenticated,
   setLoggedInUsername,
   setUserId,
 } from "./store/slices/userSlice";
-import { useDispatch, useSelector } from "react-redux";
 
 const theme = createTheme({
   palette: {
@@ -33,20 +32,9 @@ const theme = createTheme({
 });
 
 function App() {
-  const user = useSelector((state) => state.user);
+  const { isAuthenticated } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // const [loggedInUsername, setLoggedInUsername] = useState(null);
-  // const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  // const value = {
-  //   isAuthenticated: isAuthenticated,
-  //   loggedInUsername: loggedInUsername,
-  //   userId,
-  //   setLoggedInUsername: setLoggedInUsername,
-  //   setIsAuthenticated: setIsAuthenticated,
-  //   setUserId,
-  // };
 
   useEffect(() => {
     fetch("/api/is-authenticated", {
@@ -66,7 +54,7 @@ function App() {
   }, []);
 
   function makePrivate(component) {
-    if (user.isAuthenticated) {
+    if (isAuthenticated) {
       return component;
     } else {
       return <Navigate replace to="/" />;
@@ -74,7 +62,7 @@ function App() {
   }
 
   function makePublic(component) {
-    if (!user.isAuthenticated) {
+    if (!isAuthenticated) {
       return component;
     } else {
       return <Navigate replace to="/" />;
@@ -91,7 +79,7 @@ function App() {
             <Route
               path="/"
               element={
-                user.isAuthenticated ? (
+                isAuthenticated ? (
                   <Navigate replace to="/private" />
                 ) : (
                   <Navigate replace to="/login" />
@@ -114,4 +102,3 @@ function App() {
 }
 
 export default App;
-//test

@@ -13,13 +13,17 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { taskAddition } from "../../store/slices/tasksSlice";
+import { useDispatch, useSelector } from "react-redux";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 function TaskCreator() {
   const dispatch = useDispatch();
+  const moduleCodes = useSelector((state) =>
+    Object.keys(state.theme.mappingModuleCodeToColourName)
+  );
+
   const [name, setName] = useState("");
   const [dueDate, setDueDate] = useState(getDateNowString());
   const [dueTime, setDueTime] = useState("23:59");
@@ -45,6 +49,7 @@ function TaskCreator() {
 
     setUrlState("NONE");
     setDurationState("NONE");
+    setUrlState("NONE");
   }
 
   function handleOpen() {
@@ -128,11 +133,11 @@ function TaskCreator() {
                 onChange={(e) => setModuleCode(e.target.value)}
                 required
               >
-                {/* TODO: update module codes */}
-                <MenuItem value={"Others"}>Others</MenuItem>
-                <MenuItem value={"CS1101S"}>CS1101S</MenuItem>
-                <MenuItem value={"CS1231S"}>CS1231S</MenuItem>
-                <MenuItem value={"MA1521"}>MA1521</MenuItem>
+                {moduleCodes.map((moduleCode) => (
+                  <MenuItem key={moduleCode} value={moduleCode}>
+                    {moduleCode}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <TextField

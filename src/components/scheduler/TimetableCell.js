@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,8 +53,8 @@ TimetableCell.propTypes = {
 function TimetableCell({ self, row, col }) {
   const dispatch = useDispatch();
   const matrix = useSelector((state) => state.matrix);
-  const tasks = useSelector((state) => state.tasks);
   const themeState = useSelector((state) => state.theme);
+
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [openPopover, setOpenPopover] = useState(false);
@@ -73,23 +73,22 @@ function TimetableCell({ self, row, col }) {
     setIsMouseOver(false);
   }
 
-  function getTaskID(row, col) {
-    return matrix[row][col];
-  }
-
-  function getNumberOfAvailableTimeUnits(row, col) {
-    if (getTaskID(row, col) !== "0") {
+  const numberOfAvailableTimeUnits = useMemo(() => {
+    function getId(row, col) {
+      return matrix[row][col];
+    }
+    if (getId(row, col) !== "0") {
       return 0;
     }
 
     let rowPointer = row;
-    while (rowPointer + 1 < 48 && getTaskID(rowPointer + 1, col) === "0") {
+    while (rowPointer + 1 < 48 && getId(rowPointer + 1, col) === "0") {
       rowPointer += 1;
     }
     return rowPointer - row + 1;
-  }
+  }, [row, col, matrix]);
 
-  const openPopoverHandler = (event) => {
+  const openPopoverHandler = () => {
     setOpenPopover(true);
   };
 
@@ -113,7 +112,7 @@ function TimetableCell({ self, row, col }) {
     () => ({
       accept: "TASK",
       drop: (item) => {
-        const { _id: taskID, timeUnits } = item.task;
+        const { _id:taskID, timeUnits } = item.task;
 
         // add task to matrix
         const values = [];
@@ -130,24 +129,45 @@ function TimetableCell({ self, row, col }) {
       hover: (item) => {
         // update task silhouette
         const { timeUnits } = item.task;
-        setDroppingTaskTimeUnits(timeUnits);
+        if (droppingTaskTimeUnits !== timeUnits) {
+          setDroppingTaskTimeUnits(timeUnits);
+        }
       },
       canDrop: (item) => {
         const { timeUnits } = item.task;
-        return timeUnits <= getNumberOfAvailableTimeUnits(row, col);
+        return timeUnits <= numberOfAvailableTimeUnits;
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
       }),
     }),
-    [matrix, tasks]
+    [matrix]
   );
 
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
       type: "TASK",
-      item: { task: self },
+      item: () => {
+        setTimeout(() => {
+          // temporarily set taskId to "0"
+          const values = [];
+
+          for (let i = 0; i < self.timeUnits; i++) {
+            values.push([row + i, col, "0"]);
+          }
+          dispatch(rebuildMatrix(values));
+
+          dispatch(
+            updateTaskFields(self._id, {
+              row: -1,
+              col: -1,
+            })
+          );
+        }, 0);
+
+        return { task: self };
+      },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
@@ -159,24 +179,6 @@ function TimetableCell({ self, row, col }) {
   useEffect(() => {
     preview(getEmptyImage(), { captureDraggingState: true });
   }, [preview]);
-
-  useEffect(() => {
-    if (isDragging) {
-      if (isMouseOver) {
-        setIsMouseOver(false);
-      }
-
-      // temporarily set taskID to "0"
-      const values = [];
-
-      for (let i = 0; i < self.timeUnits; i++) {
-        values.push([row + i, col, "0"]);
-      }
-
-      dispatch(rebuildMatrix(values));
-      dispatch(updateTaskFields(self._id, { row: -1, col: -1 }));
-    }
-  }, [isDragging]);
 
   return (
     <>
@@ -275,13 +277,7 @@ function TimetableCell({ self, row, col }) {
                 <strong>{self.moduleCode}</strong>
               </p>
               <div>
-                <TaskEditor
-                  self={self}
-                  // _setMatrix={_setMatrix}
-                  // _setTask={_setTask}
-                  // matrix={matrix}
-                  // deleteTask={deleteTask}
-                />
+                <TaskEditor self={self} />
                 {self.isCompleted ? (
                   <Tooltip title="Restore task">
                     <IconButton size="small" onClick={markTaskAsIncomplete}>
@@ -303,16 +299,14 @@ function TimetableCell({ self, row, col }) {
             </p>
             <p>Duration: {self.durationHours} hours</p>
             <p>Status: {self.isCompleted ? "Completed" : "Not Completed"}</p>
-            {self.links.map((link) => {
-              return (
-                <React.Fragment key={link._id}>
-                  <a href={link.url} rel="noreferrer noopener" target="_blank">
-                    {link.name}
-                  </a>
-                  <br />
-                </React.Fragment>
-              );
-            })}
+            {self.links.map((link) => (
+              <React.Fragment key={link._id}>
+                <a href={link.url} rel="noreferrer noopener" target="_blank">
+                  {link.name}
+                </a>
+                <br />
+              </React.Fragment>
+            ))}
           </Box>
         </Popover>
       )}
