@@ -18,7 +18,13 @@ import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./Links.module.css";
 import { Alert } from "@mui/material";
-import DataStatus from "../helperComponents/DataStatus";
+import DataStatus, {
+  FETCHING,
+  FETCH_SUCCESS,
+  UPDATE_FAILURE,
+  UPDATE_SUCCESS,
+  UPDATING,
+} from "../helperComponents/DataStatus";
 import LinksList from "./LinksList";
 import { useSelector } from "react-redux";
 
@@ -30,8 +36,7 @@ function Links() {
   const [add_open, add_setOpen] = useState(false);
   const [edit_open, edit_setOpen] = useState(false);
   const [tempLinks, setTempLinks] = useState([]);
-  // INITIAL_LOAD, LOAD_FAILED, IN_SYNC, OUT_OF_SYNC, UPDATING
-  const [dataState, setDataState] = useState("INITIAL_LOAD");
+  const [dataState, setDataState] = useState(FETCHING);
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   useEffect(() => {
@@ -39,7 +44,7 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         setLinks(json.links);
-        setDataState("IN_SYNC");
+        setDataState(FETCH_SUCCESS);
       });
   }, []);
 
@@ -98,7 +103,7 @@ function Links() {
         newLinks.push(newLink);
       }
 
-      setDataState("UPDATING");
+      setDataState(UPDATING);
       updateLinksInDatabase(newLinks);
       setLinks(newLinks);
     }
@@ -116,13 +121,13 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
-          setDataState("OUT_OF_SYNC");
+          setDataState(UPDATE_FAILURE);
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setDataState("IN_SYNC");
+        setDataState(UPDATE_SUCCESS);
       });
   }
 
@@ -183,7 +188,7 @@ function Links() {
       newLink.name = newURL;
     }
 
-    setDataState("UPDATING");
+    setDataState(UPDATING);
     addLinkToDatabase(newLink);
     setLinks([...links, newLink]);
   }
@@ -200,13 +205,13 @@ function Links() {
       .then((res) => res.json())
       .then((json) => {
         if (json.error) {
-          setDataState("OUT_OF_SYNC");
+          setDataState(UPDATE_FAILURE);
           setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
 
-        setDataState("IN_SYNC");
+        setDataState(UPDATE_SUCCESS);
       });
   }
 
