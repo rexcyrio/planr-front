@@ -12,8 +12,8 @@ import logo from "./../../icons/logo.svg";
 import styles from "./NavBar.module.css";
 
 function NavBar() {
-  const { isAuthenticated } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   function logoutNow(event) {

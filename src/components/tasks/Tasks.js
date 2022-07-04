@@ -20,16 +20,16 @@ import TaskItem from "./TaskItem";
 const EMPTY_TASK_ITEM = <TaskItem self={EMPTY_TASK} />;
 
 function Tasks() {
+  const dispatch = useDispatch();
   const status = useSelector((state) => state.tasks.status);
   const tasks = useSelector((state) => state.tasks.data);
-  const dispatch = useDispatch();
 
   //const [modules, setModules] = useState([]);
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   useEffect(() => {
     dispatch(fetchTasks());
-  }, []);
+  }, [dispatch]);
 
   // ==========================================================================
   // Task Helper Functions

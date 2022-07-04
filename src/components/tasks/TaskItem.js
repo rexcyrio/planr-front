@@ -14,9 +14,9 @@ import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAccentColour,
-  getBackgroundColour,
+  getBackgroundColour
 } from "../../helper/colourHelper";
-import { updateTaskFields } from "../../store/slices/tasksSlice";
+import { markTaskAsComplete, markTaskAsIncomplete } from "../../store/slices/tasksSlice";
 import TaskEditor from "./TaskEditor";
 import classes from "./TaskItem.module.css";
 
@@ -44,6 +44,7 @@ function TaskItem({ self }) {
   const dispatch = useDispatch();
   const themeState = useSelector((state) => state.theme);
   const [isMouseOver, setIsMouseOver] = useState(false);
+  
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
       // "type" is required. It is used by the "accept" specification of drop targets.
@@ -58,13 +59,6 @@ function TaskItem({ self }) {
     [self]
   );
 
-  function markTaskAsComplete() {
-    dispatch(updateTaskFields(self._id, { isCompleted: true }));
-  }
-
-  function markTaskAsIncomplete() {
-    dispatch(updateTaskFields(self._id, { isCompleted: false }));
-  }
 
   function getDraggableState() {
     if (self.isCompleted) {
@@ -194,13 +188,13 @@ function TaskItem({ self }) {
 
             {self.isCompleted ? (
               <Tooltip title="Restore task">
-                <IconButton size="small" onClick={markTaskAsIncomplete}>
+                <IconButton size="small" onClick={() => dispatch(markTaskAsIncomplete(self._id))}>
                   <RestoreIcon />
                 </IconButton>
               </Tooltip>
             ) : (
               <Tooltip title="Mark task as complete">
-                <IconButton size="small" onClick={markTaskAsComplete}>
+                <IconButton size="small" onClick={() => dispatch(markTaskAsComplete(self._id))}>
                   <DoneIcon />
                 </IconButton>
               </Tooltip>

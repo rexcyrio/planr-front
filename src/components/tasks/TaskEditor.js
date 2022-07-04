@@ -16,8 +16,8 @@ import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { rebuildMatrix } from "../../store/slices/matrixSlice";
-import { deleteTask, updateTasks } from "../../store/slices/tasksSlice";
+import { setMatrix } from "../../store/slices/matrixSlice";
+import { deleteTask, updateTaskFields } from "../../store/slices/tasksSlice";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 TaskEditor.propTypes = {
@@ -134,7 +134,7 @@ function TaskEditor({ self }) {
           values.push([row + newTask.timeUnits + i, col, "0"]);
         }
 
-        dispatch(rebuildMatrix(values));
+        dispatch(setMatrix(values));
       } else if (newTask.timeUnits === self.timeUnits) {
         // do nothing
       } else if (newTask.timeUnits > self.timeUnits) {
@@ -150,7 +150,7 @@ function TaskEditor({ self }) {
             values.push([row + self.timeUnits + i, col, taskID]);
           }
 
-          dispatch(rebuildMatrix(values));
+          dispatch(setMatrix(values));
         } else {
           // case 3: user lengthened time needed for task, NOT enough available time units
           // ==> unschedule task from timetable
@@ -160,7 +160,7 @@ function TaskEditor({ self }) {
             values.push([row + i, col, "0"]);
           }
 
-          dispatch(rebuildMatrix(values));
+          dispatch(setMatrix(values));
 
           // we want to update the newTask to be as such:
           //
@@ -180,7 +180,7 @@ function TaskEditor({ self }) {
     }
 
     // updating tasks array
-    dispatch(updateTasks(taskID, newTask));
+    dispatch(updateTaskFields(taskID, {...newTask}));
 
     // no need to call `resetState()` here since the fields already represent
     // the correct information even on immediate reopen
@@ -300,7 +300,7 @@ function TaskEditor({ self }) {
                 onClick={(e) => {
                   e.preventDefault();
                   handleClose();
-                  dispatch(deleteTask(self));
+                  dispatch(deleteTask(self._id));
                 }}
               >
                 Delete
