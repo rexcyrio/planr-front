@@ -15,6 +15,7 @@ const matrixSlice = createSlice({
   name: "matrix",
   initialState,
   reducers: {
+    _setMatrixFromDatabase: (state, action) => action.payload,
     _setMatrix: (state, action) => {
       const matrix = state;
       const values = action.payload;
@@ -35,6 +36,9 @@ const matrixSlice = createSlice({
   },
 });
 
+// should only be used inside `tasksSlice` to set the matrix after fetching
+export const { _setMatrixFromDatabase } = matrixSlice.actions;
+
 // private function
 const { _setMatrix } = matrixSlice.actions;
 
@@ -54,7 +58,7 @@ const updateTimetableInDatabase = createAsyncThunk(
   async (_, { getState }) => {
     return new Promise((resolve, reject) => {
       const { userId } = getState().user;
-      const newMatrix = getState().matrix.data
+      const newMatrix = getState().matrix;
 
       fetch("/api/private/timetable", {
         method: "PUT",
