@@ -1,11 +1,11 @@
 import React from "react";
 import styles from "./LinksList.module.css";
 import Stack from "@mui/material/Stack";
-import PropTypes from "prop-types";
 import LinkItem from "./LinkItem";
 import generateSkeletons from "../../helper/skeletonHelper";
 import TasksLinks from "./TasksLinks";
 import { FETCHING, FETCH_FAILURE } from "../helperComponents/DataStatus";
+import { useSelector } from "react-redux";
 
 const DUMMY_LINK_ITEM = (
   <LinkItem
@@ -18,18 +18,15 @@ const DUMMY_LINK_ITEM = (
   />
 );
 
-LinksList.propTypes = {
-  dataState: PropTypes.string,
-  links: PropTypes.array,
-};
-
-function LinksList({ dataState, links }) {
+function LinksList() {
+  const links = useSelector((state) => state.links.permLinks);
+  const status = useSelector((state) => state.links.status);
   return (
     <div className={styles["links-container"]}>
       <Stack spacing={1} sx={{ scrollSnapType: "y mandatory" }}>
-        {dataState === FETCH_FAILURE ? (
+        {status === FETCH_FAILURE ? (
           <div>Unable to retrieve data.</div>
-        ) : dataState === FETCHING ? (
+        ) : status === FETCHING ? (
           generateSkeletons(3, DUMMY_LINK_ITEM)
         ) : (
           <>
