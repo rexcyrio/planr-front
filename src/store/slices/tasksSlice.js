@@ -8,7 +8,7 @@ import {
   UPDATE_SUCCESS_REDUCER,
   UPDATING_REDUCER
 } from "../storeHelpers/statusHelpers";
-import { setMatrix } from "./matrixSlice";
+import { setMatrix, _setMatrixFromDatabase } from "./matrixSlice";
 
 const initialState = {
   data: [],
@@ -173,7 +173,7 @@ export const fetchTasks = createAsyncThunk(
           const [databaseTasks, databaseTimetable] = items;
 
           dispatch(_setTasks(databaseTasks));
-          dispatch(setMatrix(databaseTimetable));
+          dispatch(_setMatrixFromDatabase(databaseTimetable));
           resolve();
         })
         .catch((error) => {
