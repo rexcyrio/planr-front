@@ -59,20 +59,20 @@ const tasksSlice = createSlice({
       state.data = cleanedTasks;
       return state;
     },
-    extraReducers: (builder) => {
-      builder
-        .addCase(fetchTasks.pending, FETCHING_REDUCER)
-        .addCase(fetchTasks.fulfilled, FETCH_SUCCESS_REDUCER)
-        .addCase(fetchTasks.rejected, FETCH_FAILURE_REDUCER)
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTasks.pending, FETCHING_REDUCER)
+      .addCase(fetchTasks.fulfilled, FETCH_SUCCESS_REDUCER)
+      .addCase(fetchTasks.rejected, FETCH_FAILURE_REDUCER)
 
-        .addCase(updateTasksInDatabase.pending, UPDATING_REDUCER)
-        .addCase(updateTasksInDatabase.fulfilled, UPDATE_SUCCESS_REDUCER)
-        .addCase(updateTasksInDatabase.rejected, UPDATE_FAILURE_REDUCER)
+      .addCase(updateTasksInDatabase.pending, UPDATING_REDUCER)
+      .addCase(updateTasksInDatabase.fulfilled, UPDATE_SUCCESS_REDUCER)
+      .addCase(updateTasksInDatabase.rejected, UPDATE_FAILURE_REDUCER)
 
-        .addCase(addTaskToDatabase.pending, UPDATING_REDUCER)
-        .addCase(addTaskToDatabase.fulfilled, UPDATE_SUCCESS_REDUCER)
-        .addCase(addTaskToDatabase.rejected, UPDATE_FAILURE_REDUCER);
-    },
+      .addCase(addTaskToDatabase.pending, UPDATING_REDUCER)
+      .addCase(addTaskToDatabase.fulfilled, UPDATE_SUCCESS_REDUCER)
+      .addCase(addTaskToDatabase.rejected, UPDATE_FAILURE_REDUCER);
   },
 });
 
