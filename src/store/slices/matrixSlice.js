@@ -1,4 +1,4 @@
-const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 function defaultMatrix(val) {
   const arr = [];

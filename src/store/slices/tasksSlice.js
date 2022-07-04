@@ -1,17 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { inSync, outOfSync } from "../storeHelpers/statusHelpers";
 import { rebuildMatrix, setMatrix } from "./matrixSlice";
-
-////////////////////////////////////////////////////////////////////////////////
-// Case reducers(might move to helper for reuse)
-////////////////////////////////////////////////////////////////////////////////
-
-const outOfSync = (state) => {
-  state.status = "OUT_OF_SYNC";
-};
-
-const inSync = (state) => {
-  state.status = "IN_SYNC";
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Slice
@@ -43,9 +32,6 @@ const tasksSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTasks.pending, (state) => {
-        state.status = "INITIAL_LOAD";
-      })
       .addCase(fetchTasks.fulfilled, (state) => {
         state.status = "IN_SYNC";
       })
