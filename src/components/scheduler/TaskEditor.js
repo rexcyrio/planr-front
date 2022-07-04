@@ -300,7 +300,6 @@ function TaskEditor({ self }) {
                 onClick={(e) => {
                   e.preventDefault();
                   handleClose();
-                  deleteTask(self);
                   dispatch(deleteTask(self));
                 }}
               >
