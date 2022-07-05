@@ -38,7 +38,7 @@ function Links() {
   const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchPermLinks);
+    dispatch(fetchPermLinks());
   }, [dispatch]);
 
   function openAllLinks() {
