@@ -6,7 +6,7 @@ import {
   FETCH_SUCCESS_REDUCER,
   UPDATE_FAILURE_REDUCER,
   UPDATE_SUCCESS_REDUCER,
-  UPDATING_REDUCER
+  UPDATING_REDUCER,
 } from "../storeHelpers/statusHelpers";
 import { setMatrix, _setMatrixFromDatabase } from "./matrixSlice";
 
@@ -31,6 +31,7 @@ const tasksSlice = createSlice({
     _updateTaskFields: (state, action) => {
       const tasks = state.data;
       const { taskId, newKeyValuePairs } = action.payload;
+      console.log(newKeyValuePairs);
 
       // cannot update fields of EMPTY_TASK
       if (taskId === "0") {
@@ -38,7 +39,7 @@ const tasksSlice = createSlice({
       }
 
       const index = tasks.findIndex((each) => each._id === taskId);
-      for (const [key, value] of newKeyValuePairs) {
+      for (const [key, value] of Object.entries(newKeyValuePairs)) {
         tasks[index][key] = value;
       }
 
