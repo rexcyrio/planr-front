@@ -25,7 +25,7 @@ const linksSlice = createSlice({
       return state;
     },
     _addNewPermLink: (state, action) => {
-      state.push(action.payload);
+      state.permLinks.push(action.payload);
       return state;
     },
     _saveEditedPermLinks: (state, action) => {
@@ -115,10 +115,21 @@ export function saveEditedPermLinks(tempLinks) {
 export const fetchPermLinks = createAsyncThunk(
   "links/fetchPermLinks",
   async (_, { dispatch, getState }) => {
-    const userId = getState().user.userId;
-    const res = await fetch(`/api/private/links?id=${userId}`);
-    const json = res.json();
-    dispatch(_setPermLinks(json.links));
+    return new Promise((resolve, reject) => {
+      const { userId } = getState().user;
+
+      fetch(`/api/private/links?id=${userId}`)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.error) {
+            alert(json.error);
+            reject(json.error);
+          }
+
+          dispatch(_setPermLinks(json.links));
+          resolve();
+        });
+    });
   }
 );
 
@@ -154,7 +165,7 @@ export const addLinkToDatabase = createAsyncThunk(
   "links/addLinkToDatabase",
   async (link, { getState }) => {
     return new Promise((resolve, reject) => {
-      const userId = getState.user.userId;
+      const userId = getState().user.userId;
       fetch("/api/private/links", {
         method: "POST",
         headers: {
