@@ -76,12 +76,28 @@ const paraisoTheme = {
   darkPink: "#761242",
 };
 
-const allThemes = {
+export const allThemes = {
   Eighties: eightiesTheme,
   Paraiso: paraisoTheme,
 };
 
-function getBackgroundColour(themeState, self) {
+export const allColourNames = [
+  "lightRed",
+  "lightOrange",
+  "lightYellow",
+  "lightGreen",
+  "lightCyan",
+  "lightBlue",
+  "lightPurple",
+  "lightBrown",
+  "lightPink",
+];
+
+export function getBackgroundColour(
+  themeName,
+  mappingModuleCodeToColourName,
+  self
+) {
   // check for EMPTY_TASK ==> used in <Skeleton>
   if (self._id === "0") {
     return "white";
@@ -91,14 +107,17 @@ function getBackgroundColour(themeState, self) {
     return "lightgrey";
   }
 
-  const { mappingModuleCodeToColourName } = themeState;
   const { moduleCode } = self;
   const colourName = mappingModuleCodeToColourName[moduleCode];
-
-  return getHexColour(themeState, colourName);
+  const hexColour = allThemes[themeName][colourName];
+  return hexColour;
 }
 
-function getAccentColour(themeState, self) {
+export function getAccentColour(
+  themeName,
+  mappingModuleCodeToColourName,
+  self
+) {
   // check for EMPTY_TASK ==> used in <Skeleton>
   if (self._id === "0") {
     return "white";
@@ -108,24 +127,10 @@ function getAccentColour(themeState, self) {
     return "grey";
   }
 
-  const { mappingModuleCodeToColourName } = themeState;
   const { moduleCode } = self;
   const colourName = mappingModuleCodeToColourName[moduleCode];
-
   // "lightPink" ==> "darkPink"
   const accentColourName = "dark" + colourName.slice(5);
-
-  return getHexColour(themeState, accentColourName);
+  const hexColour = allThemes[themeName][accentColourName];
+  return hexColour;
 }
-
-function getHexColour(themeState, colourName) {
-  const { themeName } = themeState;
-  return allThemes[themeName][colourName];
-}
-
-function getCurrentTheme(themeState) {
-  const { themeName } = themeState;
-  return allThemes[themeName];
-}
-
-export { getBackgroundColour, getAccentColour, getHexColour, getCurrentTheme };

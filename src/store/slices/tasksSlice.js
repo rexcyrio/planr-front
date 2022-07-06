@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { FETCHING } from "../../components/helperComponents/DataStatus";
+import formatErrorMessage from "../../helper/formatErrorMessage";
 import {
   FETCHING_REDUCER,
   FETCH_FAILURE_REDUCER,
@@ -9,6 +10,7 @@ import {
   UPDATING_REDUCER,
 } from "../storeHelpers/statusHelpers";
 import { setMatrix, _setMatrixFromDatabase } from "./matrixSlice";
+import { _setModules } from "./modulesSlice";
 
 const initialState = {
   data: [],
@@ -77,24 +79,21 @@ const tasksSlice = createSlice({
   },
 });
 
+export const { _setTasks } = tasksSlice.actions;
+
 // private functions
-const {
-  _setTasks,
-  _addTask,
-  _updateTaskFields,
-  _deleteTask,
-  _deleteCompletedTasks,
-} = tasksSlice.actions;
+const { _addTask, _updateTaskFields, _deleteTask, _deleteCompletedTasks } =
+  tasksSlice.actions;
 
 export function addTask(newTask) {
-  return async function thunk(dispatch, getState) {
+  return function thunk(dispatch, getState) {
     dispatch(_addTask(newTask));
     dispatch(addTaskToDatabase(newTask));
   };
 }
 
 export function updateTaskFields(taskId, newKeyValuePairs) {
-  return async function thunk(dispatch, getState) {
+  return function thunk(dispatch, getState) {
     const payload = {
       taskId: taskId,
       newKeyValuePairs: newKeyValuePairs,
@@ -106,7 +105,7 @@ export function updateTaskFields(taskId, newKeyValuePairs) {
 }
 
 export function deleteTask(taskId) {
-  return async function thunk(dispatch, getState) {
+  return function thunk(dispatch, getState) {
     const tasks = getState().tasks.data;
     const task = tasks.find((each) => each._id === taskId);
     const { row, col, timeUnits } = task;
@@ -128,7 +127,7 @@ export function deleteTask(taskId) {
 }
 
 export function deleteCompletedTasks() {
-  return async function thunk(dispatch, getState) {
+  return function thunk(dispatch, getState) {
     const tasks = getState().tasks;
     const completedTasks = tasks.filter((each) => each.isCompleted);
 
@@ -163,94 +162,91 @@ export function markTaskAsIncomplete(taskId) {
 export const fetchTasks = createAsyncThunk(
   "tasks/fetchTasks",
   async (_, { dispatch, getState }) => {
-    return new Promise((resolve, reject) => {
-      const { userId } = getState().user;
+    const { userId } = getState().user;
 
-      Promise.all([
+    try {
+      const items = await Promise.all([
         getItemFromDatabase("tasks", userId),
+        getItemFromDatabase("modules", userId),
         getItemFromDatabase("timetable", userId),
-      ])
-        .then((items) => {
-          const [databaseTasks, databaseTimetable] = items;
+      ]);
 
-          dispatch(_setTasks(databaseTasks));
-          dispatch(_setMatrixFromDatabase(databaseTimetable));
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+      const [databaseTasks, databaseModules, databaseTimetable] = items;
+
+      dispatch(_setTasks(databaseTasks));
+      dispatch(_setModules(databaseModules));
+      dispatch(_setMatrixFromDatabase(databaseTimetable));
+    } catch (error) {
+      alert(error);
+      console.error(error);
+      throw error;
+    }
   }
 );
 
 async function getItemFromDatabase(type, userId) {
-  return new Promise((resolve, reject) => {
-    fetch(`/api/private/${type}?id=${userId}`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.error) {
-          alert(json.error);
-          reject(json.error);
-        }
+  const res = await fetch(`/api/private/${type}?id=${userId}`);
+  const json = await res.json();
 
-        resolve(json[type]);
-      });
-  });
+  if (json.error) {
+    throw new Error(formatErrorMessage(json.error));
+  }
+
+  return json[type];
 }
 
 const updateTasksInDatabase = createAsyncThunk(
   "tasks/updateTasksInDatabase",
   async (_, { getState }) => {
-    return new Promise((resolve, reject) => {
-      const { userId } = getState().user;
-      const tasks = getState().tasks.data;
+    const { userId } = getState().user;
+    const tasks = getState().tasks.data;
 
-      fetch("/api/private/tasks", {
+    try {
+      const res = await fetch("/api/private/tasks", {
         method: "PUT",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId, tasks }),
-      })
-        .then((res) => res.json())
-        .then((json) => {
-          if (json.error) {
-            alert(json.error);
-            reject(json.error);
-          }
+      });
+      const json = await res.json();
 
-          resolve();
-        });
-    });
+      if (json.error) {
+        throw new Error(formatErrorMessage(json.error));
+      }
+    } catch (error) {
+      alert(error);
+      console.error(error);
+      throw error;
+    }
   }
 );
 
 const addTaskToDatabase = createAsyncThunk(
   "tasks/addTaskToDatabase",
   async (task, { getState }) => {
-    return new Promise((resolve, reject) => {
-      const { userId } = getState().user;
+    const { userId } = getState().user;
 
-      fetch("/api/private/tasks", {
+    try {
+      const res = await fetch("/api/private/tasks", {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId, task }),
-      })
-        .then((res) => res.json())
-        .then((json) => {
-          if (json.error) {
-            alert(json.error);
-            reject(json.error);
-          }
+      });
+      const json = await res.json();
 
-          resolve();
-        });
-    });
+      if (json.error) {
+        throw new Error(formatErrorMessage(json.error));
+      }
+    } catch (error) {
+      alert(error);
+      console.error(error);
+      throw error;
+    }
   }
 );
 

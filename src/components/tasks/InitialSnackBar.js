@@ -1,11 +1,19 @@
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { FETCH_SUCCESS } from "../helperComponents/DataStatus";
 
 function InitialSnackBar() {
   const tasks = useSelector((state) => state.tasks.data);
-  const [open, setOpen] = useState(true);
+  const status = useSelector((state) => state.tasks.status);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (status === FETCH_SUCCESS) {
+      setOpen(true);
+    }
+  }, [status]);
 
   function handleClose() {
     setOpen(false);
@@ -24,6 +32,7 @@ function InitialSnackBar() {
       return `There are ${numberOfOutstandingTasks} outstanding tasks`;
     }
   }
+
   return (
     <Snackbar
       open={open}

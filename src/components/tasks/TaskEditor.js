@@ -42,6 +42,7 @@ TaskEditor.propTypes = {
 function TaskEditor({ self }) {
   const dispatch = useDispatch();
   const matrix = useSelector((state) => state.matrix);
+  
   const [name, setName] = useState(self.name);
   const [dueDate, setDueDate] = useState(self.dueDate);
   const [dueTime, setDueTime] = useState(self.dueTime);
@@ -65,8 +66,8 @@ function TaskEditor({ self }) {
     setLinkName("");
     setLinkURL("");
 
-    setUrlState("NONE");
     setDurationState("NONE");
+    setUrlState("NONE");
   }
 
   function handleOpen() {
@@ -121,7 +122,7 @@ function TaskEditor({ self }) {
       isCompleted: self.isCompleted,
     };
 
-    const { _id: taskID, row, col } = newTask;
+    const { _id: taskId, row, col } = newTask;
 
     if (row !== -1 && col !== -1) {
       // updating matrix
@@ -147,7 +148,7 @@ function TaskEditor({ self }) {
           const values = [];
 
           for (let i = 0; i < diff; i++) {
-            values.push([row + self.timeUnits + i, col, taskID]);
+            values.push([row + self.timeUnits + i, col, taskId]);
           }
 
           dispatch(setMatrix(values));
@@ -161,26 +162,14 @@ function TaskEditor({ self }) {
           }
 
           dispatch(setMatrix(values));
-
-          // we want to update the newTask to be as such:
-          //
-          // newTask = {
-          //   ...
-          //   row: -1,
-          //   col: -1,
-          //   ...
-          // }
-          //
-          // we are NOT using the variable `row` as a dynamic key,
-          // thus the strings "row" and "col"
-          newTask["row"] = -1;
-          newTask["col"] = -1;
+          newTask.row = -1;
+          newTask.col = -1;
         }
       }
     }
 
     // updating tasks array
-    dispatch(updateTaskFields(taskID, {...newTask}));
+    dispatch(updateTaskFields(taskId, newTask));
 
     // no need to call `resetState()` here since the fields already represent
     // the correct information even on immediate reopen

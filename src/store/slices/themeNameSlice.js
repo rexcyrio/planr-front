@@ -1,22 +1,22 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import formatErrorMessage from "../../helper/formatErrorMessage";
 
-const initialState = [];
+const initialState = "Eighties";
 
-const modulesSlice = createSlice({
-  name: "modules",
+const themeNameSlice = createSlice({
+  name: "tasks",
   initialState,
   reducers: {
-    _setModules: (state, action) => action.payload,
+    _setThemeName: (state, action) => action.payload,
   },
 });
 
-export const { _setModules } = modulesSlice.actions;
+export const { _setThemeName } = themeNameSlice.actions;
 
-export function setModules(newModuleItems) {
+export function setThemeName(themeName) {
   return function thunk(dispatch, getState) {
-    dispatch(_setModules(newModuleItems));
-    dispatch(setModulesInDatabase(newModuleItems));
+    dispatch(_setThemeName(themeName));
+    dispatch(setThemeNameInDatabase());
   };
 }
 
@@ -24,19 +24,20 @@ export function setModules(newModuleItems) {
 // Database thunks
 // ============================================================================
 
-const setModulesInDatabase = createAsyncThunk(
-  "tasks/setModulesInDatabase",
-  async (modules, { getState }) => {
+const setThemeNameInDatabase = createAsyncThunk(
+  "matrix/setThemeNameInDatabase",
+  async (_, { getState }) => {
     const { userId } = getState().user;
+    const themeName = getState().themeName;
 
     try {
-      const res = await fetch("/api/private/modules", {
+      const res = await fetch("/api/private/themeName", {
         method: "PUT",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId, modules }),
+        body: JSON.stringify({ userId, themeName }),
       });
       const json = await res.json();
 
@@ -51,4 +52,4 @@ const setModulesInDatabase = createAsyncThunk(
   }
 );
 
-export default modulesSlice.reducer;
+export default themeNameSlice.reducer;

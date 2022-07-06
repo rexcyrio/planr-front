@@ -1,9 +1,7 @@
 import InfoIcon from "@mui/icons-material/Info";
-import Alert from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
 import generateSkeletons from "../../helper/skeletonHelper";
@@ -12,10 +10,11 @@ import DataStatus, {
   FETCHING,
   FETCH_FAILURE,
 } from "../helperComponents/DataStatus";
-import styles from "./Tasks.module.css";
+import InitialSnackBar from "./InitialSnackBar";
 import TaskCreator from "./TaskCreator";
 import TaskDeleteCompleted from "./TaskDeleteCompleted";
 import TaskItem from "./TaskItem";
+import styles from "./Tasks.module.css";
 
 const EMPTY_TASK_ITEM = <TaskItem self={EMPTY_TASK} />;
 
@@ -24,16 +23,9 @@ function Tasks() {
   const status = useSelector((state) => state.tasks.status);
   const tasks = useSelector((state) => state.tasks.data);
 
-  //const [modules, setModules] = useState([]);
-  const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
-
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
-
-  // ==========================================================================
-  // Task Helper Functions
-  // ==========================================================================
 
   function getTaskItems() {
     const outstandingTasks = tasks.filter((each) => each.isCompleted === false);
@@ -56,26 +48,9 @@ function Tasks() {
     );
   }
 
-  // ==========================================================================
-  // Miscellaneous
-  // ==========================================================================
-
-  const closeSnackbar = () => {
-    setOpenSyncErrorSnackbar(false);
-  };
-
   return (
     <>
-      {/* {isLoaded && <InitialSnackBar />} */}
-      <Snackbar
-        open={openSyncErrorSnackbar}
-        autoHideDuration={6000}
-        onClose={closeSnackbar}
-      >
-        <Alert onClose={closeSnackbar} severity="error" sx={{ width: "100%" }}>
-          Something went wrong! Your notes might not be saved
-        </Alert>
-      </Snackbar>
+      <InitialSnackBar />
 
       <div className={styles.title}>
         <div className={styles["title-update-container"]}>
