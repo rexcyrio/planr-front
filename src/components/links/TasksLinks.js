@@ -1,29 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import LinkItem from "./LinkItem";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setTimetableColumn } from "../../store/slices/timeSlice";
 
 TasksLinks.propTypes = {
   emptyPermLinks: PropTypes.bool,
 };
 
 function TasksLinks(props) {
-  const [date, setDate] = useState(new Date());
-  const col = date.getDay() === 0 ? 6 : date.getDay() - 1;
+  const dispatch = useDispatch();
+  const timetableColumn = useSelector((state) => state.time.timetableColumn);
 
   // links from tasks that are scheduled today
   const tasksLinks = useSelector((state) => {
     return state.tasks.data
-      .filter((task) => task.col === col)
+      .filter((task) => task.col === timetableColumn)
       .flatMap((task) => task.links);
   });
 
   useEffect(() => {
     // set interval till the next day
     const interval = setInterval(() => {
-      // const d = new Date(); // test date change
-      // d.setHours(24);
-      setDate(new Date());
+      dispatch(setTimetableColumn());
     }, new Date(new Date().setHours(23, 59, 59, 1000)).getTime() - date.getTime());
 
     return () => clearInterval(interval);
