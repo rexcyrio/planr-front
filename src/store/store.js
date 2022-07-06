@@ -3,7 +3,8 @@ import matrixReducer from "./slices/matrixSlice";
 import modulesReducer from "./slices/modulesSlice";
 import NUSModsURLReducer from "./slices/NUSModsURLSlice";
 import tasksReducer from "./slices/tasksSlice";
-import themeReducer from "./slices/themeSlice";
+import themeNameReducer from "./slices/themeNameSlice";
+import mappingModuleCodeToColourNameReducer from "./slices/mappingModuleCodeToColourNameSlice";
 import userReducer from "./slices/userSlice";
 import linksReducer from "./slices/linksSlice";
 
@@ -12,10 +13,12 @@ export const store = configureStore({
     user: userReducer,
     links: linksReducer,
     tasks: tasksReducer,
-    theme: themeReducer,
     matrix: matrixReducer,
     modules: modulesReducer,
+
+    // settings
     NUSModsURL: NUSModsURLReducer,
-    // TODO: settings reducer
+    themeName: themeNameReducer,
+    mappingModuleCodeToColourName: mappingModuleCodeToColourNameReducer,
   },
 });

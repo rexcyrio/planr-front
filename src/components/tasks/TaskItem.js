@@ -12,11 +12,11 @@ import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
+import { getAccentColour, getBackgroundColour } from "../../helper/themeHelper";
 import {
-  getAccentColour,
-  getBackgroundColour
-} from "../../helper/colourHelper";
-import { markTaskAsComplete, markTaskAsIncomplete } from "../../store/slices/tasksSlice";
+  markTaskAsComplete,
+  markTaskAsIncomplete,
+} from "../../store/slices/tasksSlice";
 import TaskEditor from "./TaskEditor";
 import classes from "./TaskItem.module.css";
 
@@ -39,12 +39,14 @@ TaskItem.propTypes = {
   }).isRequired,
 };
 
-
 function TaskItem({ self }) {
   const dispatch = useDispatch();
-  const themeState = useSelector((state) => state.theme);
+  const themeName = useSelector((state) => state.themeName);
+  const mappingModuleCodeToColourName = useSelector(
+    (state) => state.mappingModuleCodeToColourName
+  );
   const [isMouseOver, setIsMouseOver] = useState(false);
-  
+
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
       // "type" is required. It is used by the "accept" specification of drop targets.
@@ -58,7 +60,6 @@ function TaskItem({ self }) {
     }),
     [self]
   );
-
 
   function getDraggableState() {
     if (self.isCompleted) {
@@ -103,7 +104,11 @@ function TaskItem({ self }) {
       <Paper onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <div
           style={{
-            backgroundColor: getBackgroundColour(themeState, self),
+            backgroundColor: getBackgroundColour(
+              themeName,
+              mappingModuleCodeToColourName,
+              self
+            ),
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -154,7 +159,11 @@ function TaskItem({ self }) {
               <div className={classes["task-paragraph"]}>
                 <span
                   style={{
-                    color: getAccentColour(themeState, self),
+                    color: getAccentColour(
+                      themeName,
+                      mappingModuleCodeToColourName,
+                      self
+                    ),
                   }}
                 >
                   [{self.moduleCode}]
@@ -165,7 +174,11 @@ function TaskItem({ self }) {
               <div>
                 <span
                   style={{
-                    color: getAccentColour(themeState, self),
+                    color: getAccentColour(
+                      themeName,
+                      mappingModuleCodeToColourName,
+                      self
+                    ),
                   }}
                 >
                   due on:
@@ -188,13 +201,19 @@ function TaskItem({ self }) {
 
             {self.isCompleted ? (
               <Tooltip title="Restore task">
-                <IconButton size="small" onClick={() => dispatch(markTaskAsIncomplete(self._id))}>
+                <IconButton
+                  size="small"
+                  onClick={() => dispatch(markTaskAsIncomplete(self._id))}
+                >
                   <RestoreIcon />
                 </IconButton>
               </Tooltip>
             ) : (
               <Tooltip title="Mark task as complete">
-                <IconButton size="small" onClick={() => dispatch(markTaskAsComplete(self._id))}>
+                <IconButton
+                  size="small"
+                  onClick={() => dispatch(markTaskAsComplete(self._id))}
+                >
                   <DoneIcon />
                 </IconButton>
               </Tooltip>

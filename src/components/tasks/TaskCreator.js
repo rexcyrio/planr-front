@@ -21,7 +21,7 @@ import TaskLinksCreator from "./TaskLinksCreator";
 function TaskCreator() {
   const dispatch = useDispatch();
   const moduleCodes = useSelector((state) =>
-    Object.keys(state.theme.mappingModuleCodeToColourName)
+    Object.keys(state.mappingModuleCodeToColourName)
   );
 
   const [name, setName] = useState("");
@@ -47,7 +47,6 @@ function TaskCreator() {
     setLinkName("");
     setLinkURL("");
 
-    setUrlState("NONE");
     setDurationState("NONE");
     setUrlState("NONE");
   }

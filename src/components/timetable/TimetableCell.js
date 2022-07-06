@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
-import { getBackgroundColour } from "../../helper/colourHelper";
+import { getBackgroundColour } from "../../helper/themeHelper";
 import { setMatrix } from "../../store/slices/matrixSlice";
 import {
   markTaskAsComplete,
@@ -57,7 +57,10 @@ TimetableCell.propTypes = {
 function TimetableCell({ self, row, col }) {
   const dispatch = useDispatch();
   const matrix = useSelector((state) => state.matrix);
-  const themeState = useSelector((state) => state.theme);
+  const themeName = useSelector((state) => state.themeName);
+  const mappingModuleCodeToColourName = useSelector(
+    (state) => state.mappingModuleCodeToColourName
+  );
 
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
   const [isMouseOver, setIsMouseOver] = useState(false);
@@ -108,19 +111,19 @@ function TimetableCell({ self, row, col }) {
     () => ({
       accept: "TASK",
       drop: (item) => {
-        const { _id: taskID, timeUnits } = item.task;
+        const { _id: taskId, timeUnits } = item.task;
 
         // add task to matrix
         const values = [];
 
         for (let i = 0; i < timeUnits; i++) {
-          values.push([row + i, col, taskID]);
+          values.push([row + i, col, taskId]);
         }
 
         dispatch(setMatrix(values));
 
         // update `row` and `col` fields accordingly
-        dispatch(updateTaskFields(taskID, { row: row, col: col }));
+        dispatch(updateTaskFields(taskId, { row: row, col: col }));
       },
       hover: (item) => {
         // update task silhouette
@@ -188,7 +191,11 @@ function TimetableCell({ self, row, col }) {
         {self._id !== "0" && (
           <Card
             sx={{
-              backgroundColor: getBackgroundColour(themeState, self),
+              backgroundColor: getBackgroundColour(
+                themeName,
+                mappingModuleCodeToColourName,
+                self
+              ),
               margin: 0,
               height: `${(1.3125 + 1 / 16) * self.timeUnits - 0.1875}rem`,
             }}

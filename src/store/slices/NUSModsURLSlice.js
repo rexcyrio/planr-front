@@ -1,7 +1,13 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { addModules } from "./modulesSlice";
-import { addModulesToTheme } from "./themeSlice";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { setModules } from "./modulesSlice";
 import { setMatrix } from "./matrixSlice";
+import {
+  FETCHING_REDUCER,
+  FETCH_FAILURE_REDUCER,
+  FETCH_SUCCESS_REDUCER,
+} from "../storeHelpers/statusHelpers";
+import formatErrorMessage from "../../helper/formatErrorMessage";
+import { addModulesToTheme } from "./mappingModuleCodeToColourNameSlice";
 
 const NUSModsURLSlice = createSlice({
   name: "NUSModsURL",
@@ -10,31 +16,38 @@ const NUSModsURLSlice = createSlice({
     status: "NONE",
   },
   reducers: {
-    _setURL: (state, action) => {
-      const newURL = action.payload;
-      return {
-        url: newURL,
-        status: state.status,
-      };
+    _setNUSModsURL: (state, action) => {
+      state.url = action.payload;
+      return state;
     },
     _setStatus: (state, action) => {
-      const newStatus = action.payload;
-      return {
-        url: state.url,
-        status: newStatus,
-      };
+      state.status = action.payload;
+      return state;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(importNUSModsTimetable.pending, FETCHING_REDUCER)
+      .addCase(importNUSModsTimetable.fulfilled, FETCH_SUCCESS_REDUCER)
+      .addCase(importNUSModsTimetable.rejected, FETCH_FAILURE_REDUCER);
   },
 });
 
+export const { _setNUSModsURL } = NUSModsURLSlice.actions;
+
 // private function
-const { _setURL, _setStatus } = NUSModsURLSlice.actions;
+const { _setStatus } = NUSModsURLSlice.actions;
 
-function importNUSModsTimetable(NUSModsURL) {
-  return async function thunk(dispatch, getState) {
-    dispatch(_setStatus("LOADING"));
+export function resetState() {
+  return function thunk(dispatch, getState) {
+    dispatch(_setStatus("NONE"));
+  };
+}
 
-    const details = _parseNUSModsURL(NUSModsURL);
+export const importNUSModsTimetable = createAsyncThunk(
+  "NUSModsURL/importNUSModsTimetable",
+  async (NUSModsURL, { dispatch }) => {
+    const details = parseNUSModsURL(NUSModsURL);
     const moduleCodes = Object.keys(details);
     const semester = Number(NUSModsURL.split("/")[4].slice(-1));
 
@@ -53,81 +66,75 @@ function importNUSModsTimetable(NUSModsURL) {
       ? `${year - 1}-${year}`
       : `${year}-${year + 1}`;
 
-    const promises = moduleCodes.map((moduleCode) => {
-      return new Promise((resolve, reject) => {
-        const lessonType_classCode_pairs = details[moduleCode];
+    const promises = moduleCodes.map(async (moduleCode) => {
+      const lessonType_classCode_pairs = details[moduleCode];
 
-        // check whether this module has lessons
-        if (_isEmptyObject(lessonType_classCode_pairs)) {
-          resolve([]);
-          return;
+      // check whether this module has lessons
+      if (isEmptyObject(lessonType_classCode_pairs)) {
+        return [];
+      }
+
+      // fetch module information from NUSMods API
+      const res = await fetch(
+        `https://api.nusmods.com/v2/${academicYear}/modules/${moduleCode}.json`
+      );
+      const json = await res.json();
+
+      // getting correct semester data
+      const semesterData = json.semesterData.find(
+        (each) => each.semester === semester
+      );
+
+      // getting correct timetable data
+      const timetableData = semesterData.timetable;
+
+      // lessonTypes refer to "Lecture", "Tutorial", "Laboratory", "Sectional Teaching", etc.
+      const lessonTypes = Object.keys(lessonType_classCode_pairs);
+
+      const newModuleItems = [];
+
+      for (const lessonType of lessonTypes) {
+        const classNo = details[moduleCode][lessonType];
+        const lessons = timetableData.filter(
+          (each) => each.lessonType === lessonType && each.classNo === classNo
+        );
+
+        for (const lesson of lessons) {
+          const startHour = lesson.startTime.slice(0, 2);
+          const startMin = lesson.startTime.slice(2);
+
+          const endHour = lesson.endTime.slice(0, 2);
+          const endMin = lesson.endTime.slice(2);
+
+          const durationHours = getDurationHours(
+            startHour,
+            startMin,
+            endHour,
+            endMin
+          ).toString();
+
+          const newModuleItem = {
+            _id: `__${moduleCode}&day=${lesson.day}&startTime=${lesson.startTime}`,
+
+            name: `${moduleCode} ${lessonType}`,
+            dueDate: "--",
+            dueTime: "--",
+            durationHours: durationHours,
+            moduleCode: moduleCode,
+            links: [],
+
+            row: getRow(startHour, startMin),
+            col: mappingDayToColumn[lesson.day],
+            timeUnits: Math.ceil(Number(durationHours) * 2),
+
+            isCompleted: false,
+          };
+
+          newModuleItems.push(newModuleItem);
         }
+      }
 
-        // fetch module information from NUSMods API
-        fetch(
-          `https://api.nusmods.com/v2/${academicYear}/modules/${moduleCode}.json`
-        )
-          .then((res) => res.json())
-          .then((json) => {
-            // getting correct semester data
-            const semesterData = json.semesterData.find(
-              (each) => each.semester === semester
-            );
-
-            // getting correct timetable data
-            const timetableData = semesterData.timetable;
-
-            // lessonTypes refer to "Lecture", "Tutorial", "Laboratory", "Sectional Teaching", etc.
-            const lessonTypes = Object.keys(lessonType_classCode_pairs);
-
-            const newModuleItems = [];
-
-            for (const lessonType of lessonTypes) {
-              const classNo = details[moduleCode][lessonType];
-              const lessons = timetableData.filter(
-                (each) =>
-                  each.lessonType === lessonType && each.classNo === classNo
-              );
-
-              for (const lesson of lessons) {
-                const startHour = lesson.startTime.slice(0, 2);
-                const startMin = lesson.startTime.slice(2);
-
-                const endHour = lesson.endTime.slice(0, 2);
-                const endMin = lesson.endTime.slice(2);
-
-                const durationHours = _getDurationHours(
-                  startHour,
-                  startMin,
-                  endHour,
-                  endMin
-                ).toString();
-
-                const newModuleItem = {
-                  _id: `__${moduleCode}&day=${lesson.day}&startTime=${lesson.startTime}`,
-
-                  name: `${moduleCode} ${lessonType}`,
-                  dueDate: "--",
-                  dueTime: "--",
-                  durationHours: durationHours,
-                  moduleCode: moduleCode,
-                  links: [],
-
-                  row: _getRow(startHour, startMin),
-                  col: _mappingDayToColumn[lesson.day],
-                  timeUnits: Math.ceil(Number(durationHours) * 2),
-
-                  isCompleted: false,
-                };
-
-                newModuleItems.push(newModuleItem);
-              }
-            }
-
-            resolve(newModuleItems);
-            return;
-          });
-      });
+      return newModuleItems;
     });
 
     const allNewModuleItems = (await Promise.all(promises)).flat();
@@ -143,22 +150,58 @@ function importNUSModsTimetable(NUSModsURL) {
       }
     }
 
-    dispatch(_setURL(NUSModsURL));
-    dispatch(addModules(allNewModuleItems));
-    dispatch(addModulesToTheme(allNewModuleItems));
-    dispatch(setMatrix(values));
-    dispatch(_setStatus("DONE"));
-  };
-}
+    dispatch(_setNUSModsURL(NUSModsURL));
+    dispatch(setNUSModsURLInDatabase(NUSModsURL));
 
-const _mappingLessonType = {
+    dispatch(addModulesToTheme(allNewModuleItems));
+    dispatch(setModules(allNewModuleItems));
+    dispatch(setMatrix(values));
+  }
+);
+
+// ============================================================================
+// Database thunks
+// ============================================================================
+
+const setNUSModsURLInDatabase = createAsyncThunk(
+  "tasks/setNUSModsURLInDatabase",
+  async (NUSModsURL, { getState }) => {
+    const { userId } = getState().user;
+
+    try {
+      const res = await fetch("/api/private/NUSModsURL", {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, NUSModsURL }),
+      });
+      const json = await res.json();
+
+      if (json.error) {
+        throw new Error(formatErrorMessage(json.error));
+      }
+    } catch (error) {
+      alert(error);
+      console.error(error);
+      throw error;
+    }
+  }
+);
+
+// ============================================================================
+// Helper functions
+// ============================================================================
+
+const mappingLessonType = {
   LEC: "Lecture",
   TUT: "Tutorial",
   LAB: "Laboratory",
   SEC: "Sectional Teaching",
 };
 
-const _mappingDayToColumn = {
+const mappingDayToColumn = {
   Monday: 0,
   Tuesday: 1,
   Wednesday: 2,
@@ -168,7 +211,7 @@ const _mappingDayToColumn = {
   Sunday: 6,
 };
 
-function _parseNUSModsURL(NUSModsURL) {
+function parseNUSModsURL(NUSModsURL) {
   const url = new URL(NUSModsURL);
   const queryString = url.search;
   // `slice(1)` is to remove the "?" at the beginning
@@ -177,13 +220,13 @@ function _parseNUSModsURL(NUSModsURL) {
   const result = {};
 
   for (const [key, value] of keyValuePairs) {
-    result[key] = _convertStringToObject(value);
+    result[key] = convertStringToObject(value);
   }
 
   return result;
 }
 
-function _convertStringToObject(str) {
+function convertStringToObject(str) {
   if (!str) {
     return {};
   }
@@ -193,14 +236,14 @@ function _convertStringToObject(str) {
 
   for (const property of properties) {
     const [key, value] = property.split(":");
-    const lessonType = _mappingLessonType[key];
+    const lessonType = mappingLessonType[key];
     obj[lessonType] = value;
   }
 
   return obj;
 }
 
-function _getDurationHours(startHour, startMin, endHour, endMin) {
+function getDurationHours(startHour, startMin, endHour, endMin) {
   if (startMin === endMin) {
     return Number(endHour) - Number(startHour);
   } else if (startMin === "00" && endMin === "30") {
@@ -210,7 +253,7 @@ function _getDurationHours(startHour, startMin, endHour, endMin) {
   }
 }
 
-function _getRow(hour, min) {
+function getRow(hour, min) {
   let count = 0;
 
   count += Number(hour) * 2;
@@ -221,9 +264,8 @@ function _getRow(hour, min) {
   return count;
 }
 
-function _isEmptyObject(obj) {
+function isEmptyObject(obj) {
   return Object.keys(obj).length === 0;
 }
 
-export { NUSModsURLSlice, importNUSModsTimetable };
 export default NUSModsURLSlice.reducer;

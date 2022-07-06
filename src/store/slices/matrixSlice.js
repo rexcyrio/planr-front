@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import formatErrorMessage from "../../helper/formatErrorMessage";
 
 const initialState = (() => {
   const arr = [];
@@ -43,7 +44,7 @@ export const { _setMatrixFromDatabase } = matrixSlice.actions;
 const { _setMatrix } = matrixSlice.actions;
 
 export function setMatrix(values) {
-  return async function thunk(dispatch, getState) {
+  return function thunk(dispatch, getState) {
     dispatch(_setMatrix(values));
     dispatch(updateTimetableInDatabase());
   };
@@ -56,28 +57,28 @@ export function setMatrix(values) {
 const updateTimetableInDatabase = createAsyncThunk(
   "matrix/updateTimetableInDatabase",
   async (_, { getState }) => {
-    return new Promise((resolve, reject) => {
-      const { userId } = getState().user;
-      const newMatrix = getState().matrix;
+    const { userId } = getState().user;
+    const newMatrix = getState().matrix;
 
-      fetch("/api/private/timetable", {
+    try {
+      const res = await fetch("/api/private/timetable", {
         method: "PUT",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId, timetable: newMatrix }),
-      })
-        .then((res) => res.json())
-        .then((json) => {
-          if (json.error) {
-            alert(json.error);
-            reject(json.error);
-          }
+      });
+      const json = await res.json();
 
-          resolve();
-        });
-    });
+      if (json.error) {
+        throw new Error(formatErrorMessage(json.error));
+      }
+    } catch (error) {
+      alert(error);
+      console.error(error);
+      throw error;
+    }
   }
 );
 
