@@ -12,7 +12,6 @@ import { v4 as uuidv4 } from "uuid";
 
 const initialState = {
   permLinks: [],
-  tasksLinks: [],
   status: FETCHING,
 };
 

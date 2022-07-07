@@ -7,16 +7,60 @@ const modulesSlice = createSlice({
   name: "modules",
   initialState,
   reducers: {
-    _setModules: (state, action) => action.payload,
+    _setModules: (state, action) => {
+      return action.payload;
+    },
+    _saveEditedModulesLinks: (state, action) => {
+      const newLinks = action.payload;
+      for (const link of newLinks) {
+        if (link._toBeDeleted) {
+          continue;
+        }
+
+        if (link.name === "") {
+          link.name = link.url;
+        }
+
+        let finalURL = link.url;
+        if (
+          !link.url.startsWith("https://") &&
+          !link.url.startsWith("http://")
+        ) {
+          finalURL = "http://".concat(link.url);
+        }
+
+        const newLink = {
+          ...link,
+          url: finalURL,
+        };
+        loop2: for (const module of state) {
+          for (let i = 0; i < module.links.length; i++) {
+            if (link._id === module.links[i]._id) {
+              module.links[i] = newLink;
+              break loop2;
+            }
+          }
+        }
+      }
+      return state;
+    },
   },
 });
 
-export const { _setModules } = modulesSlice.actions;
+export const { _setModules, _saveEditedModulesLinks } = modulesSlice.actions;
 
+// get state in updateDB func?
 export function setModules(newModuleItems) {
   return function thunk(dispatch, getState) {
     dispatch(_setModules(newModuleItems));
     dispatch(setModulesInDatabase(newModuleItems));
+  };
+}
+
+export function saveEditedModulesLinks(newTasksLinks) {
+  return function thunk(dispatch, getState) {
+    dispatch(_saveEditedModulesLinks(newTasksLinks));
+    dispatch(setModulesInDatabase(getState().modules));
   };
 }
 
