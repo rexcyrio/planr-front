@@ -55,11 +55,45 @@ const tasksSlice = createSlice({
       tasks.splice(index, 1);
       return state;
     },
-    _deleteCompletedTasks: (state, action) => {
+    _deleteCompletedTasks: (state) => {
       const tasks = state.data;
 
       const cleanedTasks = tasks.filter((each) => !each.isCompleted);
       state.data = cleanedTasks;
+      return state;
+    },
+    _saveEditedTasksLinks: (state, action) => {
+      const newLinks = action.payload;
+      for (const link of newLinks) {
+        if (link._toBeDeleted) {
+          continue;
+        }
+
+        if (link.name === "") {
+          link.name = link.url;
+        }
+
+        let finalURL = link.url;
+        if (
+          !link.url.startsWith("https://") &&
+          !link.url.startsWith("http://")
+        ) {
+          finalURL = "http://".concat(link.url);
+        }
+
+        const newLink = {
+          ...link,
+          url: finalURL,
+        };
+        loop2: for (const task of state.data) {
+          for (let i = 0; i < task.links.length; i++) {
+            if (link._id === task.links[i]._id) {
+              task.links[i] = newLink;
+              break loop2;
+            }
+          }
+        }
+      }
       return state;
     },
   },
@@ -82,8 +116,13 @@ const tasksSlice = createSlice({
 export const { _setTasks } = tasksSlice.actions;
 
 // private functions
-const { _addTask, _updateTaskFields, _deleteTask, _deleteCompletedTasks } =
-  tasksSlice.actions;
+const {
+  _addTask,
+  _updateTaskFields,
+  _deleteTask,
+  _deleteCompletedTasks,
+  _saveEditedTasksLinks,
+} = tasksSlice.actions;
 
 export function addTask(newTask) {
   return function thunk(dispatch, getState) {
@@ -153,6 +192,13 @@ export function markTaskAsComplete(taskId) {
 
 export function markTaskAsIncomplete(taskId) {
   updateTaskFields(taskId, { isCompleted: false });
+}
+
+export function saveEditedTasksLinks(newTasksLinks) {
+  return function thunk(dispatch, getState) {
+    dispatch(_saveEditedTasksLinks(newTasksLinks));
+    dispatch(updateTasksInDatabase());
+  };
 }
 
 // ============================================================================

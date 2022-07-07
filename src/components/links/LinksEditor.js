@@ -1,6 +1,4 @@
-import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import RestoreIcon from "@mui/icons-material/Restore";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -8,21 +6,34 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
-import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { saveEditedPermLinks } from "../../store/slices/linksSlice";
+import { saveEditedModulesLinks } from "../../store/slices/modulesSlice";
+import { saveEditedTasksLinks } from "../../store/slices/tasksSlice";
+import {
+  modulesLinksSelector,
+  tasksLinksSelector,
+} from "../../store/storeHelpers/selectors";
+import EditLinkItem from "./EditLinkItem";
 
 function LinksEditor() {
   const dispatch = useDispatch();
-  const links = useSelector((state) => state.links.permLinks);
+  const timetableColumn = useSelector((state) => state.time.timetableColumn);
+  const permLinks = useSelector((state) => state.links.permLinks);
+  const modulesLinks = useSelector(modulesLinksSelector(timetableColumn));
+  const tasksLinks = useSelector(tasksLinksSelector(timetableColumn));
   const [edit_open, edit_setOpen] = useState(false);
-  const [tempLinks, setTempLinks] = useState([]);
+  const [tempPermLinks, setTempPermLinks] = useState([]);
+  const [tempTasksLinks, setTempTasksLinks] = useState([]);
+  const [tempModulesLinks, setTempModulesLinks] = useState([]);
 
   const edit_openDialog = () => {
-    if (links.length > 0) {
-      setTempLinks([...links]);
+    if (permLinks.length + modulesLinks.length + tasksLinks.length > 0) {
+      setTempPermLinks([...permLinks]);
+      setTempModulesLinks([...modulesLinks]);
+      setTempTasksLinks([...tasksLinks]);
       edit_setOpen(true);
     }
   };
@@ -31,43 +42,11 @@ function LinksEditor() {
     edit_setOpen(false);
 
     if (saveChanges) {
-      dispatch(saveEditedPermLinks(tempLinks));
+      dispatch(saveEditedPermLinks(tempPermLinks));
+      dispatch(saveEditedModulesLinks(tempModulesLinks));
+      dispatch(saveEditedTasksLinks(tempTasksLinks));
     }
   };
-
-  function updateTempLink(newLink) {
-    setTempLinks((prev) => {
-      const index = prev.findIndex((each) => each._id === newLink._id);
-      return [...prev.slice(0, index), newLink, ...prev.slice(index + 1)];
-    });
-  }
-
-  function toggleToBeDeleted(self) {
-    const newLink = {
-      ...self,
-      _toBeDeleted: !self._toBeDeleted,
-    };
-
-    updateTempLink(newLink);
-  }
-
-  function updateTempName(self, name) {
-    const newLink = {
-      ...self,
-      name: name,
-    };
-
-    updateTempLink(newLink);
-  }
-
-  function updateTempURL(self, url) {
-    const newLink = {
-      ...self,
-      url: url,
-    };
-
-    updateTempLink(newLink);
-  }
 
   return (
     <>
@@ -91,59 +70,32 @@ function LinksEditor() {
           }}
         >
           <DialogContent>
-            {tempLinks.map((self) => (
-              <React.Fragment key={self._id}>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <TextField
-                    disabled={self._toBeDeleted}
-                    sx={{
-                      marginRight: "1rem",
-                      width: "13rem",
-                      textDecoration: self._toBeDeleted ? "line-through" : "",
-                    }}
-                    margin="dense"
-                    id="name"
-                    label="Link Name"
-                    type="text"
-                    variant="outlined"
-                    value={self.name}
-                    autoComplete="off"
-                    onChange={(e) => updateTempName(self, e.target.value)}
-                  />
-                  <TextField
-                    disabled={self._toBeDeleted}
-                    sx={{
-                      marginRight: "0.5rem",
-                      width: "27rem",
-                      textDecoration: self._toBeDeleted ? "line-through" : "",
-                    }}
-                    margin="dense"
-                    id="url"
-                    label="URL"
-                    type="text"
-                    variant="outlined"
-                    required
-                    value={self.url}
-                    autoComplete="off"
-                    onChange={(e) => updateTempURL(self, e.target.value)}
-                  />
-                  {self._toBeDeleted ? (
-                    <Tooltip title="Restore link">
-                      <IconButton onClick={() => toggleToBeDeleted(self)}>
-                        <RestoreIcon />
-                      </IconButton>
-                    </Tooltip>
-                  ) : (
-                    <Tooltip title="Delete link">
-                      <IconButton onClick={() => toggleToBeDeleted(self)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  <br />
-                </Box>
-              </React.Fragment>
-            ))}
+            {tempPermLinks
+              .map((self) => (
+                <React.Fragment key={self._id}>
+                  <EditLinkItem self={self} setTempLinks={setTempPermLinks} />
+                </React.Fragment>
+              ))
+              .concat(
+                tempModulesLinks.map((self) => (
+                  <React.Fragment key={self._id}>
+                    <EditLinkItem
+                      self={self}
+                      setTempLinks={setTempModulesLinks}
+                    />
+                  </React.Fragment>
+                ))
+              )
+              .concat(
+                tempTasksLinks.map((self) => (
+                  <React.Fragment key={self._id}>
+                    <EditLinkItem
+                      self={self}
+                      setTempLinks={setTempTasksLinks}
+                    />
+                  </React.Fragment>
+                ))
+              )}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => edit_closeDialog(false)}>

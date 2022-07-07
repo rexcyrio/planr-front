@@ -3,7 +3,7 @@ import styles from "./LinksList.module.css";
 import Stack from "@mui/material/Stack";
 import LinkItem from "./LinkItem";
 import generateSkeletons from "../../helper/skeletonHelper";
-import TasksLinks from "./TasksLinks";
+import TasksLinks from "./TimetableLinks";
 import { FETCHING, FETCH_FAILURE } from "../helperComponents/DataStatus";
 import { useSelector } from "react-redux";
 
