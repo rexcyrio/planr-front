@@ -16,8 +16,8 @@ function currentWeek() {
   const mondayDate = date - day;
   const week =
     mondayDate.toString() +
-    dateObject.getMonth.toString() +
-    dateObject.getFullYear.toString();
+    dateObject.getMonth().toString() +
+    dateObject.getFullYear().toString();
   return week;
 }
 
@@ -33,9 +33,11 @@ const timeSlice = createSlice({
   reducers: {
     _setTimetableColumn: (state, action) => {
       state.timetableColumn = action.payload;
+      return state;
     },
     _setWeek: (state, action) => {
       state.timetableColumn = action.payload;
+      return state;
     },
   },
 });
