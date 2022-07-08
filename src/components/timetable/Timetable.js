@@ -1,3 +1,7 @@
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import React from "react";
 import { useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
@@ -47,6 +51,31 @@ function Timetable() {
 
   return (
     <>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0.5rem 0",
+        }}
+      >
+        <Tooltip title="Previous week" placement="left">
+          <IconButton size="small">
+            <ArrowBackIosNewIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <div style={{ margin: "0 0.75rem" }}>
+          {getWeekRange(getMondayDateString(new Date()))}
+        </div>
+
+        <Tooltip title="Next week" placement="right">
+          <IconButton size="small">
+            <ArrowForwardIosIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </div>
+
       <div className={styles["sticky-container"]}>
         <table className={styles["sticky-table"]}>
           <thead>
@@ -106,31 +135,80 @@ function Timetable() {
 
 function getTimePairArray() {
   const arr = [];
-  let time = "00:00";
 
-  for (let i = 0; i < 48; i++) {
-    const time_ = get30MinLater(time);
-    arr.push([time, time_]);
-    time = time_;
+  let hour = 0;
+  for (let i = 0; i < 24; i++) {
+    const hourString = zeroPad(hour % 24, 2);
+    const hourString_ = zeroPad((hour + 1) % 24, 2);
+
+    arr.push([`${hourString}:00`, `${hourString}:30`]);
+    arr.push([`${hourString}:30`, `${hourString_}:00`]);
+
+    hour += 1;
   }
 
   return arr;
 }
 
-function get30MinLater(time24H) {
-  const [hour, min] = time24H.split(":");
-
-  if (min === "00") {
-    return `${hour}:30`;
-  } else if (min === "30") {
-    return `${zeroPad((Number(hour) + 1) % 24, 2)}:00`;
-  } else {
-    throw Error("incorrect time format");
-  }
-}
-
 function zeroPad(num, places) {
   return String(num).padStart(places, "0");
 }
+
+function getMondayDateString(dateObject) {
+  const day = dateObject.getDay();
+
+  if (day === 0) {
+    // is Sunday
+    const monday = new Date(
+      new Date(dateObject).setDate(dateObject.getDate() - 6)
+    );
+    return convertToDateString(monday);
+  } else if (day === 1) {
+    // is Monday
+    return convertToDateString(dateObject);
+  } else {
+    // is other days of the week
+    const monday = new Date(
+      new Date(dateObject).setDate(dateObject.getDate() - (day - 1))
+    );
+    return convertToDateString(monday);
+  }
+}
+
+function getWeekRange(mondayDateString) {
+  const [date, shortMonthName, year] = mondayDateString.split(" ");
+
+  const monthNumber = mappingShortMonthNameToMonthNumber[shortMonthName];
+  const dateNumber = Number(date);
+
+  const monday = new Date(year, monthNumber, dateNumber);
+  const sunday = new Date(year, monthNumber, dateNumber + 6);
+  return `${convertToDateString(monday)} - ${convertToDateString(sunday)}`;
+}
+
+function convertToDateString(dateObject) {
+  // "Wed Jul 28 1993"
+  const str = dateObject.toDateString();
+
+  // ["Jul", "28", "1993"]
+  const [shortMonthName, date, year] = str.split(" ").slice(1);
+
+  return `${date} ${shortMonthName} ${year}`;
+}
+
+const mappingShortMonthNameToMonthNumber = {
+  Jan: 0,
+  Feb: 1,
+  Mar: 2,
+  Apr: 3,
+  May: 4,
+  Jun: 5,
+  Jul: 6,
+  Aug: 7,
+  Sep: 8,
+  Oct: 9,
+  Nov: 10,
+  Dec: 11,
+};
 
 export default Timetable;

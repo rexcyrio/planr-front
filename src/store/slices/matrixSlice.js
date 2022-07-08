@@ -1,23 +1,13 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import formatErrorMessage from "../../helper/formatErrorMessage";
+import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = (() => {
-  const arr = [];
-
-  for (let i = 0; i < 48; i++) {
-    const row = ["0", "0", "0", "0", "0", "0", "0"];
-    arr.push(row);
-  }
-
-  return arr;
-})();
+const initialState = defaultMatrix();
 
 const matrixSlice = createSlice({
   name: "matrix",
   initialState,
   reducers: {
-    _setMatrixFromDatabase: (state, action) => action.payload,
-    _setMatrix: (state, action) => {
+    _refreshMatrix: (state, action) => action.payload,
+    setMatrix: (state, action) => {
       const matrix = state;
       const values = action.payload;
 
@@ -37,49 +27,52 @@ const matrixSlice = createSlice({
   },
 });
 
-// should only be used inside `tasksSlice` to set the matrix after fetching
-export const { _setMatrixFromDatabase } = matrixSlice.actions;
+// available outside to set the values of the matrix directly
+export const { setMatrix } = matrixSlice.actions;
 
 // private function
-const { _setMatrix } = matrixSlice.actions;
+const { _refreshMatrix } = matrixSlice.actions;
 
-export function setMatrix(values) {
+
+export function refreshMatrix() {
   return function thunk(dispatch, getState) {
-    dispatch(_setMatrix(values));
-    dispatch(updateTimetableInDatabase());
+    const matrix = defaultMatrix();
+
+    // TODO: time slice
+    const modules = getState().modules;
+    const tasks = getState().tasks.data;
+
+    for (const items of [modules, tasks]) {
+      for (const item of items) {
+        const { _id, row, col, timeUnits } = item;
+
+        if (row === -1 && col === -1) {
+          continue;
+        }
+
+        for (let i = 0; i < timeUnits; i++) {
+          matrix[row + i][col] = _id;
+        }
+      }
+    }
+
+    dispatch(_refreshMatrix(matrix));
   };
 }
 
 // ============================================================================
-// Database thunks
+// Helper functions
 // ============================================================================
 
-const updateTimetableInDatabase = createAsyncThunk(
-  "matrix/updateTimetableInDatabase",
-  async (_, { getState }) => {
-    const { userId } = getState().user;
-    const newMatrix = getState().matrix;
+function defaultMatrix() {
+  const arr = [];
 
-    try {
-      const res = await fetch("/api/private/timetable", {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, timetable: newMatrix }),
-      });
-      const json = await res.json();
-
-      if (json.error) {
-        throw new Error(formatErrorMessage(json.error));
-      }
-    } catch (error) {
-      alert(error);
-      console.error(error);
-      throw error;
-    }
+  for (let i = 0; i < 48; i++) {
+    const row = ["0", "0", "0", "0", "0", "0", "0"];
+    arr.push(row);
   }
-);
+
+  return arr;
+}
 
 export default matrixSlice.reducer;

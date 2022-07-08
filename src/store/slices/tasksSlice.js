@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { batch } from "react-redux";
 import { FETCHING } from "../../components/helperComponents/DataStatus";
 import formatErrorMessage from "../../helper/formatErrorMessage";
 import {
@@ -9,8 +10,11 @@ import {
   UPDATE_SUCCESS_REDUCER,
   UPDATING_REDUCER,
 } from "../storeHelpers/statusHelpers";
-import { setMatrix, _setMatrixFromDatabase } from "./matrixSlice";
+import { _setMappingModuleCodeToColourName } from "./mappingModuleCodeToColourNameSlice";
+import { refreshMatrix, setMatrix } from "./matrixSlice";
 import { _setModules } from "./modulesSlice";
+import { _setNUSModsURL } from "./NUSModsURLSlice";
+import { _setThemeName } from "./themeNameSlice";
 
 const initialState = {
   data: [],
@@ -33,7 +37,6 @@ const tasksSlice = createSlice({
     _updateTaskFields: (state, action) => {
       const tasks = state.data;
       const { taskId, newKeyValuePairs } = action.payload;
-      console.log(newKeyValuePairs);
 
       // cannot update fields of EMPTY_TASK
       if (taskId === "0") {
@@ -187,11 +190,15 @@ export function deleteCompletedTasks() {
 }
 
 export function markTaskAsComplete(taskId) {
-  updateTaskFields(taskId, { isCompleted: true });
+  return function thunk(dispatch, getState) {
+    dispatch(updateTaskFields(taskId, { isCompleted: true }));
+  };
 }
 
 export function markTaskAsIncomplete(taskId) {
-  updateTaskFields(taskId, { isCompleted: false });
+  return function thunk(dispatch, getState) {
+    dispatch(updateTaskFields(taskId, { isCompleted: false }));
+  };
 }
 
 export function saveEditedTasksLinks(newTasksLinks) {
@@ -214,14 +221,36 @@ export const fetchTasks = createAsyncThunk(
       const items = await Promise.all([
         getItemFromDatabase("tasks", userId),
         getItemFromDatabase("modules", userId),
-        getItemFromDatabase("timetable", userId),
+
+        getItemFromDatabase("NUSModsURL", userId),
+        getItemFromDatabase("themeName", userId),
+        getItemFromDatabase("mappingModuleCodeToColourName", userId),
       ]);
 
-      const [databaseTasks, databaseModules, databaseTimetable] = items;
+      const [
+        databaseTasks,
+        databaseModules,
 
-      dispatch(_setTasks(databaseTasks));
-      dispatch(_setModules(databaseModules));
-      dispatch(_setMatrixFromDatabase(databaseTimetable));
+        databaseNUSModsURL,
+        databaseThemeName,
+        databaseMappingModuleCodeToColourName,
+      ] = items;
+
+      batch(() => {
+        dispatch(_setTasks(databaseTasks));
+        dispatch(_setModules(databaseModules));
+
+        dispatch(_setNUSModsURL(databaseNUSModsURL));
+        dispatch(_setThemeName(databaseThemeName));
+        dispatch(
+          _setMappingModuleCodeToColourName(
+            databaseMappingModuleCodeToColourName
+          )
+        );
+
+        // refresh the matrix after fetching the task and module objects from database
+        dispatch(refreshMatrix());
+      });
     } catch (error) {
       alert(error);
       console.error(error);
