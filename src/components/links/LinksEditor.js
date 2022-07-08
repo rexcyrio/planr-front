@@ -13,17 +13,16 @@ import { saveEditedPermLinks } from "../../store/slices/linksSlice";
 import { saveEditedModulesLinks } from "../../store/slices/modulesSlice";
 import { saveEditedTasksLinks } from "../../store/slices/tasksSlice";
 import {
-  modulesLinksSelector,
-  tasksLinksSelector,
+  selectModuleLinks,
+  selectTaskLinks,
 } from "../../store/storeHelpers/selectors";
 import EditLinkItem from "./EditLinkItem";
 
 function LinksEditor() {
   const dispatch = useDispatch();
-  const timetableColumn = useSelector((state) => state.time.timetableColumn);
   const permLinks = useSelector((state) => state.links.permLinks);
-  const modulesLinks = useSelector(modulesLinksSelector(timetableColumn));
-  const tasksLinks = useSelector(tasksLinksSelector(timetableColumn));
+  const modulesLinks = useSelector(selectModuleLinks());
+  const tasksLinks = useSelector(selectTaskLinks());
   const [edit_open, edit_setOpen] = useState(false);
   const [tempPermLinks, setTempPermLinks] = useState([]);
   const [tempTasksLinks, setTempTasksLinks] = useState([]);

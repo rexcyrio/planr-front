@@ -1,26 +1,11 @@
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import Card from "@mui/material/Card";
 import PropTypes from "prop-types";
-import React, { useEffect, useMemo, useState } from "react";
-import { useDrag, useDrop } from "react-dnd";
-import { getEmptyImage } from "react-dnd-html5-backend";
+import React, { useMemo, useState } from "react";
+import { useDrop } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
-import { getBackgroundColour } from "../../helper/themeHelper";
 import { setMatrix } from "../../store/slices/matrixSlice";
 import { updateTaskFields } from "../../store/slices/tasksSlice";
-import DetailsPopover from "./DetailsPopover";
 import styles from "./TimetableCell.module.css";
-
-const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
-  return (
-    <DragIndicatorIcon
-      fontSize="inherit"
-      sx={{
-        color: "hsl(0, 0%, 25%)",
-      }}
-    />
-  );
-});
+import TimetableCellCard from "./TimetableCellCard";
 
 TimetableCell.propTypes = {
   self: PropTypes.shape({
@@ -38,6 +23,7 @@ TimetableCell.propTypes = {
     timeUnits: PropTypes.number.isRequired,
 
     isCompleted: PropTypes.bool.isRequired,
+    mondayKey: PropTypes.array.isRequired,
   }).isRequired,
 
   row: PropTypes.number.isRequired,
@@ -47,26 +33,7 @@ TimetableCell.propTypes = {
 function TimetableCell({ self, row, col }) {
   const dispatch = useDispatch();
   const matrix = useSelector((state) => state.matrix);
-  const themeName = useSelector((state) => state.themeName);
-  const mappingModuleCodeToColourName = useSelector(
-    (state) => state.mappingModuleCodeToColourName
-  );
-
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
-  const [isMouseOver, setIsMouseOver] = useState(false);
-
-  function handleMouseEnter() {
-    // if the user is dragging an item around, it shouldn't make the
-    // drag indicator icon appear
-    if (isDragging) {
-      return;
-    }
-    setIsMouseOver(true);
-  }
-
-  function handleMouseLeave() {
-    setIsMouseOver(false);
-  }
 
   const numberOfAvailableTimeUnits = useMemo(() => {
     function getId(row, col) {
@@ -84,10 +51,6 @@ function TimetableCell({ self, row, col }) {
 
     return rowPointer - row + 1;
   }, [row, col, matrix]);
-
-  // ==========================================================================
-  // Drag and drop
-  // ==========================================================================
 
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
@@ -126,113 +89,10 @@ function TimetableCell({ self, row, col }) {
     [matrix]
   );
 
-  const [{ isDragging }, drag, preview] = useDrag(
-    () => ({
-      type: "TASK",
-      item: () => {
-        setTimeout(() => {
-          // temporarily set taskId to "0"
-          const values = [];
-
-          for (let i = 0; i < self.timeUnits; i++) {
-            values.push([row + i, col, "0"]);
-          }
-
-          dispatch(setMatrix(values));
-
-          dispatch(
-            updateTaskFields(self._id, {
-              row: -1,
-              col: -1,
-            })
-          );
-        }, 0);
-
-        return { task: self };
-      },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
-      }),
-    }),
-    [self]
-  );
-
-  // needed for custom drag layer
-  useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
-  }, [preview]);
-
   return (
     <>
-      <td
-        ref={drop}
-        className={styles["cell"]}
-        rowSpan={self.timeUnits}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {isNonEmptyItem(self) && (
-          <Card
-            sx={{
-              backgroundColor: getBackgroundColour(
-                themeName,
-                mappingModuleCodeToColourName,
-                self
-              ),
-              margin: 0,
-              height: `${(1.3125 + 1 / 16) * self.timeUnits - 0.1875}rem`,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              {isModuleItem(self) ? (
-                <div
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "0.75rem",
-                    paddingLeft: "0.25rem",
-                  }}
-                >
-                  {self.moduleCode}
-                </div>
-              ) : (
-                <div
-                  title="Move task around"
-                  ref={drag}
-                  style={{
-                    width: "fit-content",
-                    cursor: "grab",
-                    visibility: isMouseOver ? "visible" : "hidden",
-                    fontSize: "0.95rem",
-                  }}
-                >
-                  <MemoDragIndicatorIcon />
-                </div>
-              )}
-              <DetailsPopover self={self} />
-            </div>
-
-            <div
-              title={self.name}
-              style={{
-                display: "-webkit-box",
-                WebkitBoxOrient: "vertical",
-                WebkitLineClamp: `${self.timeUnits - 1}`,
-                overflow: "hidden",
-                width: "auto",
-                maxWidth: "5.55rem",
-                paddingLeft: "0.25rem",
-              }}
-            >
-              {self.name}
-            </div>
-          </Card>
-        )}
+      <td ref={drop} className={styles["cell"]} rowSpan={self.timeUnits}>
+        {isNonEmptyItem(self) && <TimetableCellCard self={self} />}
         {isOver && (
           <div
             style={{
@@ -249,10 +109,6 @@ function TimetableCell({ self, row, col }) {
       </td>
     </>
   );
-}
-
-function isModuleItem(self) {
-  return self._id.slice(0, 2) === "__";
 }
 
 function isNonEmptyItem(self) {

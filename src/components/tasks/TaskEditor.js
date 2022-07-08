@@ -36,13 +36,14 @@ TaskEditor.propTypes = {
     timeUnits: PropTypes.number.isRequired,
 
     isCompleted: PropTypes.bool.isRequired,
+    mondayKey: PropTypes.array.isRequired,
   }).isRequired,
 };
 
 function TaskEditor({ self }) {
   const dispatch = useDispatch();
   const matrix = useSelector((state) => state.matrix);
-  
+
   const [name, setName] = useState(self.name);
   const [dueDate, setDueDate] = useState(self.dueDate);
   const [dueTime, setDueTime] = useState(self.dueTime);
@@ -120,6 +121,7 @@ function TaskEditor({ self }) {
       timeUnits: Math.ceil(Number(durationHours) * 2),
 
       isCompleted: self.isCompleted,
+      mondayKey: self.mondayKey,
     };
 
     const { _id: taskId, row, col } = newTask;

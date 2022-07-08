@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
 import generateSkeletons from "../../helper/skeletonHelper";
 import { fetchTasks } from "../../store/slices/tasksSlice";
+import { selectCurrentWeekTasks } from "../../store/storeHelpers/selectors";
 import DataStatus, {
   FETCHING,
   FETCH_FAILURE,
@@ -21,7 +22,7 @@ const EMPTY_TASK_ITEM = <TaskItem self={EMPTY_TASK} />;
 function Tasks() {
   const dispatch = useDispatch();
   const status = useSelector((state) => state.tasks.status);
-  const tasks = useSelector((state) => state.tasks.data);
+  const tasks = useSelector(selectCurrentWeekTasks());
 
   useEffect(() => {
     dispatch(fetchTasks());

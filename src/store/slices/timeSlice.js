@@ -1,31 +1,10 @@
-const { createSlice } = require("@reduxjs/toolkit");
+import { createSlice } from "@reduxjs/toolkit";
+import { refreshMatrix } from "./matrixSlice";
 
-// ============================================================================
-// Time helper functions
-// ============================================================================
-
-function currentColumn() {
-  const date = new Date();
-  return date.getDay() === 0 ? 6 : date.getDay() - 1;
-}
-
-function currentWeek() {
-  const dateObject = new Date();
-  const day = dateObject.getDay() === 0 ? 6 : dateObject.getDay() - 1;
-  const date = dateObject.getDate();
-  const mondayDate = date - day;
-  const week =
-    mondayDate.toString() +
-    dateObject.getMonth().toString() +
-    dateObject.getFullYear().toString();
-  return week;
-}
-
-// ============================================================================
-// Slice
-// ============================================================================
-
-const initialState = { timetableColumn: currentColumn(), week: currentWeek() };
+const initialState = {
+  timetableColumn: getCurrentColumn(),
+  mondayKey: getMondayKey(new Date()),
+};
 
 const timeSlice = createSlice({
   name: "time",
@@ -35,20 +14,86 @@ const timeSlice = createSlice({
       state.timetableColumn = action.payload;
       return state;
     },
-    _setWeek: (state, action) => {
-      state.timetableColumn = action.payload;
+    _goToNextWeek: (state, action) => {
+      const mondayKey = state.mondayKey;
+      const [dateNumber, monthNumber, yearNumber] = mondayKey;
+
+      const dateObject = new Date(yearNumber, monthNumber, dateNumber + 7);
+      state.mondayKey = convertToKey(dateObject);
+      return state;
+    },
+    _goToPreviousWeek: (state, action) => {
+      const mondayKey = state.mondayKey;
+      const [dateNumber, monthNumber, yearNumber] = mondayKey;
+
+      const dateObject = new Date(yearNumber, monthNumber, dateNumber - 7);
+      state.mondayKey = convertToKey(dateObject);
       return state;
     },
   },
 });
 
+// private function
+const { _setTimetableColumn, _goToNextWeek, _goToPreviousWeek } =
+  timeSlice.actions;
+
 export function setTimetableColumn() {
   return function thunk(dispatch) {
-    const newTimetableColumn = currentColumn();
-    dispatch(setTimetableColumn(newTimetableColumn));
+    const newTimetableColumn = getCurrentColumn();
+    dispatch(_setTimetableColumn(newTimetableColumn));
   };
 }
 
-export const { _setWeek } = timeSlice.actions;
+export function goToNextWeek() {
+  return function thunk(dispatch) {
+    dispatch(_goToNextWeek());
+    dispatch(refreshMatrix());
+  };
+}
+
+export function goToPreviousWeek() {
+  return function thunk(dispatch) {
+    dispatch(_goToPreviousWeek());
+    dispatch(refreshMatrix());
+  };
+}
+
+export function getMondayKey(dateObject) {
+  const day = dateObject.getDay();
+
+  if (day === 0) {
+    // is Sunday
+    const monday = new Date(
+      new Date(dateObject).setDate(dateObject.getDate() - 6)
+    );
+    return convertToKey(monday);
+  } else if (day === 1) {
+    // is Monday
+    return convertToKey(dateObject);
+  } else {
+    // is other days of the week
+    const monday = new Date(
+      new Date(dateObject).setDate(dateObject.getDate() - (day - 1))
+    );
+    return convertToKey(monday);
+  }
+}
+
+// ============================================================================
+// Helper functions
+// ============================================================================
+
+function getCurrentColumn() {
+  const date = new Date();
+  return date.getDay() === 0 ? 6 : date.getDay() - 1;
+}
+
+function convertToKey(dateObject) {
+  const dateNumber = dateObject.getDate();
+  const monthNumber = dateObject.getMonth();
+  const yearNumber = dateObject.getFullYear();
+
+  return [dateNumber, monthNumber, yearNumber];
+}
 
 export default timeSlice.reducer;

@@ -7,9 +7,7 @@ const modulesSlice = createSlice({
   name: "modules",
   initialState,
   reducers: {
-    _setModules: (state, action) => {
-      return action.payload;
-    },
+    _setModules: (state, action) => action.payload,
     _saveEditedModulesLinks: (state, action) => {
       const newLinks = action.payload;
       for (const link of newLinks) {
@@ -55,14 +53,14 @@ export const { _setModules, _saveEditedModulesLinks } = modulesSlice.actions;
 export function setModules(newModuleItems) {
   return function thunk(dispatch, getState) {
     dispatch(_setModules(newModuleItems));
-    dispatch(setModulesInDatabase(newModuleItems));
+    dispatch(setModulesInDatabase());
   };
 }
 
 export function saveEditedModulesLinks(newTasksLinks) {
   return function thunk(dispatch, getState) {
     dispatch(_saveEditedModulesLinks(newTasksLinks));
-    dispatch(setModulesInDatabase(getState().modules));
+    dispatch(setModulesInDatabase());
   };
 }
 
@@ -72,8 +70,9 @@ export function saveEditedModulesLinks(newTasksLinks) {
 
 const setModulesInDatabase = createAsyncThunk(
   "tasks/setModulesInDatabase",
-  async (modules, { getState }) => {
+  async (_, { getState }) => {
     const { userId } = getState().user;
+    const modules = getState().modules;
 
     try {
       const res = await fetch("/api/private/modules", {

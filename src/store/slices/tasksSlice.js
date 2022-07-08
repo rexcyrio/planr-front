@@ -170,7 +170,7 @@ export function deleteTask(taskId) {
 
 export function deleteCompletedTasks() {
   return function thunk(dispatch, getState) {
-    const tasks = getState().tasks;
+    const tasks = getState().tasks.data;
     const completedTasks = tasks.filter((each) => each.isCompleted);
 
     // remove completed tasks from matrix

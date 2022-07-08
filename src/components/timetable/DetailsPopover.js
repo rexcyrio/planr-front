@@ -31,6 +31,7 @@ DetailsPopover.propTypes = {
     timeUnits: PropTypes.number.isRequired,
 
     isCompleted: PropTypes.bool.isRequired,
+    mondayKey: PropTypes.array.isRequired,
   }).isRequired,
 };
 

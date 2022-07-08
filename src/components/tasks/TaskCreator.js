@@ -20,6 +20,7 @@ import TaskLinksCreator from "./TaskLinksCreator";
 
 function TaskCreator() {
   const dispatch = useDispatch();
+  const mondayKey = useSelector((state) => state.time.mondayKey);
   const moduleCodes = useSelector((state) =>
     Object.keys(state.mappingModuleCodeToColourName)
   );
@@ -101,6 +102,7 @@ function TaskCreator() {
       timeUnits: Math.ceil(Number(durationHours) * 2),
 
       isCompleted: false,
+      mondayKey: mondayKey,
     };
 
     dispatch(addTask(newTask));
