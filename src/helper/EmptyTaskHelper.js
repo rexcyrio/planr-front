@@ -13,4 +13,5 @@ export const EMPTY_TASK = {
   timeUnits: 1,
 
   isCompleted: false,
+  mondayKey: [],
 };

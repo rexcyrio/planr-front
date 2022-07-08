@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { selectCurrentWeekTasks } from "../storeHelpers/selectors";
 
 const initialState = defaultMatrix();
 
@@ -33,14 +34,12 @@ export const { setMatrix } = matrixSlice.actions;
 // private function
 const { _refreshMatrix } = matrixSlice.actions;
 
-
 export function refreshMatrix() {
   return function thunk(dispatch, getState) {
     const matrix = defaultMatrix();
 
-    // TODO: time slice
     const modules = getState().modules;
-    const tasks = getState().tasks.data;
+    const tasks = selectCurrentWeekTasks()(getState());
 
     for (const items of [modules, tasks]) {
       for (const item of items) {

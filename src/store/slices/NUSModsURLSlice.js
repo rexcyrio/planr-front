@@ -128,6 +128,7 @@ export const importNUSModsTimetable = createAsyncThunk(
             timeUnits: Math.ceil(Number(durationHours) * 2),
 
             isCompleted: false,
+            mondayKey: [],
           };
 
           newModuleItems.push(newModuleItem);

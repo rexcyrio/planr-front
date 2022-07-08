@@ -3,16 +3,20 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
+import { goToNextWeek, goToPreviousWeek } from "../../store/slices/timeSlice";
+import { selectCurrentWeekTasks } from "../../store/storeHelpers/selectors";
 import LineMarker from "../timetable/LineMarker";
 import TimetableCell from "../timetable/TimetableCell";
 import styles from "./Timetable.module.css";
 
 function Timetable() {
-  const tasks = useSelector((state) => state.tasks.data);
+  const dispatch = useDispatch();
+  const tasks = useSelector(selectCurrentWeekTasks());
   const modules = useSelector((state) => state.modules);
   const matrix = useSelector((state) => state.matrix);
+  const mondayKey = useSelector((state) => state.time.mondayKey);
 
   // ==========================================================================
   // Matrix Helper Functions
@@ -59,17 +63,32 @@ function Timetable() {
           padding: "0.5rem 0",
         }}
       >
-        <Tooltip title="Previous week" placement="left">
+        <Tooltip
+          title="Previous week"
+          placement="left"
+          onClick={() => dispatch(goToPreviousWeek())}
+        >
           <IconButton size="small">
             <ArrowBackIosNewIcon fontSize="small" />
           </IconButton>
         </Tooltip>
 
-        <div style={{ margin: "0 0.75rem" }}>
-          {getWeekRange(getMondayDateString(new Date()))}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "14rem",
+          }}
+        >
+          {getWeekRange(mondayKey)}
         </div>
 
-        <Tooltip title="Next week" placement="right">
+        <Tooltip
+          title="Next week"
+          placement="right"
+          onClick={() => dispatch(goToNextWeek())}
+        >
           <IconButton size="small">
             <ArrowForwardIosIcon fontSize="small" />
           </IconButton>
@@ -154,35 +173,11 @@ function zeroPad(num, places) {
   return String(num).padStart(places, "0");
 }
 
-function getMondayDateString(dateObject) {
-  const day = dateObject.getDay();
+function getWeekRange(mondayKey) {
+  const [dateNumber, monthNumber, yearNumber] = mondayKey;
 
-  if (day === 0) {
-    // is Sunday
-    const monday = new Date(
-      new Date(dateObject).setDate(dateObject.getDate() - 6)
-    );
-    return convertToDateString(monday);
-  } else if (day === 1) {
-    // is Monday
-    return convertToDateString(dateObject);
-  } else {
-    // is other days of the week
-    const monday = new Date(
-      new Date(dateObject).setDate(dateObject.getDate() - (day - 1))
-    );
-    return convertToDateString(monday);
-  }
-}
-
-function getWeekRange(mondayDateString) {
-  const [date, shortMonthName, year] = mondayDateString.split(" ");
-
-  const monthNumber = mappingShortMonthNameToMonthNumber[shortMonthName];
-  const dateNumber = Number(date);
-
-  const monday = new Date(year, monthNumber, dateNumber);
-  const sunday = new Date(year, monthNumber, dateNumber + 6);
+  const monday = new Date(yearNumber, monthNumber, dateNumber);
+  const sunday = new Date(yearNumber, monthNumber, dateNumber + 6);
   return `${convertToDateString(monday)} - ${convertToDateString(sunday)}`;
 }
 
@@ -195,20 +190,5 @@ function convertToDateString(dateObject) {
 
   return `${date} ${shortMonthName} ${year}`;
 }
-
-const mappingShortMonthNameToMonthNumber = {
-  Jan: 0,
-  Feb: 1,
-  Mar: 2,
-  Apr: 3,
-  May: 4,
-  Jun: 5,
-  Jul: 6,
-  Aug: 7,
-  Sep: 8,
-  Oct: 9,
-  Nov: 10,
-  Dec: 11,
-};
 
 export default Timetable;

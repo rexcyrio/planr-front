@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import LinkItem from "./LinkItem";
 import PropTypes from "prop-types";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setTimetableColumn } from "../../store/slices/timeSlice";
 import {
-  modulesLinksSelector,
-  tasksLinksSelector,
+  selectModuleLinks,
+  selectTaskLinks
 } from "../../store/storeHelpers/selectors";
+import LinkItem from "./LinkItem";
 
 TimetableLinks.propTypes = {
   emptyPermLinks: PropTypes.bool,
@@ -14,13 +14,12 @@ TimetableLinks.propTypes = {
 
 function TimetableLinks(props) {
   const dispatch = useDispatch();
-  const timetableColumn = useSelector((state) => state.time.timetableColumn);
-
-  // links from tasks that are scheduled today
-  const tasksLinks = useSelector(tasksLinksSelector(timetableColumn));
 
   // links from modules that are scheduled today
-  const modulesLinks = useSelector(modulesLinksSelector(timetableColumn));
+  const modulesLinks = useSelector(selectModuleLinks());
+
+  // links from tasks that are scheduled today
+  const tasksLinks = useSelector(selectTaskLinks());
 
   useEffect(() => {
     // set interval till the next day
@@ -34,8 +33,8 @@ function TimetableLinks(props) {
 
   // rendered below perm links
   return props.emptyPermLinks &&
-    tasksLinks.length === 0 &&
-    modulesLinks.length === 0 ? (
+    modulesLinks.length === 0 &&
+    tasksLinks.length === 0 ? (
     <div>There are no links.</div>
   ) : (
     modulesLinks
