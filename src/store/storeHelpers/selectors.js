@@ -1,8 +1,13 @@
+import isCurrentWeek from "../../helper/isCurrentWeekHelper";
+
 export function selectModuleLinks() {
   return (state) => {
     const timetableColumn = state.time.timetableColumn;
     return state.modules
-      .filter((module) => module.col === timetableColumn)
+      .filter(
+        (module) =>
+          module.col === timetableColumn && isCurrentWeek(module.mondayKey)
+      )
       .flatMap((module) => module.links);
   };
 }
@@ -11,7 +16,9 @@ export function selectTaskLinks() {
   return (state) => {
     const timetableColumn = state.time.timetableColumn;
     return state.tasks.data
-      .filter((task) => task.col === timetableColumn)
+      .filter(
+        (task) => task.col === timetableColumn && isCurrentWeek(task.mondayKey)
+      )
       .flatMap((task) => task.links);
   };
 }
