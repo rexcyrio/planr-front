@@ -65,10 +65,6 @@ const tasksSlice = createSlice({
     _saveEditedTasksLinks: (state, action) => {
       const newLinks = action.payload;
       for (const link of newLinks) {
-        if (link._toBeDeleted) {
-          continue;
-        }
-
         if (link.name === "") {
           link.name = link.url;
         }
@@ -88,7 +84,11 @@ const tasksSlice = createSlice({
         loop2: for (const task of state.data) {
           for (let i = 0; i < task.links.length; i++) {
             if (link._id === task.links[i]._id) {
-              task.links[i] = newLink;
+              if (link._toBeDeleted) {
+                task.links = task.links.filter((each) => each._id !== link._id);
+              } else {
+                task.links[i] = newLink;
+              }
               break loop2;
             }
           }

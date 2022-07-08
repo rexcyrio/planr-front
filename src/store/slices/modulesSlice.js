@@ -13,10 +13,6 @@ const modulesSlice = createSlice({
     _saveEditedModulesLinks: (state, action) => {
       const newLinks = action.payload;
       for (const link of newLinks) {
-        if (link._toBeDeleted) {
-          continue;
-        }
-
         if (link.name === "") {
           link.name = link.url;
         }
@@ -36,7 +32,13 @@ const modulesSlice = createSlice({
         loop2: for (const module of state) {
           for (let i = 0; i < module.links.length; i++) {
             if (link._id === module.links[i]._id) {
-              module.links[i] = newLink;
+              if (link._toBeDeleted) {
+                module.links = module.links.filter(
+                  (each) => each._id !== link._id
+                );
+              } else {
+                module.links[i] = newLink;
+              }
               break loop2;
             }
           }
