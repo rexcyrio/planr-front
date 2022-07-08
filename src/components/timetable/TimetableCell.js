@@ -1,24 +1,14 @@
-import DoneIcon from "@mui/icons-material/Done";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import RestoreIcon from "@mui/icons-material/Restore";
-import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
-import IconButton from "@mui/material/IconButton";
-import Popover from "@mui/material/Popover";
-import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
 import { getBackgroundColour } from "../../helper/themeHelper";
 import { setMatrix } from "../../store/slices/matrixSlice";
-import {
-  markTaskAsComplete,
-  markTaskAsIncomplete,
-  updateTaskFields
-} from "../../store/slices/tasksSlice";
-import TaskEditor from "../tasks/TaskEditor";
+import { updateTaskFields } from "../../store/slices/tasksSlice";
+import DetailsPopover from "./DetailsPopover";
 import styles from "./TimetableCell.module.css";
 
 const MemoDragIndicatorIcon = React.memo(function IconWrapper() {
@@ -64,8 +54,6 @@ function TimetableCell({ self, row, col }) {
 
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
   const [isMouseOver, setIsMouseOver] = useState(false);
-  const [openPopover, setOpenPopover] = useState(false);
-  let elRef = useRef(null);
 
   function handleMouseEnter() {
     // if the user is dragging an item around, it shouldn't make the
@@ -84,6 +72,7 @@ function TimetableCell({ self, row, col }) {
     function getId(row, col) {
       return matrix[row][col];
     }
+
     if (getId(row, col) !== "0") {
       return 0;
     }
@@ -92,16 +81,9 @@ function TimetableCell({ self, row, col }) {
     while (rowPointer + 1 < 48 && getId(rowPointer + 1, col) === "0") {
       rowPointer += 1;
     }
+
     return rowPointer - row + 1;
   }, [row, col, matrix]);
-
-  const openPopoverHandler = () => {
-    setOpenPopover(true);
-  };
-
-  const closePopoverHandler = () => {
-    setOpenPopover(false);
-  };
 
   // ==========================================================================
   // Drag and drop
@@ -155,6 +137,7 @@ function TimetableCell({ self, row, col }) {
           for (let i = 0; i < self.timeUnits; i++) {
             values.push([row + i, col, "0"]);
           }
+
           dispatch(setMatrix(values));
 
           dispatch(
@@ -188,7 +171,7 @@ function TimetableCell({ self, row, col }) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {self._id !== "0" && (
+        {isNonEmptyItem(self) && (
           <Card
             sx={{
               backgroundColor: getBackgroundColour(
@@ -200,31 +183,38 @@ function TimetableCell({ self, row, col }) {
               height: `${(1.3125 + 1 / 16) * self.timeUnits - 0.1875}rem`,
             }}
           >
-            <div className={styles["cell-top"]}>
-              <div
-                title="Move task around"
-                ref={drag}
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "fit-content",
-                  cursor: "grab",
-                  visibility:
-                    self._id !== "0" && isMouseOver ? "visible" : "hidden",
-                  fontSize: "0.95rem",
-                }}
-              >
-                <MemoDragIndicatorIcon />
-              </div>
-              {self._id !== "0" && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              {isModuleItem(self) ? (
                 <div
-                  className={styles["details-popup"]}
-                  ref={elRef}
-                  onClick={openPopoverHandler}
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "0.75rem",
+                    paddingLeft: "0.25rem",
+                  }}
                 >
-                  Details
+                  {self.moduleCode}
+                </div>
+              ) : (
+                <div
+                  title="Move task around"
+                  ref={drag}
+                  style={{
+                    width: "fit-content",
+                    cursor: "grab",
+                    visibility: isMouseOver ? "visible" : "hidden",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  <MemoDragIndicatorIcon />
                 </div>
               )}
+              <DetailsPopover self={self} />
             </div>
 
             <div
@@ -243,7 +233,7 @@ function TimetableCell({ self, row, col }) {
             </div>
           </Card>
         )}
-        {isOver ? (
+        {isOver && (
           <div
             style={{
               position: "absolute",
@@ -255,72 +245,18 @@ function TimetableCell({ self, row, col }) {
               backgroundColor: canDrop ? "green" : "red",
             }}
           ></div>
-        ) : (
-          <></>
         )}
       </td>
-      {self._id !== "0" && (
-        <Popover
-          open={openPopover}
-          anchorEl={elRef.current}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          onClose={closePopoverHandler}
-        >
-          <Box
-            sx={{
-              border: 1,
-              borderRadius: "5px",
-              p: 1,
-              bgcolor: "background.paper",
-              maxWidth: "16rem",
-            }}
-          >
-            <div className={styles["details-popup-header-container"]}>
-              <p className={styles["details-popup-header"]}>
-                <strong>{self.moduleCode}</strong>
-              </p>
-              <div>
-                <TaskEditor self={self} />
-                {self.isCompleted ? (
-                  <Tooltip title="Restore task">
-                    <IconButton
-                      size="small"
-                      onClick={() => dispatch(markTaskAsIncomplete(self._id))}
-                    >
-                      <RestoreIcon />
-                    </IconButton>
-                  </Tooltip>
-                ) : (
-                  <Tooltip title="Mark task as complete">
-                    <IconButton
-                      size="small"
-                      onClick={() => dispatch(markTaskAsComplete(self._id))}
-                    >
-                      <DoneIcon />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </div>
-            </div>
-            <p className={styles["task-name-paragraph"]}>{self.name}</p>
-            <p>
-              Due on: {self.dueDate} at {self.dueTime}
-            </p>
-            <p>Duration: {self.durationHours} hours</p>
-            <p>Status: {self.isCompleted ? "Completed" : "Not Completed"}</p>
-            {self.links.map((link) => (
-              <React.Fragment key={link._id}>
-                <a href={link.url} rel="noreferrer noopener" target="_blank">
-                  {link.name}
-                </a>
-                <br />
-              </React.Fragment>
-            ))}
-          </Box>
-        </Popover>
-      )}
     </>
   );
+}
+
+function isModuleItem(self) {
+  return self._id.slice(0, 2) === "__";
+}
+
+function isNonEmptyItem(self) {
+  return self._id !== "0";
 }
 
 function roundOff(number, places) {

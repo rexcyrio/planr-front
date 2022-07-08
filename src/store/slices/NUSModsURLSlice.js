@@ -116,7 +116,7 @@ export const importNUSModsTimetable = createAsyncThunk(
           const newModuleItem = {
             _id: `__${moduleCode}&day=${lesson.day}&startTime=${lesson.startTime}`,
 
-            name: `${moduleCode} ${lessonType}`,
+            name: lessonType,
             dueDate: "--",
             dueTime: "--",
             durationHours: durationHours,

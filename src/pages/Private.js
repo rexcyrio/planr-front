@@ -1,21 +1,13 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { useDispatch } from "react-redux";
 import MyDragLayer from "../components/helperComponents/MyDragLayer";
 import Links from "../components/links/Links";
 import Notes from "../components/notes/Notes";
 import Tasks from "../components/tasks/Tasks";
 import Timetable from "../components/timetable/Timetable";
-import { fetchAll } from "../store/storeHelpers/fetchAll";
 
 function Private() {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(fetchAll());
-  }, [dispatch]);
-
   return (
     <>
       <DndProvider backend={HTML5Backend}>
