@@ -14,6 +14,10 @@ const timeSlice = createSlice({
       state.timetableColumn = action.payload;
       return state;
     },
+    _goToToday: (state, action) => {
+      state.mondayKey = getMondayKey(new Date());
+      return state;
+    },
     _goToNextWeek: (state, action) => {
       const mondayKey = state.mondayKey;
       const [dateNumber, monthNumber, yearNumber] = mondayKey;
@@ -34,13 +38,20 @@ const timeSlice = createSlice({
 });
 
 // private function
-const { _setTimetableColumn, _goToNextWeek, _goToPreviousWeek } =
+const { _setTimetableColumn, _goToToday, _goToNextWeek, _goToPreviousWeek } =
   timeSlice.actions;
 
 export function setTimetableColumn() {
   return function thunk(dispatch) {
     const newTimetableColumn = getCurrentColumn();
     dispatch(_setTimetableColumn(newTimetableColumn));
+  };
+}
+
+export function goToToday() {
+  return function thunk(dispatch) {
+    dispatch(_goToToday());
+    dispatch(refreshMatrix());
   };
 }
 
