@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import React, { useMemo, useState } from "react";
 import { useDrop } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
+import isCurrentWeek from "../../helper/isCurrentWeekHelper";
 import { setMatrix } from "../../store/slices/matrixSlice";
 import { updateTaskFields } from "../../store/slices/tasksSlice";
 import styles from "./TimetableCell.module.css";
@@ -32,6 +33,8 @@ TimetableCell.propTypes = {
 
 function TimetableCell({ self, row, col }) {
   const dispatch = useDispatch();
+  const mondayKey = useSelector((state) => state.time.mondayKey);
+  const timetableColumn = useSelector((state) => state.time.timetableColumn);
   const matrix = useSelector((state) => state.matrix);
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
 
@@ -89,14 +92,44 @@ function TimetableCell({ self, row, col }) {
     [matrix]
   );
 
+  function getBackgroundcolor() {
+    if (isCurrentWeek(mondayKey)) {
+      if (col === timetableColumn) {
+        if (Math.floor(row / 2) % 2 === 0) {
+          return "#e5f8eb";
+        }
+        return "#d8ebdf";
+      }
+    }
+    if (col % 2 === 0) {
+      if (Math.floor(row / 2) % 2 === 0) {
+        return "transparent";
+      }
+      return "#f2f2f2";
+    }
+    if (Math.floor(row / 2) % 2 === 0) {
+      return "#f2f2f2";
+    }
+    return "#e6e6e6";
+  }
+  isOver && getRem(droppingTaskTimeUnits);
   return (
     <>
-      <td ref={drop} className={styles["cell"]} rowSpan={self.timeUnits}>
+      <td
+        ref={drop}
+        className={styles["cell"]}
+        rowSpan={self.timeUnits}
+        style={{
+          backgroundColor: getBackgroundcolor(),
+          overflow: "visible",
+        }}
+      >
         {isNonEmptyItem(self) && <TimetableCellCard self={self} />}
         {isOver && (
           <div
             style={{
               position: "absolute",
+              float: "left",
               top: "0",
               left: "0",
               height: getRem(droppingTaskTimeUnits),
