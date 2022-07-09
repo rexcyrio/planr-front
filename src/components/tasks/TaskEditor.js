@@ -250,29 +250,34 @@ function TaskEditor({ self }) {
               helperText={durationStates[durationState].helperText}
               error={durationStates[durationState].error}
             />
-            <TextField
-              sx={{ mr: "1rem" }}
-              margin="dense"
-              id="dueDate"
-              label="Due date"
-              type="date"
-              variant="outlined"
-              required
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              helperText=" "
-            />
-            <TextField
-              margin="dense"
-              id="dueTime"
-              label="Due time"
-              type="time"
-              variant="outlined"
-              required
-              value={dueTime}
-              onChange={(e) => setDueTime(e.target.value)}
-              helperText=" "
-            />
+            {dueDate !== "--" && (
+              <>
+                <TextField
+                  sx={{ mr: "1rem" }}
+                  margin="dense"
+                  id="dueDate"
+                  label="Due date"
+                  type="date"
+                  variant="outlined"
+                  required
+                  value={dueDate}
+                  placeholder=""
+                  onChange={(e) => setDueDate(e.target.value)}
+                  helperText=" "
+                />
+                <TextField
+                  margin="dense"
+                  id="dueTime"
+                  label="Due time"
+                  type="time"
+                  variant="outlined"
+                  required
+                  value={dueTime}
+                  onChange={(e) => setDueTime(e.target.value)}
+                  helperText=" "
+                />
+              </>
+            )}
             <TaskLinksCreator
               taskLinks={taskLinks}
               setTaskLinks={setTaskLinks}
