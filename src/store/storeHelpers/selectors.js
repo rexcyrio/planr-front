@@ -15,11 +15,18 @@ export function selectModuleLinks() {
 export function selectTaskLinks() {
   return (state) => {
     const timetableColumn = state.time.timetableColumn;
-    return state.tasks.data
+
+    const scheduledRecurringTasksLinks = state.tasks.data
+      .filter((task) => task.col !== -1 && task.dueDate === "--")
+      .flatMap((task) => task.links);
+
+    const currentWeekTasksLinks = state.tasks.data
       .filter(
         (task) => task.col === timetableColumn && isCurrentWeek(task.mondayKey)
       )
       .flatMap((task) => task.links);
+
+    return scheduledRecurringTasksLinks.concat(currentWeekTasksLinks);
   };
 }
 
@@ -27,6 +34,10 @@ export function selectCurrentWeekTasks() {
   return (state) => {
     const mondayKey = state.time.mondayKey;
     const tasks = state.tasks.data;
+
+    const recurringTasks = tasks.filter((each) => {
+      return each.mondayKey.length === 0;
+    });
 
     const currentWeekTasks = tasks.filter((each) => {
       for (let i = 0; i < 3; i++) {
@@ -37,6 +48,6 @@ export function selectCurrentWeekTasks() {
       return true;
     });
 
-    return currentWeekTasks;
+    return recurringTasks.concat(currentWeekTasks);
   };
 }

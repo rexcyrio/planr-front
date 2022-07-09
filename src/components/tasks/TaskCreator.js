@@ -7,10 +7,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Fab from "@mui/material/Fab";
 import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import InputAdornment from "@mui/material/InputAdornment";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,6 +36,7 @@ function TaskCreator() {
   const [taskLinks, setTaskLinks] = useState([]);
   const [linkName, setLinkName] = useState("");
   const [linkURL, setLinkURL] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
 
   const [durationState, setDurationState] = useState("NONE");
   const [urlState, setUrlState] = useState("NONE");
@@ -91,8 +94,8 @@ function TaskCreator() {
       _id: uuidv4(),
 
       name: name,
-      dueDate: dueDate,
-      dueTime: dueTime,
+      dueDate: isRecurring ? "--" : dueDate,
+      dueTime: isRecurring ? "--" : dueTime,
       durationHours: durationHours,
       moduleCode: moduleCode,
       links: taskLinks,
@@ -102,7 +105,7 @@ function TaskCreator() {
       timeUnits: Math.ceil(Number(durationHours) * 2),
 
       isCompleted: false,
-      mondayKey: mondayKey,
+      mondayKey: isRecurring ? [] : mondayKey,
     };
 
     dispatch(addTask(newTask));
@@ -121,7 +124,17 @@ function TaskCreator() {
       </Fab>
 
       <Dialog open={open} onClose={handleClose} maxWidth="md">
-        <DialogTitle>Add a new Task</DialogTitle>
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
+          <div>Add a new Task</div>
+          <FormControlLabel
+            control={
+              <Switch
+                onChange={(event) => setIsRecurring(event.target.checked)}
+              />
+            }
+            label="Recurring"
+          />
+        </DialogTitle>
         <Box component="form" onSubmit={handleSubmit}>
           <DialogContent>
             <FormControl sx={{ width: "10rem", mr: "1rem" }} margin="dense">
@@ -179,7 +192,9 @@ function TaskCreator() {
               label="Due date"
               type="date"
               variant="outlined"
-              required
+              required={!isRecurring}
+              disabled={isRecurring}
+              disableUnderline="false"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               helperText=" "
@@ -190,7 +205,9 @@ function TaskCreator() {
               label="Due time"
               type="time"
               variant="outlined"
-              required
+              required={!isRecurring}
+              disabled={isRecurring}
+              disableUnderline="false"
               value={dueTime}
               onChange={(e) => setDueTime(e.target.value)}
               helperText=" "

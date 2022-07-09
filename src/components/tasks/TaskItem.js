@@ -172,7 +172,7 @@ function TaskItem({ self }) {
                 {self.name} ({self.durationHours} hr)
               </div>
 
-              <div>
+              {self.dueDate === "--" ? (
                 <span
                   style={{
                     color: getAccentColour(
@@ -182,10 +182,24 @@ function TaskItem({ self }) {
                     ),
                   }}
                 >
-                  due on:
-                </span>{" "}
-                {self.dueDate}@{convert_24H_to_12H(self.dueTime)}
-              </div>
+                  Recurring
+                </span>
+              ) : (
+                <div>
+                  <span
+                    style={{
+                      color: getAccentColour(
+                        themeName,
+                        mappingModuleCodeToColourName,
+                        self
+                      ),
+                    }}
+                  >
+                    due on:
+                  </span>{" "}
+                  {self.dueDate}@{convert_24H_to_12H(self.dueTime)}
+                </div>
+              )}
             </div>
           </div>
 
