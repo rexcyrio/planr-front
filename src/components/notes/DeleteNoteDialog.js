@@ -50,7 +50,7 @@ function DeleteNoteDialog({ self, deleteNote }) {
           <Button onClick={() => setDeleteNoteDialogOpen(false)}>Cancel</Button>
           <Button
             sx={{ color: "red" }}
-            onClick={confirmDeleteNoteHandler(self)}
+            onClick={() => confirmDeleteNoteHandler(self)}
           >
             Delete
           </Button>
@@ -60,4 +60,4 @@ function DeleteNoteDialog({ self, deleteNote }) {
   );
 }
 
-export default DeleteNoteDialog;
+export default React.memo(DeleteNoteDialog);
