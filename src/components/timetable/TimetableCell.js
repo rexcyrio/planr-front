@@ -129,7 +129,6 @@ function TimetableCell({ self, row, col }) {
           <div
             style={{
               position: "absolute",
-              float: "left",
               top: "0",
               left: "0",
               height: getRem(droppingTaskTimeUnits),
