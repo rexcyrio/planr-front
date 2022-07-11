@@ -1,13 +1,20 @@
 import DoneIcon from "@mui/icons-material/Done";
 import ErrorIcon from "@mui/icons-material/Error";
+import WarningIcon from "@mui/icons-material/Warning";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useState } from "react";
+import PropTypes from "prop-types";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { importNUSModsTimetable } from "../../store/slices/NUSModsURLSlice";
+import { importNUSModsTimetable, resetSettingsState } from "../../store/slices/NUSModsURLSlice";
 
 function ImportNUSModsTimetable() {
   const dispatch = useDispatch();
@@ -15,10 +22,23 @@ function ImportNUSModsTimetable() {
   const [NUSModsURL, setNUSModsURL] = useState(
     useSelector((state) => state.NUSModsURL.url)
   );
+  const [isValidNUSModsURL, setIsValidNUSModsURL] = useState(true);
 
   function handleSubmit(event) {
     event.preventDefault();
-    dispatch(importNUSModsTimetable(NUSModsURL));
+
+    if (NUSModsURL.indexOf("nusmods.com/timetable/") === -1) {
+      setIsValidNUSModsURL(false);
+    } else {
+      setIsValidNUSModsURL(true);
+      dispatch(importNUSModsTimetable(NUSModsURL, false));
+    }
+  }
+
+  function handleChange(event) {
+    setIsValidNUSModsURL(true)
+    setNUSModsURL(event.target.value)
+    dispatch(resetSettingsState())
   }
 
   return (
@@ -34,7 +54,9 @@ function ImportNUSModsTimetable() {
           label="NUSMods URL"
           fullWidth
           required
-          onChange={(e) => setNUSModsURL(e.target.value)}
+          onChange={handleChange}
+          helperText={isValidNUSModsURL ? " " : "Invalid NUSMods URL"}
+          error={!isValidNUSModsURL}
           placeholder="e.g. https://nusmods.com/timetable/sem-1/share?..."
         />
         <br />
@@ -50,7 +72,56 @@ function ImportNUSModsTimetable() {
           {mappingStatusToIcon[status]}
         </div>
       </Box>
+
+      <WarningPopup NUSModsURL={NUSModsURL} />
     </>
+  );
+}
+
+WarningPopup.propTypes = {
+  NUSModsURL: PropTypes.string.isRequired,
+};
+
+function WarningPopup({ NUSModsURL }) {
+  const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+  const status = useSelector((state) => state.NUSModsURL.status);
+
+  useEffect(() => {
+    if (status === "WARNING") {
+      setOpen(true);
+    }
+  }, [status]);
+
+  function handleCancel() {
+    setOpen(false);
+  }
+
+  function handleContinue() {
+    dispatch(importNUSModsTimetable(NUSModsURL, true));
+    setOpen(false);
+  }
+
+  return (
+    <Dialog open={open} onClose={handleCancel}>
+      <DialogTitle>Timetable clash detected!</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          There are scheduled tasks that clash with the NUSMods timetable that
+          you&apos;re trying to import.
+          <br />
+          <br />
+          Either cancel this operation and manually move the tasks away, or
+          continue and have the tasks automatically unscheduled.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancel} variant="contained">
+          Cancel
+        </Button>
+        <Button onClick={handleContinue}>Continue</Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
@@ -82,6 +153,16 @@ const mappingStatusToIcon = {
         sx={{
           ml: "1rem",
           color: "#cc0000",
+        }}
+      />
+    </Tooltip>
+  ),
+  WARNING: (
+    <Tooltip title="Timetable clash detected!">
+      <WarningIcon
+        sx={{
+          ml: "1rem",
+          color: "#ffcc00",
         }}
       />
     </Tooltip>
