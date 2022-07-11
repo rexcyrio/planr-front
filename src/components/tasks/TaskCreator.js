@@ -56,12 +56,12 @@ function TaskCreator() {
   }
 
   function handleOpen() {
+    resetState();
     setOpen(true);
   }
 
   function handleClose() {
     setOpen(false);
-    resetState();
   }
 
   function handleDurationHoursChange(event) {
@@ -109,7 +109,6 @@ function TaskCreator() {
     };
 
     dispatch(addTask(newTask));
-    resetState();
   }
 
   return (
