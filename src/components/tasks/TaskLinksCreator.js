@@ -13,14 +13,14 @@ import PropTypes from "prop-types";
 import { v4 as uuidv4 } from "uuid";
 
 TaskLinksCreator.propTypes = {
-  taskLinks: PropTypes.array,
-  setTaskLinks: PropTypes.func,
-  linkName: PropTypes.string,
-  setLinkName: PropTypes.func,
-  linkURL: PropTypes.string,
-  setLinkURL: PropTypes.func,
-  urlState: PropTypes.string,
-  setUrlState: PropTypes.func,
+  taskLinks: PropTypes.array.isRequired,
+  setTaskLinks: PropTypes.func.isRequired,
+  linkName: PropTypes.string.isRequired,
+  setLinkName: PropTypes.func.isRequired,
+  linkURL: PropTypes.string.isRequired,
+  setLinkURL: PropTypes.func.isRequired,
+  urlState: PropTypes.string.isRequired,
+  setUrlState: PropTypes.func.isRequired,
 };
 
 const urlStates = {
@@ -74,6 +74,7 @@ function TaskLinksCreator({
         newLink._name = linkURL;
         newLink.name = linkURL;
       }
+
       return [...prev, newLink];
     });
     setLinkName("");
@@ -81,35 +82,31 @@ function TaskLinksCreator({
   };
 
   const deleteTaskLinkHandler = (linkId) => {
-    setTaskLinks((prev) => {
-      return prev.filter((link) => link._id !== linkId);
-    });
+    setTaskLinks((prev) => prev.filter((each) => each._id !== linkId));
   };
 
   function generateTaskLinks() {
-    return taskLinks.map((link) => {
-      return (
-        <React.Fragment key={link._id}>
-          <ListItem
-            divider={true}
-            secondaryAction={
-              <Tooltip title="Remove link">
-                <IconButton onClick={() => deleteTaskLinkHandler(link._id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-            }
-          >
-            <ListItemText
-              primary={link.name}
-              secondary={link.url}
-              sx={{ margin: 0 }}
-            />
-          </ListItem>
-          <Divider />
-        </React.Fragment>
-      );
-    });
+    return taskLinks.map((link) => (
+      <React.Fragment key={link._id}>
+        <ListItem
+          divider={true}
+          secondaryAction={
+            <Tooltip title="Remove link">
+              <IconButton onClick={() => deleteTaskLinkHandler(link._id)}>
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          }
+        >
+          <ListItemText
+            primary={link.name}
+            secondary={link.url}
+            sx={{ margin: 0 }}
+          />
+        </ListItem>
+        <Divider />
+      </React.Fragment>
+    ));
   }
 
   return (

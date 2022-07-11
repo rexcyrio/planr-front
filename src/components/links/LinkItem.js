@@ -7,11 +7,11 @@ import Tooltip from "@mui/material/Tooltip";
 
 LinkItem.propTypes = {
   self: PropTypes.shape({
-    _id: PropTypes.string,
-    _toBeDeleted: PropTypes.bool,
-    name: PropTypes.string,
-    url: PropTypes.string,
-  }),
+    _id: PropTypes.string.isRequired,
+    _toBeDeleted: PropTypes.bool.isRequired,
+    name: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 function LinkItem({ self }) {

@@ -6,11 +6,11 @@ import ErrorIcon from "@mui/icons-material/Error";
 import PendingIcon from "@mui/icons-material/Pending";
 import Tooltip from "@mui/material/Tooltip";
 
-function DataStatus({ status }) {
-  DataStatus.propTypes = {
-    status: PropTypes.string,
-  };
+DataStatus.propTypes = {
+  status: PropTypes.string.isRequired,
+};
 
+function DataStatus({ status }) {
   switch (status) {
     case FETCHING:
       return (

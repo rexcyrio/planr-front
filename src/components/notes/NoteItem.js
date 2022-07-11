@@ -13,15 +13,16 @@ import styles from "./NoteItem.module.css";
 
 NoteItem.propTypes = {
   self: PropTypes.shape({
-    _id: PropTypes.string,
-    text: PropTypes.string,
-    isEditMode: PropTypes.bool,
-  }),
-  deleteNote: PropTypes.func,
-  updateEditMode: PropTypes.func,
-  exitEditMode: PropTypes.func,
-  cancelEditMode: PropTypes.func,
-  updateText: PropTypes.func,
+    _id: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
+    isEditMode: PropTypes.bool.isRequired,
+  }).isRequired,
+  
+  deleteNote: PropTypes.func.isRequired,
+  updateEditMode: PropTypes.func.isRequired,
+  exitEditMode: PropTypes.func.isRequired,
+  cancelEditMode: PropTypes.func.isRequired,
+  updateText: PropTypes.func.isRequired,
 };
 
 function NoteItem(props) {

@@ -9,7 +9,7 @@ import {
 import LinkItem from "./LinkItem";
 
 TimetableLinks.propTypes = {
-  emptyPermLinks: PropTypes.bool,
+  emptyPermLinks: PropTypes.bool.isRequired,
 };
 
 function TimetableLinks(props) {
