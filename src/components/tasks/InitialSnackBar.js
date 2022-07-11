@@ -7,13 +7,14 @@ import { FETCH_SUCCESS } from "../helperComponents/DataStatus";
 function InitialSnackBar() {
   const tasks = useSelector((state) => state.tasks.data);
   const status = useSelector((state) => state.tasks.status);
+  const isNewUser = useSelector((state) => state.isNewUser);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (status === FETCH_SUCCESS) {
+    if (!isNewUser && status === FETCH_SUCCESS) {
       setOpen(true);
     }
-  }, [status]);
+  }, [isNewUser, status]);
 
   function handleClose() {
     setOpen(false);

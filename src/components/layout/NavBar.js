@@ -1,13 +1,15 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import {
   setIsAuthenticated,
   setLoggedInUsername,
   setUserId,
 } from "../../store/slices/userSlice";
+import { resetReduxStore } from "../../store/storeHelpers/actions";
+import HelpWindow from "../helpWindow/HelpWindow";
 import Settings from "../settings/Settings";
 import logo from "./../../icons/logo.svg";
 import styles from "./NavBar.module.css";
@@ -38,6 +40,7 @@ function NavBar() {
         dispatch(setIsAuthenticated(false));
         dispatch(setLoggedInUsername(null));
         dispatch(setUserId(null));
+        dispatch(resetReduxStore());
         navigate("/login", { replace: true });
       });
   }
@@ -53,6 +56,7 @@ function NavBar() {
         </Link>
 
         <div className={styles.utility}>
+          {isAuthenticated && <HelpWindow />}
           {isAuthenticated && <Settings />}
 
           <Box sx={{ display: "flex", alignItems: "center" }}>

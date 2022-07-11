@@ -1,6 +1,4 @@
-import InfoIcon from "@mui/icons-material/Info";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
@@ -52,14 +50,11 @@ function Tasks() {
   return (
     <>
       <InitialSnackBar />
-
+      
       <div className={styles.title}>
         <div className={styles["title-update-container"]}>
           <h1>Tasks</h1>
           <DataStatus status={status} />
-          <Tooltip title="Drag tasks using the drag icon to schedule them onto the timetable">
-            <InfoIcon color="info" />
-          </Tooltip>
         </div>
 
         <TaskDeleteCompleted />

@@ -12,6 +12,7 @@ import {
   setLoggedInUsername,
   setUserId,
 } from "../store/slices/userSlice";
+import { setIsNewUser } from "../store/slices/isNewUserSlice";
 
 function Signup() {
   const dispatch = useDispatch();
@@ -232,6 +233,7 @@ function Signup() {
           dispatch(setIsAuthenticated(true));
           dispatch(setLoggedInUsername(json.loggedInUsername));
           dispatch(setUserId(json.userId));
+          dispatch(setIsNewUser(true));
           navigate("/private", { replace: true });
         } else {
           alert(json.error);
