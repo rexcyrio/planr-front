@@ -12,6 +12,7 @@ import {
   markTaskAsComplete,
   markTaskAsIncomplete,
 } from "../../store/slices/tasksSlice";
+import ModuleLinksManager from "../links/ModuleLinksManager";
 import TaskEditor from "../tasks/TaskEditor";
 import styles from "./TimetableCell.module.css";
 
@@ -38,7 +39,7 @@ DetailsPopover.propTypes = {
 function DetailsPopover({ self }) {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -90,25 +91,31 @@ function DetailsPopover({ self }) {
           >
             <div style={{ fontWeight: "bold" }}>{self.moduleCode}</div>
             <div>
-              <TaskEditor self={self} />
-              {self.isCompleted ? (
-                <Tooltip title="Restore task">
-                  <IconButton
-                    size="small"
-                    onClick={() => dispatch(markTaskAsIncomplete(self._id))}
-                  >
-                    <RestoreIcon />
-                  </IconButton>
-                </Tooltip>
+              {isModuleItem(self) ? (
+                <ModuleLinksManager self={self} />
               ) : (
-                <Tooltip title="Mark task as complete">
-                  <IconButton
-                    size="small"
-                    onClick={() => dispatch(markTaskAsComplete(self._id))}
-                  >
-                    <DoneIcon />
-                  </IconButton>
-                </Tooltip>
+                <>
+                  <TaskEditor self={self} />
+                  {self.isCompleted ? (
+                    <Tooltip title="Restore task">
+                      <IconButton
+                        size="small"
+                        onClick={() => dispatch(markTaskAsIncomplete(self._id))}
+                      >
+                        <RestoreIcon />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title="Mark task as complete">
+                      <IconButton
+                        size="small"
+                        onClick={() => dispatch(markTaskAsComplete(self._id))}
+                      >
+                        <DoneIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </>
               )}
             </div>
           </div>
