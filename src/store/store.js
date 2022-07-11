@@ -8,6 +8,7 @@ import tasksReducer from "./slices/tasksSlice";
 import themeNameReducer from "./slices/themeNameSlice";
 import timeReducer from "./slices/timeSlice";
 import userReducer from "./slices/userSlice";
+import isNewUserReducer from "./slices/isNewUserSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,5 +23,8 @@ export const store = configureStore({
     NUSModsURL: NUSModsURLReducer,
     themeName: themeNameReducer,
     mappingModuleCodeToColourName: mappingModuleCodeToColourNameReducer,
+
+    // extras
+    isNewUser: isNewUserReducer,
   },
 });

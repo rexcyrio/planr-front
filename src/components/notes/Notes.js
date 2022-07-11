@@ -1,32 +1,27 @@
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import InfoIcon from "@mui/icons-material/Info";
 import List from "@mui/material/List";
 import Skeleton from "@mui/material/Skeleton";
-import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
-import Tooltip from "@mui/material/Tooltip";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
-import styles from "./Notes.module.css";
-import NoteItem from "./NoteItem";
 import DataStatus, {
   FETCHING,
   FETCH_FAILURE,
   FETCH_SUCCESS,
   UPDATE_FAILURE,
   UPDATE_SUCCESS,
-  UPDATING,
+  UPDATING
 } from "../helperComponents/DataStatus";
-import { useSelector } from "react-redux";
+import NoteItem from "./NoteItem";
+import styles from "./Notes.module.css";
 
 function Notes() {
   const { userId } = useSelector((state) => state.user);
   const [notes, setNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
   const [dataState, setDataState] = useState(FETCHING);
-  const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
 
   useEffect(() => {
     fetch(`/api/private/notes?id=${userId}`)
@@ -68,7 +63,6 @@ function Notes() {
       .then((json) => {
         if (json.error) {
           setDataState(UPDATE_FAILURE);
-          setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
@@ -168,7 +162,6 @@ function Notes() {
       .then((json) => {
         if (json.error) {
           setDataState(UPDATE_FAILURE);
-          setOpenSyncErrorSnackbar(true);
           alert(json.error);
           return;
         }
@@ -177,30 +170,11 @@ function Notes() {
       });
   }
 
-  const closeSnackbar = () => {
-    setOpenSyncErrorSnackbar(false);
-  };
-
   return (
     <>
-      <Snackbar
-        open={openSyncErrorSnackbar}
-        autoHideDuration={6000}
-        onClose={closeSnackbar}
-      >
-        <Alert onClose={closeSnackbar} severity="error" sx={{ width: "100%" }}>
-          Something went wrong! Your notes might not be saved
-        </Alert>
-      </Snackbar>
-
-      <div className={styles.title}>
-        <div className={styles["title-update-container"]}>
-          <h1>Notes</h1>
-          <DataStatus status={dataState} />
-        </div>
-        <Tooltip title="Double click existing notes to edit">
-          <InfoIcon color="info" />
-        </Tooltip>
+      <div className={styles["title-update-container"]}>
+        <h1>Notes</h1>
+        <DataStatus status={dataState} />
       </div>
 
       <div className={styles["main-container"]}>
