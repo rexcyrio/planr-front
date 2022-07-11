@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { resetReduxStore } from "../storeHelpers/actions";
 import { selectCurrentWeekTasks } from "../storeHelpers/selectors";
 
 const initialState = defaultMatrix();
@@ -25,6 +26,9 @@ const matrixSlice = createSlice({
 
       return matrix;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(resetReduxStore, (state, action) => initialState);
   },
 });
 

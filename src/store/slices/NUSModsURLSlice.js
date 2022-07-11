@@ -1,20 +1,20 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { setModules } from "./modulesSlice";
-import { setMatrix } from "./matrixSlice";
-import {
-  FETCHING_REDUCER,
-  FETCH_FAILURE_REDUCER,
-  FETCH_SUCCESS_REDUCER,
-} from "../storeHelpers/statusHelpers";
+import { batch } from "react-redux";
 import formatErrorMessage from "../../helper/formatErrorMessage";
+import { resetReduxStore } from "../storeHelpers/actions";
 import { addModulesToTheme } from "./mappingModuleCodeToColourNameSlice";
+import { refreshMatrix } from "./matrixSlice";
+import { setModules } from "./modulesSlice";
+import { unscheduleTasks } from "./tasksSlice";
+
+const initialState = {
+  url: "",
+  status: "NONE",
+};
 
 const NUSModsURLSlice = createSlice({
   name: "NUSModsURL",
-  initialState: {
-    url: "",
-    status: "NONE",
-  },
+  initialState,
   reducers: {
     _setNUSModsURL: (state, action) => {
       state.url = action.payload;
@@ -26,10 +26,7 @@ const NUSModsURLSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder
-      .addCase(importNUSModsTimetable.pending, FETCHING_REDUCER)
-      .addCase(importNUSModsTimetable.fulfilled, FETCH_SUCCESS_REDUCER)
-      .addCase(importNUSModsTimetable.rejected, FETCH_FAILURE_REDUCER);
+    builder.addCase(resetReduxStore, (state, action) => initialState);
   },
 });
 
@@ -38,134 +35,100 @@ export const { _setNUSModsURL } = NUSModsURLSlice.actions;
 // private function
 const { _setStatus } = NUSModsURLSlice.actions;
 
-export function resetState() {
+export function resetSettingsState() {
   return function thunk(dispatch, getState) {
     dispatch(_setStatus("NONE"));
   };
 }
 
-export const importNUSModsTimetable = createAsyncThunk(
-  "NUSModsURL/importNUSModsTimetable",
-  async (NUSModsURL, { dispatch }) => {
-    const details = parseNUSModsURL(NUSModsURL);
-    const moduleCodes = Object.keys(details);
-    const semester = Number(NUSModsURL.split("/")[4].slice(-1));
+export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
+  return async function thunk(dispatch, getState) {
+    dispatch(_setStatus("FETCHING"));
 
-    // hard code 15 June as the split between the previous academic year and
-    // the new academic year
-    const splitDate = new Date();
-    // dates are 1-indexed
-    splitDate.setDate(15);
-    // months are 0-indexed
-    splitDate.setMonth(5);
+    try {
+      const moduleItems = await getModuleItems(NUSModsURL);
 
-    const isPreviousAcademicYear = new Date() < splitDate;
-    const year = Number(new Date().getFullYear());
-
-    const academicYear = isPreviousAcademicYear
-      ? `${year - 1}-${year}`
-      : `${year}-${year + 1}`;
-
-    const promises = moduleCodes.map(async (moduleCode) => {
-      const lessonType_classCode_pairs = details[moduleCode];
-
-      // check whether this module has lessons
-      if (isEmptyObject(lessonType_classCode_pairs)) {
-        return [];
+      if (moduleItems.length === 0) {
+        throw Error("Invalid NUSMods URL");
       }
 
-      // fetch module information from NUSMods API
-      const res = await fetch(
-        `https://api.nusmods.com/v2/${academicYear}/modules/${moduleCode}.json`
-      );
-      const json = await res.json();
+      const matrix = getState().matrix;
 
-      // getting correct semester data
-      const semesterData = json.semesterData.find(
-        (each) => each.semester === semester
-      );
+      // case 1: no conflicts  + autoRemoveTasks === false    => [FALL THROUGH] setMatrix like normal
+      // case 2: YES conflicts + autoRemoveTasks === false    => stop & warn user
 
-      // getting correct timetable data
-      const timetableData = semesterData.timetable;
+      // case 3: no conflicts  + autoRemoveTasks === true     => should NEVER happen
+      // case 4: YES conflicts + autoRemoveTasks === true     => continue and remove offending tasks
 
-      // lessonTypes refer to "Lecture", "Tutorial", "Laboratory", "Sectional Teaching", etc.
-      const lessonTypes = Object.keys(lessonType_classCode_pairs);
+      // handling cases 1, 2
+      if (autoRemoveTasks === false) {
+        for (const moduleItem of moduleItems) {
+          const { row, col, timeUnits } = moduleItem;
 
-      const newModuleItems = [];
+          for (let i = 0; i < timeUnits; i++) {
+            const id = matrix[row + i][col];
 
-      for (const lessonType of lessonTypes) {
-        const classNo = details[moduleCode][lessonType];
-        const lessons = timetableData.filter(
-          (each) => each.lessonType === lessonType && each.classNo === classNo
-        );
-
-        for (const lesson of lessons) {
-          const startHour = lesson.startTime.slice(0, 2);
-          const startMin = lesson.startTime.slice(2);
-
-          const endHour = lesson.endTime.slice(0, 2);
-          const endMin = lesson.endTime.slice(2);
-
-          const durationHours = getDurationHours(
-            startHour,
-            startMin,
-            endHour,
-            endMin
-          ).toString();
-
-          const newModuleItem = {
-            _id: `__${moduleCode}&day=${lesson.day}&startTime=${lesson.startTime}`,
-
-            name: lessonType,
-            dueDate: "--",
-            dueTime: "--",
-            durationHours: durationHours,
-            moduleCode: moduleCode,
-            links: [],
-
-            row: getRow(startHour, startMin),
-            col: mappingDayToColumn[lesson.day],
-            timeUnits: Math.ceil(Number(durationHours) * 2),
-
-            isCompleted: false,
-            mondayKey: [],
-          };
-
-          newModuleItems.push(newModuleItem);
+            //      empty task => "0"
+            // old module item => "__CS1010X..."
+            if (id !== "0" && id.slice(0, 2) !== "__") {
+              // case 2
+              dispatch(_setStatus("WARNING"));
+              return;
+            }
+          }
         }
       }
 
-      return newModuleItems;
-    });
+      // handling cases 1, 4
+      const occupiedCells = {};
+      const tasks = getState().tasks.data;
+      const offendingTaskIds = [];
 
-    const allNewModuleItems = (await Promise.all(promises)).flat();
+      for (const moduleItem of moduleItems) {
+        const { row, col, timeUnits } = moduleItem;
 
-    // updating matrix
-    const values = [];
-
-    for (const newModuleItem of allNewModuleItems) {
-      const { _id, row, col, timeUnits } = newModuleItem;
-
-      for (let i = 0; i < timeUnits; i++) {
-        values.push([row + i, col, _id]);
+        for (let i = 0; i < timeUnits; i++) {
+          const str = `${row + i},${col}`;
+          occupiedCells[str] = true;
+        }
       }
+
+      for (const task of tasks) {
+        const { _id, row, col, timeUnits } = task;
+
+        for (let i = 0; i < timeUnits; i++) {
+          const str = `${row + i},${col}`;
+
+          if (str in occupiedCells) {
+            offendingTaskIds.push(_id);
+            break;
+          }
+        }
+      }
+
+      batch(() => {
+        dispatch(_setNUSModsURL(NUSModsURL));
+        dispatch(setNUSModsURLInDatabase(NUSModsURL));
+
+        dispatch(unscheduleTasks(offendingTaskIds));
+        dispatch(addModulesToTheme(moduleItems));
+        dispatch(setModules(moduleItems));
+        dispatch(refreshMatrix());
+        dispatch(_setStatus("FETCH_SUCCESS"));
+      });
+    } catch (error) {
+      console.error(error);
+      dispatch(_setStatus("FETCH_FAILURE"));
     }
-
-    dispatch(_setNUSModsURL(NUSModsURL));
-    dispatch(setNUSModsURLInDatabase(NUSModsURL));
-
-    dispatch(addModulesToTheme(allNewModuleItems));
-    dispatch(setModules(allNewModuleItems));
-    dispatch(setMatrix(values));
-  }
-);
+  };
+}
 
 // ============================================================================
 // Database thunks
 // ============================================================================
 
 const setNUSModsURLInDatabase = createAsyncThunk(
-  "tasks/setNUSModsURLInDatabase",
+  "NUSModsURL/setNUSModsURLInDatabase",
   async (NUSModsURL, { getState }) => {
     const { userId } = getState().user;
 
@@ -211,6 +174,102 @@ const mappingDayToColumn = {
   Saturday: 5,
   Sunday: 6,
 };
+
+async function getModuleItems(NUSModsURL) {
+  const details = parseNUSModsURL(NUSModsURL);
+  const moduleCodes = Object.keys(details);
+  const semester = Number(NUSModsURL.split("/")[4].slice(-1));
+
+  // hard code 15 June as the split between the previous academic year and
+  // the new academic year
+  const splitDate = new Date();
+  // dates are 1-indexed
+  splitDate.setDate(15);
+  // months are 0-indexed
+  splitDate.setMonth(5);
+
+  const isPreviousAcademicYear = new Date() < splitDate;
+  const year = Number(new Date().getFullYear());
+
+  const academicYear = isPreviousAcademicYear
+    ? `${year - 1}-${year}`
+    : `${year}-${year + 1}`;
+
+  const promises = moduleCodes.map(async (moduleCode) => {
+    const lessonType_classCode_pairs = details[moduleCode];
+
+    // check whether this module has lessons
+    if (isEmptyObject(lessonType_classCode_pairs)) {
+      return [];
+    }
+
+    // fetch module information from NUSMods API
+    const res = await fetch(
+      `https://api.nusmods.com/v2/${academicYear}/modules/${moduleCode}.json`
+    );
+    const json = await res.json();
+
+    // getting correct semester data
+    const semesterData = json.semesterData.find(
+      (each) => each.semester === semester
+    );
+
+    // getting correct timetable data
+    const timetableData = semesterData.timetable;
+
+    // lessonTypes refer to "Lecture", "Tutorial", "Laboratory", "Sectional Teaching", etc.
+    const lessonTypes = Object.keys(lessonType_classCode_pairs);
+
+    const moduleItems = [];
+
+    for (const lessonType of lessonTypes) {
+      const classNo = details[moduleCode][lessonType];
+      const lessons = timetableData.filter(
+        (each) => each.lessonType === lessonType && each.classNo === classNo
+      );
+
+      for (const lesson of lessons) {
+        const startHour = lesson.startTime.slice(0, 2);
+        const startMin = lesson.startTime.slice(2);
+
+        const endHour = lesson.endTime.slice(0, 2);
+        const endMin = lesson.endTime.slice(2);
+
+        const durationHours = getDurationHours(
+          startHour,
+          startMin,
+          endHour,
+          endMin
+        ).toString();
+
+        const moduleItem = {
+          _id: `__${moduleCode}&day=${lesson.day}&startTime=${lesson.startTime}`,
+
+          name: lessonType,
+          dueDate: "--",
+          dueTime: "--",
+          durationHours: durationHours,
+          moduleCode: moduleCode,
+          links: [],
+
+          row: getRow(startHour, startMin),
+          col: mappingDayToColumn[lesson.day],
+          timeUnits: Math.ceil(Number(durationHours) * 2),
+
+          isCompleted: false,
+          mondayKey: [],
+        };
+
+        moduleItems.push(moduleItem);
+      }
+    }
+
+    return moduleItems;
+  });
+
+  const allModuleItems = (await Promise.all(promises)).flat();
+  return allModuleItems;
+}
 
 function parseNUSModsURL(NUSModsURL) {
   const url = new URL(NUSModsURL);

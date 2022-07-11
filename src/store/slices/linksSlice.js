@@ -9,6 +9,7 @@ import {
   UPDATING_REDUCER,
 } from "../storeHelpers/statusHelpers";
 import { v4 as uuidv4 } from "uuid";
+import { resetReduxStore } from "../storeHelpers/actions";
 
 const initialState = {
   permLinks: [],
@@ -58,6 +59,8 @@ const linksSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(resetReduxStore, (state, action) => initialState)
+
       .addCase(fetchPermLinks.pending, FETCHING_REDUCER)
       .addCase(fetchPermLinks.fulfilled, FETCH_SUCCESS_REDUCER)
       .addCase(fetchPermLinks.rejected, FETCH_FAILURE_REDUCER)

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import formatErrorMessage from "../../helper/formatErrorMessage";
 import { allColourNames } from "../../helper/themeHelper";
+import { resetReduxStore } from "../storeHelpers/actions";
 
 const initialState = {
   Others: "lightPink",
@@ -69,6 +70,9 @@ const mappingModuleCodeToColourNameSlice = createSlice({
       return state;
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(resetReduxStore, (state, action) => initialState);
+  },
 });
 
 export const { _setMappingModuleCodeToColourName } =
@@ -102,7 +106,7 @@ export function updateModuleColour(moduleCode, newColour) {
 // ============================================================================
 
 const updateMappingModuleCodeToColourNameInDatabase = createAsyncThunk(
-  "tasks/updateMappingModuleCodeToColourNameInDatabase",
+  "mappingModuleCodeToColourName/updateMappingModuleCodeToColourNameInDatabase",
   async (_, { getState }) => {
     const { userId } = getState().user;
     const mappingModuleCodeToColourName =
