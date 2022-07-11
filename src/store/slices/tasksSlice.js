@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { batch } from "react-redux";
 import { FETCHING } from "../../components/helperComponents/DataStatus";
 import formatErrorMessage from "../../helper/formatErrorMessage";
+import { resetReduxStore } from "../storeHelpers/actions";
 import {
   FETCHING_REDUCER,
   FETCH_FAILURE_REDUCER,
@@ -66,42 +67,114 @@ const tasksSlice = createSlice({
       return state;
     },
     _saveEditedTasksLinks: (state, action) => {
-      const newLinks = action.payload;
-      for (const link of newLinks) {
-        if (link.name === "") {
-          link.name = link.url;
-        }
+      const tasks = state.data;
+      const newTaskLinks = action.payload;
 
-        let finalURL = link.url;
-        if (
-          !link.url.startsWith("https://") &&
-          !link.url.startsWith("http://")
-        ) {
-          finalURL = "http://".concat(link.url);
-        }
+      const mappingTaskLinkIdToTasksIndex = {};
 
-        const newLink = {
-          ...link,
-          url: finalURL,
-        };
-        loop2: for (const task of state.data) {
-          for (let i = 0; i < task.links.length; i++) {
-            if (link._id === task.links[i]._id) {
-              if (link._toBeDeleted) {
-                task.links = task.links.filter((each) => each._id !== link._id);
-              } else {
-                task.links[i] = newLink;
-              }
-              break loop2;
-            }
-          }
+      for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        const oldTaskLinks = task.links;
+
+        for (const oldTaskLink of oldTaskLinks) {
+          const { _id: oldTaskLinkId } = oldTaskLink;
+          mappingTaskLinkIdToTasksIndex[oldTaskLinkId] = i;
         }
       }
+
+      const allBuckets = [];
+      for (let i = 0; i < tasks.length; i++) {
+        allBuckets.push([]);
+      }
+
+      for (const newLink of newTaskLinks) {
+        // can change to deep copying if bugs occur
+
+        if (newLink.name === "") {
+          newLink.name = newLink.url;
+        }
+
+        if (
+          !newLink.url.startsWith("https://") &&
+          !newLink.url.startsWith("http://")
+        ) {
+          newLink.url = "http://".concat(newLink.url);
+        }
+
+        const { _id: newTaskLinkId } = newLink;
+        const index = mappingTaskLinkIdToTasksIndex[newTaskLinkId];
+        allBuckets[index].push(newLink);
+      }
+
+      for (let i = 0; i < allBuckets.length; i++) {
+        const bucket = allBuckets[i];
+        // state.data          => array of all task items
+        // state.data[i]       => a particular task item
+        // state.data[i].links => array of links associated with this particular task item
+        state.data[i].links = bucket.filter((each) => !each._toBeDeleted);
+      }
+
+      return state;
+
+      // for (const link of newTaskLinks) {
+      //   if (link.name === "") {
+      //     link.name = link.url;
+      //   }
+
+      //   let finalURL = link.url;
+      //   if (
+      //     !link.url.startsWith("https://") &&
+      //     !link.url.startsWith("http://")
+      //   ) {
+      //     finalURL = "http://".concat(link.url);
+      //   }
+
+      //   const newLink = {
+      //     ...link,
+      //     url: finalURL,
+      //   };
+      //   loop2: for (const task of state.data) {
+      //     for (let i = 0; i < task.links.length; i++) {
+      //       if (link._id === task.links[i]._id) {
+      //         if (link._toBeDeleted) {
+      //           task.links = task.links.filter((each) => each._id !== link._id);
+      //         } else {
+      //           task.links[i] = newLink;
+      //         }
+      //         break loop2;
+      //       }
+      //     }
+      //   }
+      // }
+      // return state;
+    },
+    _unscheduleTasks: (state, action) => {
+      const tasks = state.data;
+      const taskIds = action.payload;
+
+      const mappingTaskIdToIndex = {};
+
+      for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        mappingTaskIdToIndex[task._id] = i;
+      }
+
+      for (const taskId of taskIds) {
+        const index = mappingTaskIdToIndex[taskId];
+
+        // unschedule task
+        tasks[index].row = -1;
+        tasks[index].col = -1;
+      }
+
+      state.data = tasks;
       return state;
     },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(resetReduxStore, (state, action) => initialState)
+
       .addCase(fetchTasks.pending, FETCHING_REDUCER)
       .addCase(fetchTasks.fulfilled, FETCH_SUCCESS_REDUCER)
       .addCase(fetchTasks.rejected, FETCH_FAILURE_REDUCER)
@@ -125,6 +198,7 @@ const {
   _deleteTask,
   _deleteCompletedTasks,
   _saveEditedTasksLinks,
+  _unscheduleTasks,
 } = tasksSlice.actions;
 
 export function addTask(newTask) {
@@ -204,6 +278,13 @@ export function markTaskAsIncomplete(taskId) {
 export function saveEditedTasksLinks(newTasksLinks) {
   return function thunk(dispatch, getState) {
     dispatch(_saveEditedTasksLinks(newTasksLinks));
+    dispatch(updateTasksInDatabase());
+  };
+}
+
+export function unscheduleTasks(taskIds) {
+  return function thunk(dispatch, getState) {
+    dispatch(_unscheduleTasks(taskIds));
     dispatch(updateTasksInDatabase());
   };
 }

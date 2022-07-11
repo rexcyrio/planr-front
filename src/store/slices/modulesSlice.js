@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import formatErrorMessage from "../../helper/formatErrorMessage";
+import { resetReduxStore } from "../storeHelpers/actions";
 
 const initialState = [];
 
@@ -8,6 +9,17 @@ const modulesSlice = createSlice({
   initialState,
   reducers: {
     _setModules: (state, action) => action.payload,
+    _addModuleLinks: (state, action) => {
+      const modules = state;
+      const { moduleCode, links } = action.payload;
+
+      for (const module of modules) {
+        if (module.moduleCode === moduleCode) {
+          module.links = links;
+          return state;
+        }
+      }
+    },
     _saveEditedModulesLinks: (state, action) => {
       const newLinks = action.payload;
       for (const link of newLinks) {
@@ -45,14 +57,26 @@ const modulesSlice = createSlice({
       return state;
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(resetReduxStore, (state, action) => initialState);
+  },
 });
 
-export const { _setModules, _saveEditedModulesLinks } = modulesSlice.actions;
+export const { _setModules } = modulesSlice.actions;
 
-// get state in updateDB func?
+const { _addModuleLinks, _saveEditedModulesLinks } = modulesSlice.actions;
+
 export function setModules(newModuleItems) {
   return function thunk(dispatch, getState) {
     dispatch(_setModules(newModuleItems));
+    dispatch(setModulesInDatabase());
+  };
+}
+
+export function addModuleLinks(moduleCode, links) {
+  return function thunk(dispatch, getState) {
+    const payload = { moduleCode, links };
+    dispatch(_addModuleLinks(payload));
     dispatch(setModulesInDatabase());
   };
 }
@@ -69,7 +93,7 @@ export function saveEditedModulesLinks(newTasksLinks) {
 // ============================================================================
 
 const setModulesInDatabase = createAsyncThunk(
-  "tasks/setModulesInDatabase",
+  "modules/setModulesInDatabase",
   async (_, { getState }) => {
     const { userId } = getState().user;
     const modules = getState().modules;

@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { resetReduxStore } from "../storeHelpers/actions";
 import { refreshMatrix } from "./matrixSlice";
 
 const initialState = {
@@ -34,6 +35,9 @@ const timeSlice = createSlice({
       state.mondayKey = convertToKey(dateObject);
       return state;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(resetReduxStore, (state, action) => initialState);
   },
 });
 

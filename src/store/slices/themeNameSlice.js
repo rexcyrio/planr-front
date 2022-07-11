@@ -1,13 +1,17 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import formatErrorMessage from "../../helper/formatErrorMessage";
+import { resetReduxStore } from "../storeHelpers/actions";
 
 const initialState = "Eighties";
 
 const themeNameSlice = createSlice({
-  name: "tasks",
+  name: "themeName",
   initialState,
   reducers: {
     _setThemeName: (state, action) => action.payload,
+  },
+  extraReducers: (builder) => {
+    builder.addCase(resetReduxStore, (state, action) => initialState);
   },
 });
 
@@ -25,7 +29,7 @@ export function setThemeName(themeName) {
 // ============================================================================
 
 const setThemeNameInDatabase = createAsyncThunk(
-  "matrix/setThemeNameInDatabase",
+  "themeName/setThemeNameInDatabase",
   async (_, { getState }) => {
     const { userId } = getState().user;
     const themeName = getState().themeName;
