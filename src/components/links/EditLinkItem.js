@@ -9,12 +9,13 @@ import React from "react";
 
 EditLinkItem.propTypes = {
   self: PropTypes.shape({
-    _id: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string,
-    _toBeDeleted: PropTypes.bool,
-  }),
-  setTempLinks: PropTypes.func,
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    _toBeDeleted: PropTypes.bool.isRequired,
+  }).isRequired,
+  
+  setTempLinks: PropTypes.func.isRequired,
 };
 
 function EditLinkItem({ self, setTempLinks }) {
