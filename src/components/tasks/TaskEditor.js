@@ -43,6 +43,9 @@ TaskEditor.propTypes = {
 function TaskEditor({ self }) {
   const dispatch = useDispatch();
   const matrix = useSelector((state) => state.matrix);
+  const moduleCodes = useSelector((state) =>
+    Object.keys(state.mappingModuleCodeToColourName)
+  );
 
   const [name, setName] = useState(self.name);
   const [dueDate, setDueDate] = useState(self.dueDate);
@@ -212,11 +215,11 @@ function TaskEditor({ self }) {
                 onChange={(e) => setModuleCode(e.target.value)}
                 required
               >
-                {/* TODO: update module codes */}
-                <MenuItem value={"Others"}>Others</MenuItem>
-                <MenuItem value={"CS1101S"}>CS1101S</MenuItem>
-                <MenuItem value={"CS1231S"}>CS1231S</MenuItem>
-                <MenuItem value={"MA1521"}>MA1521</MenuItem>
+                {moduleCodes.map((moduleCode) => (
+                  <MenuItem key={moduleCode} value={moduleCode}>
+                    {moduleCode}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <TextField
