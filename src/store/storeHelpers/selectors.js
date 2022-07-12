@@ -51,3 +51,7 @@ export function selectCurrentWeekTasks() {
     return recurringTasks.concat(currentWeekTasks);
   };
 }
+
+export function selectModuleCodes() {
+  return (state) => Object.keys(state.mappingModuleCodeToColourName);
+}
