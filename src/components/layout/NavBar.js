@@ -11,6 +11,7 @@ import {
 import { resetReduxStore } from "../../store/storeHelpers/actions";
 import HelpWindow from "../helpWindow/HelpWindow";
 import Settings from "../settings/Settings";
+import Statistics from "../statistics/Statistics";
 import logo from "./../../icons/logo.svg";
 import styles from "./NavBar.module.css";
 
@@ -56,8 +57,15 @@ function NavBar() {
         </Link>
 
         <div className={styles.utility}>
-          {isAuthenticated && <HelpWindow />}
-          {isAuthenticated && <Settings />}
+          {isAuthenticated && (
+            <>
+              <Statistics />
+              <HelpWindow />
+              <Settings />
+            </>
+          )}
+          {/* {isAuthenticated && <HelpWindow />}
+          {isAuthenticated && <Settings />} */}
 
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {isAuthenticated ? (
