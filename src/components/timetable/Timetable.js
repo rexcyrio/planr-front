@@ -205,7 +205,7 @@ function Timetable() {
       </div>
 
       <div className={styles["timetable-container"]}>
-        <LineMarker />
+        {isCurrentWeek(mondayKey) && <LineMarker />}
         <table className={styles["timetable-table"]}>
           <tbody>
             {getTimePairArray().map((timePair, index) => {
