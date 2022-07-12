@@ -18,14 +18,13 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { addTask } from "../../store/slices/tasksSlice";
+import { selectModuleCodes } from "../../store/storeHelpers/selectors";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 function TaskCreator() {
   const dispatch = useDispatch();
   const mondayKey = useSelector((state) => state.time.mondayKey);
-  const moduleCodes = useSelector((state) =>
-    Object.keys(state.mappingModuleCodeToColourName)
-  );
+  const moduleCodes = useSelector(selectModuleCodes());
 
   const [name, setName] = useState("");
   const [dueDate, setDueDate] = useState(getDateNowString());
