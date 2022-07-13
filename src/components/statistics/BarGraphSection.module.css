@@ -1,0 +1,9 @@
+.section-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.graph {
+  width: 50rem;
+  height: 25rem;
+}
