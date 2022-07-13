@@ -4,9 +4,13 @@ import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
-import { useDispatch, useSelector } from "react-redux";
+import { batch, useDispatch, useSelector } from "react-redux";
 import { getBackgroundColour } from "../../helper/themeHelper";
-import { setMatrix } from "../../store/slices/matrixSlice";
+import {
+  blackenCells,
+  refreshMatrix,
+  setMatrix,
+} from "../../store/slices/matrixSlice";
 import { updateTaskFields } from "../../store/slices/tasksSlice";
 import DetailsPopover from "./DetailsPopover";
 
@@ -60,17 +64,30 @@ function TimetableCellCard({ self }) {
             values.push([row + i, col, "0"]);
           }
 
-          dispatch(setMatrix(values));
+          batch(() => {
+            dispatch(setMatrix(values));
 
-          dispatch(
-            updateTaskFields(self._id, {
-              row: -1,
-              col: -1,
-            })
-          );
+            dispatch(
+              updateTaskFields(self._id, {
+                row: -1,
+                col: -1,
+              })
+            );
+            
+            if (self.dueDate === "--") {
+              dispatch(blackenCells());
+            }
+          });
         }, 0);
 
         return { task: self };
+      },
+      end: (item, monitor) => {
+        const { dueDate } = item.task;
+
+        if (dueDate === "--") {
+          dispatch(refreshMatrix());
+        }
       },
     }),
     [self]

@@ -13,6 +13,7 @@ import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccentColour, getBackgroundColour } from "../../helper/themeHelper";
+import { blackenCells, refreshMatrix } from "../../store/slices/matrixSlice";
 import {
   markTaskAsComplete,
   markTaskAsIncomplete,
@@ -52,7 +53,19 @@ function TaskItem({ self }) {
     () => ({
       // "type" is required. It is used by the "accept" specification of drop targets.
       type: "TASK",
-      item: { task: self },
+      item: () => {
+        if (self.dueDate === "--") {
+          dispatch(blackenCells());
+        }
+        return { task: self };
+      },
+      end: (item, monitor) => {
+        const { dueDate } = item.task;
+
+        if (dueDate === "--") {
+          dispatch(refreshMatrix());
+        }
+      },
       // The collect function utilizes a "monitor" instance (see the Overview for what this is)
       // to pull important pieces of state from the DnD system.
       collect: (monitor) => ({
