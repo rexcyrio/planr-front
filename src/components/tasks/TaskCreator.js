@@ -49,6 +49,7 @@ function TaskCreator() {
     setTaskLinks([]);
     setLinkName("");
     setLinkURL("");
+    setIsRecurring(false)
 
     setDurationState("NONE");
     setUrlState("NONE");
@@ -192,7 +193,6 @@ function TaskCreator() {
               variant="outlined"
               required={!isRecurring}
               disabled={isRecurring}
-              disableUnderline="false"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               helperText=" "
@@ -205,7 +205,6 @@ function TaskCreator() {
               variant="outlined"
               required={!isRecurring}
               disabled={isRecurring}
-              disableUnderline="false"
               value={dueTime}
               onChange={(e) => setDueTime(e.target.value)}
               helperText=" "
