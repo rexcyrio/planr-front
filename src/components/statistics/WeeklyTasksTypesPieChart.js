@@ -26,18 +26,18 @@ function generateWeekModuleHoursData(countObject, weekTasks, modules) {
 }
 
 function generateBackgroundColourArray(stringColourArray, themeName) {
-  const hexColour = stringColourArray.map(
+  const hexColourArray = stringColourArray.map(
     (colorName) => allThemes[themeName][colorName]
   );
-  return hexColour;
+  return hexColourArray;
 }
 
 function generateBorderColourArray(stringColourArray, themeName) {
-  const hexColour = stringColourArray.map((colorName) => {
+  const hexColourArray = stringColourArray.map((colorName) => {
     const darkColorName = "dark" + colorName.slice(5);
     return allThemes[themeName][darkColorName];
   });
-  return hexColour;
+  return hexColourArray;
 }
 
 function WeeklyTasksTypesPieChart() {
