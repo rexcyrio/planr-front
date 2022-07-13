@@ -10,6 +10,21 @@ import { unscheduleTasks } from "./tasksSlice";
 const initialState = {
   url: "",
   status: "NONE",
+
+  // cache the module information to avoid fetching from NUSMods API again when
+  // a timetable clash is detected
+  cache: {},
+
+  // cache: {
+  //   url: {
+  //     dateLastFetched: "",
+  //     moduleItems: [],
+  //   },
+  //   url2: {
+  //     dateLastFetched: "",
+  //     moduleItems: [],
+  //   },
+  // },
 };
 
 const NUSModsURLSlice = createSlice({
@@ -24,6 +39,16 @@ const NUSModsURLSlice = createSlice({
       state.status = action.payload;
       return state;
     },
+    _cacheModuleItems: (state, action) => {
+      const { url, dateLastFetched, moduleItems } = action.payload;
+
+      state.cache[url] = {
+        dateLastFetched: dateLastFetched,
+        moduleItems: moduleItems,
+      };
+
+      return state;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(resetReduxStore, (state, action) => initialState);
@@ -33,7 +58,7 @@ const NUSModsURLSlice = createSlice({
 export const { _setNUSModsURL } = NUSModsURLSlice.actions;
 
 // private function
-const { _setStatus } = NUSModsURLSlice.actions;
+const { _setStatus, _cacheModuleItems } = NUSModsURLSlice.actions;
 
 export function resetSettingsState() {
   return function thunk(dispatch, getState) {
@@ -46,11 +71,25 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
     dispatch(_setStatus("FETCHING"));
 
     try {
-      const moduleItems = await getModuleItems(NUSModsURL);
+      const { cache } = getState().NUSModsURL;
+      const dateNow = new Date().toDateString();
+
+      const moduleItems =
+        NUSModsURL in cache && cache[NUSModsURL].dateLastFetched === dateNow
+          ? cache[NUSModsURL].moduleItems
+          : await fetchModuleItems(NUSModsURL);
 
       if (moduleItems.length === 0) {
         throw Error("Invalid NUSMods URL");
       }
+
+      const payload = {
+        url: NUSModsURL,
+        dateLastFetched: dateNow,
+        moduleItems: moduleItems,
+      };
+
+      dispatch(_cacheModuleItems(payload));
 
       const matrix = getState().matrix;
 
@@ -175,7 +214,7 @@ const mappingDayToColumn = {
   Sunday: 6,
 };
 
-async function getModuleItems(NUSModsURL) {
+async function fetchModuleItems(NUSModsURL) {
   const details = parseNUSModsURL(NUSModsURL);
   const moduleCodes = Object.keys(details);
   const semester = Number(NUSModsURL.split("/")[4].slice(-1));
