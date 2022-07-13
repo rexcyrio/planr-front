@@ -63,6 +63,35 @@ export function refreshMatrix() {
   };
 }
 
+export function blackenCells() {
+  return function thunk(dispatch, getState) {
+    const tasks = getState().tasks.data;
+    const occupiedCells = {};
+
+    for (const task of tasks) {
+      if (task.dueDate === "--") {
+        continue;
+      }
+
+      // is normal task
+      const { row, col, timeUnits } = task;
+
+      for (let i = 0; i < timeUnits; i++) {
+        const str = `${row + i},${col}`;
+        occupiedCells[str] = true;
+      }
+    }
+
+    const values = [];
+    for (const value of Object.keys(occupiedCells)) {
+      const [row, col] = value.split(",");
+      values.push([row, col, "black"]);
+    }
+
+    dispatch(setMatrix(values));
+  };
+}
+
 // ============================================================================
 // Helper functions
 // ============================================================================
