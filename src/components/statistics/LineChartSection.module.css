@@ -3,11 +3,5 @@
   flex-direction: column;
   margin: 2rem;
   margin-top: 0;
-  align-items: center;
-  justify-content: center;
-  width: 90%;
-}
-
-.graph {
-  width: 100%;
+  margin-bottom: 0;
 }

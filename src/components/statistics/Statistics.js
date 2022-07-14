@@ -27,10 +27,10 @@ function Statistics() {
         </IconButton>
       </Tooltip>
 
-      <Dialog open={open} onClose={closeDialog} fullWidth="true" maxWidth="xl">
+      <Dialog open={open} onClose={closeDialog} fullWidth maxWidth="xl">
         <DialogTitle>Statistics</DialogTitle>
 
-        <DialogContent sx={{ maxWidth: "100%" }}>
+        <DialogContent>
           <StatsContent />
         </DialogContent>
 

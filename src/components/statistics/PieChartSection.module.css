@@ -1,13 +1,9 @@
 .section-container {
   display: flex;
   flex-direction: column;
+  width: 85%;
   margin: 2rem;
-  margin-top: 0;
+  margin-left: 4rem;
   align-items: center;
   justify-content: center;
-  width: 90%;
-}
-
-.graph {
-  width: 100%;
 }

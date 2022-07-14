@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { selectCurrentWeekTasks } from "../../store/storeHelpers/selectors";
 import { generateEmptyWeekArray } from "../../helper/statsHelper";
 import { allThemes } from "../../helper/themeHelper";
+import PropTypes from "prop-types";
 
 ChartJS.register(
   CategoryScale,
@@ -22,6 +23,34 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+const options = {
+  plugins: {
+    title: {
+      display: true,
+      text: "Current week workload hours distribution",
+    },
+  },
+  responsive: true,
+  scales: {
+    x: {
+      stacked: true,
+    },
+    y: {
+      stacked: true,
+    },
+  },
+};
+
+const labels = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
 function toArrayCountObject(object, keys) {
   const arrayCountObject = { ...object };
@@ -68,9 +97,13 @@ function generateDatasetObjectsArray(
   return datasets;
 }
 
-function WeeklyTasksBarGraph() {
-  const currentWeekTasks = useSelector(selectCurrentWeekTasks());
-  const modules = useSelector((state) => state.modules);
+WeeklyTasksBarGraph.propTypes = {
+  taskType: PropTypes.string,
+};
+
+function WeeklyTasksBarGraph({ taskType }) {
+  let currentWeekTasks = useSelector(selectCurrentWeekTasks());
+  let modules = useSelector((state) => state.modules);
   const themeName = useSelector((state) => state.themeName);
   const mappingModuleCodeToColourName = useSelector(
     (state) => state.mappingModuleCodeToColourName
@@ -81,39 +114,21 @@ function WeeklyTasksBarGraph() {
     mappingModuleCodeToColourName,
     moduleCodeKeys
   );
+
+  if (taskType === "Completed") {
+    currentWeekTasks = currentWeekTasks.filter((task) => task.isCompleted);
+    modules = [];
+  }
+  if (taskType === "Incompleted") {
+    currentWeekTasks = currentWeekTasks.filter((task) => !task.isCompleted);
+    modules = [];
+  }
+
   const nestedDataObject = generateWeekWorkloadHoursDistributionData(
     arrayCountObject,
     currentWeekTasks,
     modules
   );
-
-  const options = {
-    plugins: {
-      title: {
-        display: true,
-        text: "Current week workload hours distribution",
-      },
-    },
-    responsive: true,
-    scales: {
-      x: {
-        stacked: true,
-      },
-      y: {
-        stacked: true,
-      },
-    },
-  };
-
-  const labels = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
 
   const data = {
     labels,

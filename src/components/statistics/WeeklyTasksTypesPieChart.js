@@ -4,8 +4,22 @@ import { Pie } from "react-chartjs-2";
 import { useSelector } from "react-redux";
 import { allThemes } from "../../helper/themeHelper";
 import { selectCurrentWeekTasks } from "../../store/storeHelpers/selectors";
+import PropTypes from "prop-types";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+const options = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: "top",
+    },
+    title: {
+      display: true,
+      text: "Hours by task type",
+    },
+  },
+};
 
 function toCountObject(object, keys) {
   const countObject = { ...object };
@@ -40,8 +54,16 @@ function generateBorderColourArray(stringColourArray, themeName) {
   return hexColourArray;
 }
 
-function WeeklyTasksTypesPieChart() {
-  const currentWeekTasks = useSelector(selectCurrentWeekTasks());
+WeeklyTasksTypesPieChart.propTypes = {
+  durationType: PropTypes.string,
+};
+
+function WeeklyTasksTypesPieChart({ durationType }) {
+  const tasks = useSelector(
+    durationType === "All"
+      ? (state) => state.tasks.data
+      : selectCurrentWeekTasks()
+  );
   const modules = useSelector((state) => state.modules);
   const themeName = useSelector((state) => state.themeName);
   const mappingModuleCodeToColourName = useSelector(
@@ -62,7 +84,7 @@ function WeeklyTasksTypesPieChart() {
         label: "sddd",
         data: generateWeekModuleHoursData(
           moduleCodeHoursObject,
-          currentWeekTasks,
+          tasks,
           modules
         ),
         backgroundColor: generateBackgroundColourArray(
@@ -74,7 +96,7 @@ function WeeklyTasksTypesPieChart() {
       },
     ],
   };
-  return <Pie data={data} />;
+  return <Pie data={data} options={options} />;
 }
 
 export default WeeklyTasksTypesPieChart;

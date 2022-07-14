@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import WeeklyTasksBarGraph from "./WeeklyTasksBarGraph";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import styles from "./BarGraphSection.module.css";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import React, { useState } from "react";
+import styles from "./BarGraphSection.module.css";
+import WeeklyTasksBarGraph from "./WeeklyTasksBarGraph";
 
 function BarGraphSection() {
   const [taskType, setTaskType] = useState("All tasks");
@@ -16,10 +16,10 @@ function BarGraphSection() {
   return (
     <div className={styles["section-container"]}>
       <div className={styles.graph}>
-        <WeeklyTasksBarGraph />
+        <WeeklyTasksBarGraph taskType={taskType} />
       </div>
-      <FormControl size="small" sx={{ width: "10rem" }}>
-        <InputLabel sx={{ alignContent: "center" }}>Age</InputLabel>
+      <FormControl size="small" sx={{ width: "10rem", marginTop: "1rem" }}>
+        <InputLabel sx={{ alignContent: "center" }}>Task </InputLabel>
         <Select
           value={taskType}
           label="Task type"
