@@ -103,7 +103,7 @@ function getCurrentColumn() {
   return date.getDay() === 0 ? 6 : date.getDay() - 1;
 }
 
-function convertToKey(dateObject) {
+export function convertToKey(dateObject) {
   const dateNumber = dateObject.getDate();
   const monthNumber = dateObject.getMonth();
   const yearNumber = dateObject.getFullYear();
