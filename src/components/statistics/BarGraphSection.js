@@ -19,7 +19,7 @@ function BarGraphSection() {
         <WeeklyTasksBarGraph taskType={taskType} />
       </div>
       <FormControl size="small" sx={{ width: "10rem", marginTop: "1rem" }}>
-        <InputLabel sx={{ alignContent: "center" }}>Task </InputLabel>
+        <InputLabel sx={{ alignContent: "center" }}>Task Type</InputLabel>
         <Select
           value={taskType}
           label="Task type"
