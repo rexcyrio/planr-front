@@ -1,4 +1,16 @@
 .charts {
   display: flex;
+  flex-direction: row;
+}
+
+.pie-chart-div {
+  width: 50%;
   align-items: center;
+  justify-content: center;
+}
+
+.bar-line-grouping {
+  width: 50%;
+  align-items: center;
+  justify-content: center;
 }
