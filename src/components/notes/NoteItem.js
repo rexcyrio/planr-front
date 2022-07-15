@@ -17,7 +17,7 @@ NoteItem.propTypes = {
     text: PropTypes.string.isRequired,
     isEditMode: PropTypes.bool.isRequired,
   }).isRequired,
-  
+
   deleteNote: PropTypes.func.isRequired,
   updateEditMode: PropTypes.func.isRequired,
   exitEditMode: PropTypes.func.isRequired,
@@ -25,15 +25,14 @@ NoteItem.propTypes = {
   updateText: PropTypes.func.isRequired,
 };
 
-function NoteItem(props) {
-  const {
-    self,
-    deleteNote,
-    updateEditMode,
-    exitEditMode,
-    cancelEditMode,
-    updateText,
-  } = props;
+function NoteItem({
+  self,
+  deleteNote,
+  updateEditMode,
+  exitEditMode,
+  cancelEditMode,
+  updateText,
+}) {
   const [originalNote, setOriginalNote] = useState("");
 
   function handleDoubleClick(self) {

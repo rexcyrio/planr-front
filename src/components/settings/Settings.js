@@ -8,7 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { resetSettingsState } from "../../store/slices/NUSModsURLSlice";
+import { resetNUSModsURLStatus } from "../../store/slices/NUSModsURLSlice";
 import ImportNUSModsTimetable from "./ImportNUSModsTimetable";
 import MappingModuleCodeToColourName from "./MappingModuleCodeToColourName";
 import ThemeName from "./ThemeName";
@@ -18,7 +18,7 @@ function Settings() {
   const [open, setOpen] = useState(false);
 
   const openDialog = () => {
-    dispatch(resetSettingsState());
+    dispatch(resetNUSModsURLStatus());
     setOpen(true);
   };
 

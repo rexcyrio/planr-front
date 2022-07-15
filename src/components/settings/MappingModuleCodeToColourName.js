@@ -7,13 +7,11 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { allColourNames } from "../../helper/themeHelper";
 import { updateModuleColour } from "../../store/slices/mappingModuleCodeToColourNameSlice";
+import { selectModuleCodes } from "../../store/storeHelpers/selectors";
 import ColourIcon from "./ColourIcon";
 
 function MappingModuleCodeToColourName() {
-  const mappingModuleCodeToColourName = useSelector(
-    (state) => state.mappingModuleCodeToColourName
-  );
-  const moduleCodes = Object.keys(mappingModuleCodeToColourName);
+  const moduleCodes = useSelector(selectModuleCodes());
 
   return (
     <>
