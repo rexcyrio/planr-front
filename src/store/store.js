@@ -9,6 +9,7 @@ import themeNameReducer from "./slices/themeNameSlice";
 import timeReducer from "./slices/timeSlice";
 import userReducer from "./slices/userSlice";
 import isNewUserReducer from "./slices/isNewUserSlice";
+import TaskEditorPopupReducer from "./slices/TaskEditorPopupSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,5 +27,8 @@ export const store = configureStore({
 
     // extras
     isNewUser: isNewUserReducer,
+
+    // popup manager
+    TaskEditorPopup: TaskEditorPopupReducer,
   },
 });

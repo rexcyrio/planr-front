@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
@@ -16,8 +17,9 @@ import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setMatrix } from "../../store/slices/matrixSlice";
-import { deleteTask, updateTaskFields } from "../../store/slices/tasksSlice";
+import { setTaskEditorPopupWarningOpen } from "../../store/slices/TaskEditorPopupSlice";
+import { deleteTask, saveEditedTask } from "../../store/slices/tasksSlice";
+import { selectModuleCodes } from "../../store/storeHelpers/selectors";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 TaskEditor.propTypes = {
@@ -42,10 +44,7 @@ TaskEditor.propTypes = {
 
 function TaskEditor({ self }) {
   const dispatch = useDispatch();
-  const matrix = useSelector((state) => state.matrix);
-  const moduleCodes = useSelector((state) =>
-    Object.keys(state.mappingModuleCodeToColourName)
-  );
+  const moduleCodes = useSelector(selectModuleCodes());
 
   const [name, setName] = useState(self.name);
   const [dueDate, setDueDate] = useState(self.dueDate);
@@ -107,8 +106,6 @@ function TaskEditor({ self }) {
       return;
     }
 
-    setOpen(false);
-
     const newTask = {
       _id: self._id,
 
@@ -127,75 +124,34 @@ function TaskEditor({ self }) {
       mondayKey: self.mondayKey,
     };
 
-    const { _id: taskId, row, col } = newTask;
-
-    if (row !== -1 && col !== -1) {
-      // updating matrix
-      if (newTask.timeUnits < self.timeUnits) {
-        // case 1: user shortened time needed for task
-        const diff = self.timeUnits - newTask.timeUnits;
-        const values = [];
-
-        for (let i = 0; i < diff; i++) {
-          values.push([row + newTask.timeUnits + i, col, "0"]);
-        }
-
-        dispatch(setMatrix(values));
-      } else if (newTask.timeUnits === self.timeUnits) {
-        // do nothing
-      } else if (newTask.timeUnits > self.timeUnits) {
-        // check whether there is enough available time units to expand
-        const diff = newTask.timeUnits - self.timeUnits;
-
-        if (canExpand(row, col, self.timeUnits, diff)) {
-          // case 2: user lengthened time needed for task, enough available time units
-          // ==> update matrix
-          const values = [];
-
-          for (let i = 0; i < diff; i++) {
-            values.push([row + self.timeUnits + i, col, taskId]);
-          }
-
-          dispatch(setMatrix(values));
-        } else {
-          // case 3: user lengthened time needed for task, NOT enough available time units
-          // ==> unschedule task from timetable
-          const values = [];
-
-          for (let i = 0; i < self.timeUnits; i++) {
-            values.push([row + i, col, "0"]);
-          }
-
-          dispatch(setMatrix(values));
-          newTask.row = -1;
-          newTask.col = -1;
-        }
-      }
-    }
-
-    // updating tasks array
-    dispatch(updateTaskFields(taskId, newTask));
-
-    // no need to call `resetState()` here since the fields already represent
-    // the correct information even on immediate reopen
+    dispatch(saveEditedTask(self, newTask, false, handleClose));
   }
 
-  function canExpand(row, col, timeUnits, diff) {
-    if (row - 1 + timeUnits + diff >= 48) {
-      return false;
-    }
+  function continueFunction() {
+    const newTask = {
+      _id: self._id,
 
-    for (let i = 0; i < diff; i++) {
-      if (matrix[row + timeUnits + i][col] !== "0") {
-        return false;
-      }
-    }
-    return true;
+      name: name,
+      dueDate: dueDate,
+      dueTime: dueTime,
+      durationHours: durationHours,
+      moduleCode: moduleCode,
+      links: taskLinks,
+
+      row: self.row,
+      col: self.col,
+      timeUnits: Math.ceil(Number(durationHours) * 2),
+
+      isCompleted: self.isCompleted,
+      mondayKey: self.mondayKey,
+    };
+
+    dispatch(saveEditedTask(self, newTask, true, handleClose));
   }
 
   return (
     <>
-      <Tooltip title="Edit" disableInteractive={true}>
+      <Tooltip title="Edit">
         <IconButton size="small" onClick={handleOpen}>
           <EditIcon />
         </IconButton>
@@ -311,8 +267,59 @@ function TaskEditor({ self }) {
             </Box>
           </DialogActions>
         </Box>
+
+        <AutoUnscheduleSelfPopup continueFunction={continueFunction} />
       </Dialog>
     </>
+  );
+}
+
+AutoUnscheduleSelfPopup.propTypes = {
+  continueFunction: PropTypes.func.isRequired,
+};
+
+function AutoUnscheduleSelfPopup({ continueFunction }) {
+  const dispatch = useDispatch();
+  const open = useSelector((state) => state.TaskEditorPopup.warningOpen);
+
+  function handleCancel() {
+    dispatch(setTaskEditorPopupWarningOpen(false));
+  }
+
+  function handleContinue() {
+    continueFunction();
+  }
+
+  return (
+    <Dialog open={open} onClose={handleCancel}>
+      <DialogTitle>Failed to extend task duration</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          If this task&apos;s duration was extended, it would either:
+        </DialogContentText>
+        <ul>
+          <li>
+            <DialogContentText>
+              clash with other module lessons / scheduled tasks below it; or
+            </DialogContentText>
+          </li>
+          <li>
+            <DialogContentText>exceed the timetable.</DialogContentText>
+          </li>
+        </ul>
+        <br />
+        <DialogContentText>
+          If you choose to continue, your changes will be saved and this task
+          will be <strong>automatically unscheduled</strong>.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancel} variant="contained">
+          Cancel
+        </Button>
+        <Button onClick={handleContinue}>Continue</Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 

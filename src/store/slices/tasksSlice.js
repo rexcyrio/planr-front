@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { batch } from "react-redux";
 import { FETCHING } from "../../components/helperComponents/DataStatus";
 import formatErrorMessage from "../../helper/formatErrorMessage";
 import { resetReduxStore } from "../storeHelpers/actions";
@@ -15,6 +14,7 @@ import { _setMappingModuleCodeToColourName } from "./mappingModuleCodeToColourNa
 import { refreshMatrix, setMatrix } from "./matrixSlice";
 import { _setModules } from "./modulesSlice";
 import { _setNUSModsURL } from "./NUSModsURLSlice";
+import { setTaskEditorPopupWarningOpen } from "./TaskEditorPopupSlice";
 import { _setThemeName } from "./themeNameSlice";
 
 const initialState = {
@@ -289,6 +289,84 @@ export function unscheduleTasks(taskIds) {
   };
 }
 
+export function saveEditedTask(self, newTask, autoUnscheduleSelf, handleClose) {
+  return function thunk(dispatch, getState) {
+    const matrix = getState().matrix;
+
+    function canExpand(row, col, timeUnits, diff) {
+      if (row - 1 + timeUnits + diff >= 48) {
+        return false;
+      }
+
+      for (let i = 0; i < diff; i++) {
+        if (matrix[row + timeUnits + i][col] !== "0") {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    const { _id: taskId, row, col } = newTask;
+
+    if (row !== -1 && col !== -1) {
+      // updating matrix
+      if (newTask.timeUnits < self.timeUnits) {
+        // case 1: user shortened time needed for task
+        const diff = self.timeUnits - newTask.timeUnits;
+        const values = [];
+
+        for (let i = 0; i < diff; i++) {
+          values.push([row + newTask.timeUnits + i, col, "0"]);
+        }
+
+        dispatch(setMatrix(values));
+      } else if (newTask.timeUnits === self.timeUnits) {
+        // do nothing
+      } else if (newTask.timeUnits > self.timeUnits) {
+        // check whether there is enough available time units to expand
+        const diff = newTask.timeUnits - self.timeUnits;
+
+        if (canExpand(row, col, self.timeUnits, diff)) {
+          // case 2: user lengthened time needed for task, enough available time units
+          // ==> update matrix
+          const values = [];
+
+          for (let i = 0; i < diff; i++) {
+            values.push([row + self.timeUnits + i, col, taskId]);
+          }
+
+          dispatch(setMatrix(values));
+        } else {
+          // case 3: user lengthened time needed for task, NOT enough available time units
+
+          if (!autoUnscheduleSelf) {
+            // warn user
+            dispatch(setTaskEditorPopupWarningOpen(true));
+            return;
+          }
+
+          dispatch(setTaskEditorPopupWarningOpen(false));
+
+          // ==> unschedule task from timetable
+          const values = [];
+
+          for (let i = 0; i < self.timeUnits; i++) {
+            values.push([row + i, col, "0"]);
+          }
+
+          dispatch(setMatrix(values));
+          newTask.row = -1;
+          newTask.col = -1;
+        }
+      }
+    }
+
+    // updating tasks array
+    dispatch(updateTaskFields(taskId, newTask));
+    handleClose();
+  };
+}
+
 // ============================================================================
 // Database thunks
 // ============================================================================
@@ -317,21 +395,17 @@ export const fetchTasks = createAsyncThunk(
         databaseMappingModuleCodeToColourName,
       ] = items;
 
-      batch(() => {
-        dispatch(_setTasks(databaseTasks));
-        dispatch(_setModules(databaseModules));
+      dispatch(_setTasks(databaseTasks));
+      dispatch(_setModules(databaseModules));
 
-        dispatch(_setNUSModsURL(databaseNUSModsURL));
-        dispatch(_setThemeName(databaseThemeName));
-        dispatch(
-          _setMappingModuleCodeToColourName(
-            databaseMappingModuleCodeToColourName
-          )
-        );
+      dispatch(_setNUSModsURL(databaseNUSModsURL));
+      dispatch(_setThemeName(databaseThemeName));
+      dispatch(
+        _setMappingModuleCodeToColourName(databaseMappingModuleCodeToColourName)
+      );
 
-        // refresh the matrix after fetching the task and module objects from database
-        dispatch(refreshMatrix());
-      });
+      // refresh the matrix after fetching the task and module objects from database
+      dispatch(refreshMatrix());
     } catch (error) {
       alert(error);
       console.error(error);
