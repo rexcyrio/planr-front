@@ -24,7 +24,7 @@ function PieChartSection() {
           onChange={selectChangeHandler}
         >
           <MenuItem value={"All"}>All</MenuItem>
-          <MenuItem value={"Completed"}>Current Week</MenuItem>
+          <MenuItem value={"Reference week"}>Reference week</MenuItem>
         </Select>
       </FormControl>
     </div>
