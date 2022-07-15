@@ -1,11 +1,17 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { batch } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 import formatErrorMessage from "../../helper/formatErrorMessage";
 import { resetReduxStore } from "../storeHelpers/actions";
-import { addModulesToTheme } from "./mappingModuleCodeToColourNameSlice";
+import { selectModuleCodes } from "../storeHelpers/selectors";
+import { setModulesInTheme } from "./mappingModuleCodeToColourNameSlice";
 import { refreshMatrix } from "./matrixSlice";
 import { setModules } from "./modulesSlice";
-import { unscheduleTasks } from "./tasksSlice";
+import {
+  addTask,
+  unscheduleTasks,
+  updateTaskFields,
+  _setTasks,
+} from "./tasksSlice";
 
 const initialState = {
   url: "",
@@ -60,7 +66,7 @@ export const { _setNUSModsURL } = NUSModsURLSlice.actions;
 // private function
 const { _setStatus, _cacheModuleItems } = NUSModsURLSlice.actions;
 
-export function resetSettingsState() {
+export function resetNUSModsURLStatus() {
   return function thunk(dispatch, getState) {
     dispatch(_setStatus("NONE"));
   };
@@ -71,25 +77,34 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
     dispatch(_setStatus("FETCHING"));
 
     try {
-      const { cache } = getState().NUSModsURL;
-      const dateNow = new Date().toDateString();
+      const moduleItems = await (async () => {
+        const { cache } = getState().NUSModsURL;
+        const dateNow = new Date().toDateString();
 
-      const moduleItems =
-        NUSModsURL in cache && cache[NUSModsURL].dateLastFetched === dateNow
-          ? cache[NUSModsURL].moduleItems
-          : await fetchModuleItems(NUSModsURL);
+        if (
+          NUSModsURL in cache &&
+          cache[NUSModsURL].dateLastFetched === dateNow
+        ) {
+          return cache[NUSModsURL].moduleItems;
+        }
 
-      if (moduleItems.length === 0) {
-        throw Error("Invalid NUSMods URL");
-      }
+        // need to fetch
+        const _moduleItems = await fetchModuleItems(NUSModsURL);
 
-      const payload = {
-        url: NUSModsURL,
-        dateLastFetched: dateNow,
-        moduleItems: moduleItems,
-      };
+        if (_moduleItems.length === 0) {
+          throw Error("Invalid NUSMods URL");
+        }
 
-      dispatch(_cacheModuleItems(payload));
+        // cache the moduleItems
+        const payload = {
+          url: NUSModsURL,
+          dateLastFetched: dateNow,
+          moduleItems: _moduleItems,
+        };
+
+        dispatch(_cacheModuleItems(payload));
+        return _moduleItems;
+      })();
 
       const matrix = getState().matrix;
 
@@ -145,16 +160,72 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         }
       }
 
-      batch(() => {
-        dispatch(_setNUSModsURL(NUSModsURL));
-        dispatch(setNUSModsURLInDatabase(NUSModsURL));
+      const oldModuleCodes = selectModuleCodes()(getState());
 
-        dispatch(unscheduleTasks(offendingTaskIds));
-        dispatch(addModulesToTheme(moduleItems));
-        dispatch(setModules(moduleItems));
-        dispatch(refreshMatrix());
-        dispatch(_setStatus("FETCH_SUCCESS"));
-      });
+      dispatch(_setNUSModsURL(NUSModsURL));
+      dispatch(setNUSModsURLInDatabase(NUSModsURL));
+
+      dispatch(unscheduleTasks(offendingTaskIds));
+      dispatch(setModulesInTheme(moduleItems));
+      dispatch(setModules(moduleItems));
+
+      const newModuleCodes = selectModuleCodes()(getState());
+
+      const moduleCodesNoLongerInUse = oldModuleCodes.filter(
+        (each) => !newModuleCodes.includes(each)
+      );
+
+      const moduleCodesNoLongerInUseObject = Object.fromEntries(
+        moduleCodesNoLongerInUse.map((each) => [each, true])
+      );
+
+      // set tasks with old module codes to "Others"
+      for (const task of tasks) {
+        const { _id, moduleCode } = task;
+
+        if (moduleCode in moduleCodesNoLongerInUseObject) {
+          dispatch(updateTaskFields(_id, { moduleCode: "Others" }));
+        }
+      }
+
+      // ======================================================================
+      // Auto generate tutorial tasks
+      // ======================================================================
+
+      // remove previously auto generated tutorial tasks
+      dispatch(
+        _setTasks(tasks.filter((each) => each._id.slice(0, 9) !== "auto-gen-"))
+      );
+
+      // generate new tutorial tasks
+      for (const moduleItem of moduleItems) {
+        if (moduleItem.name === "Tutorial") {
+          const { moduleCode } = moduleItem;
+
+          const newTask = {
+            _id: "auto-gen-" + uuidv4(),
+
+            name: `Do ${moduleCode} Tutorial`,
+            dueDate: "--",
+            dueTime: "--",
+            durationHours: "1",
+            moduleCode: moduleCode,
+            links: [],
+
+            row: -1,
+            col: -1,
+            timeUnits: 2,
+
+            isCompleted: false,
+            mondayKey: [],
+          };
+
+          dispatch(addTask(newTask));
+        }
+      }
+
+      dispatch(refreshMatrix());
+      dispatch(_setStatus("FETCH_SUCCESS"));
     } catch (error) {
       console.error(error);
       dispatch(_setStatus("FETCH_FAILURE"));
