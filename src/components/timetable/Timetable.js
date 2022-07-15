@@ -113,7 +113,6 @@ function Timetable() {
                 >
                   Friday
                 </th>
-                <th className={styles["cell"]}></th>
                 <th
                   className={
                     timetableColumn === 5
@@ -141,7 +140,6 @@ function Timetable() {
                 <th className={styles["cell"]}>Wednesday</th>
                 <th className={styles["cell"]}>Thursday</th>
                 <th className={styles["cell"]}>Friday</th>
-                <th className={styles["cell"]}></th>
                 <th className={styles["cell"]}>Saturday</th>
                 <th className={styles["cell"]}>Sunday</th>
               </tr>
@@ -153,7 +151,7 @@ function Timetable() {
       <div className={styles["timetable-container"]}>
         <TimetableBackground />
         {isCurrentWeek(mondayKey) && <LineMarker />}
-        
+
         <table className={styles["timetable-table"]}>
           <tbody>
             {getTimePairArray().map((timePair, index) => {
@@ -171,10 +169,6 @@ function Timetable() {
                       {createTimetableCell(row, col)}
                     </React.Fragment>
                   ))}
-
-                  <td className={styles["cell"]}>
-                    {time24H} - {time24H_}
-                  </td>
 
                   {[5, 6].map((col) => (
                     <React.Fragment key={`(${row}, ${col})`}>

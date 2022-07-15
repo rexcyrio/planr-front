@@ -28,7 +28,7 @@ function TimetableBackground() {
     if (Math.floor(row / 2) % 2 === 0) {
       return "#f2f2f2";
     }
-    
+
     return "#e6e6e6";
   }
 
@@ -64,8 +64,6 @@ function TimetableBackground() {
                   </td>
                 </React.Fragment>
               ))}
-
-              <td className={styles["cell"]}></td>
 
               {[5, 6].map((col) => (
                 <React.Fragment key={`(${row}, ${col})`}>
