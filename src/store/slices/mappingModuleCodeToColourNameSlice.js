@@ -12,58 +12,6 @@ const mappingModuleCodeToColourNameSlice = createSlice({
   initialState,
   reducers: {
     _setMappingModuleCodeToColourName: (state, action) => action.payload,
-    _addModulesToTheme: (state, action) => {
-      const mappingModuleCodeToColourName = state;
-      const newModuleItems = action.payload;
-
-      // filter out duplicated module codes
-      const moduleCodes = [
-        ...new Set(newModuleItems.map((each) => each.moduleCode)),
-      ];
-
-      const isColourNameUsed = Object.fromEntries(
-        allColourNames.map((colourName) => [colourName, false])
-      );
-
-      for (const colourName of Object.values(mappingModuleCodeToColourName)) {
-        isColourNameUsed[colourName] = true;
-      }
-
-      const unusedColourNames = [];
-      for (const [colourName, isUsed] of Object.entries(isColourNameUsed)) {
-        if (!isUsed) {
-          unusedColourNames.push(colourName);
-        }
-      }
-
-      const modules_unusedColourNames = moduleCodes.slice(
-        0,
-        unusedColourNames.length
-      );
-      const modules_randomColourNames = moduleCodes.slice(
-        unusedColourNames.length
-      );
-
-      // deep copy
-      const newState = { ...state };
-
-      for (let i = 0; i < modules_unusedColourNames.length; i++) {
-        const moduleCode = modules_unusedColourNames[i];
-        const colour = unusedColourNames[i];
-        newState[moduleCode] = colour;
-      }
-
-      for (let i = 0; i < modules_randomColourNames; i++) {
-        const moduleCode = modules_randomColourNames[i];
-        const randomColour =
-          allColourNames[Math.floor(Math.random() * allColourNames.length)];
-
-        newState[moduleCode] = randomColour;
-      }
-
-      // sort by module code
-      return sortObjectByKey(newState);
-    },
     _updateModuleColour: (state, action) => {
       const { moduleCode, newColour } = action.payload;
       state[moduleCode] = newColour;
@@ -79,12 +27,80 @@ export const { _setMappingModuleCodeToColourName } =
   mappingModuleCodeToColourNameSlice.actions;
 
 // private functions
-const { _addModulesToTheme, _updateModuleColour } =
-  mappingModuleCodeToColourNameSlice.actions;
+const { _updateModuleColour } = mappingModuleCodeToColourNameSlice.actions;
 
-export function addModulesToTheme(newModuleItems) {
-  return async function thunk(dispatch, getState) {
-    dispatch(_addModulesToTheme(newModuleItems));
+export function setModulesInTheme(newModuleItems) {
+  return function thunk(dispatch, getState) {
+    const old_mappingModuleCodeToColourName =
+      getState().mappingModuleCodeToColourName;
+    const new_mappingModuleCodeToColourName = {};
+
+    // filter out duplicated module codes
+    const moduleCodes = [
+      ...new Set(newModuleItems.map((each) => each.moduleCode)),
+    ];
+
+    // retain colour mapping for "Others"
+    new_mappingModuleCodeToColourName["Others"] =
+      old_mappingModuleCodeToColourName["Others"];
+
+    // retain colour mapping for old modules
+    for (const moduleCode of moduleCodes) {
+      if (moduleCode in old_mappingModuleCodeToColourName) {
+        new_mappingModuleCodeToColourName[moduleCode] =
+          old_mappingModuleCodeToColourName[moduleCode];
+      }
+    }
+
+    const isColourNameUsed = Object.fromEntries(
+      allColourNames.map((colourName) => [colourName, false])
+    );
+
+    const usedColourNames = Object.values(new_mappingModuleCodeToColourName);
+    for (const colourName of usedColourNames) {
+      isColourNameUsed[colourName] = true;
+    }
+
+    const unusedColourNames = [];
+    for (const [colourName, isUsed] of Object.entries(isColourNameUsed)) {
+      if (!isUsed) {
+        unusedColourNames.push(colourName);
+      }
+    }
+
+    const newModuleCodes = moduleCodes.filter(
+      (each) => !(each in new_mappingModuleCodeToColourName)
+    );
+
+    const modules_unusedColourNames = newModuleCodes.slice(
+      0,
+      unusedColourNames.length
+    );
+    const modules_randomColourNames = newModuleCodes.slice(
+      unusedColourNames.length
+    );
+
+    for (let i = 0; i < modules_unusedColourNames.length; i++) {
+      const moduleCode = modules_unusedColourNames[i];
+      const colour = unusedColourNames[i];
+      new_mappingModuleCodeToColourName[moduleCode] = colour;
+    }
+
+    for (let i = 0; i < modules_randomColourNames; i++) {
+      const moduleCode = modules_randomColourNames[i];
+      const randomColour =
+        allColourNames[Math.floor(Math.random() * allColourNames.length)];
+
+      new_mappingModuleCodeToColourName[moduleCode] = randomColour;
+    }
+
+    // sort by module code
+    dispatch(
+      _setMappingModuleCodeToColourName(
+        sortObjectByKey(new_mappingModuleCodeToColourName)
+      )
+    );
+
     dispatch(updateMappingModuleCodeToColourNameInDatabase());
   };
 }
