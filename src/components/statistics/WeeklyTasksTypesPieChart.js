@@ -81,7 +81,7 @@ function WeeklyTasksTypesPieChart({ durationType }) {
     labels,
     datasets: [
       {
-        label: "sddd",
+        label: "Module hours",
         data: generateWeekModuleHoursData(
           moduleCodeHoursObject,
           tasks,

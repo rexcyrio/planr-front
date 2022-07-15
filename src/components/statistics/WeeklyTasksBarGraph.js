@@ -28,7 +28,7 @@ const options = {
   plugins: {
     title: {
       display: true,
-      text: "Current week workload hours distribution",
+      text: "Reference week workload hours distribution",
     },
   },
   responsive: true,

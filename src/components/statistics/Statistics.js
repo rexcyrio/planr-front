@@ -7,9 +7,12 @@ import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import getWeekRange from "../../helper/getWeekRangeHelper";
 import StatsContent from "./StatsContent";
 
 function Statistics() {
+  const mondayKey = useSelector((state) => state.time.mondayKey);
   const [open, setOpen] = useState(false);
 
   const openDialog = () => {
@@ -28,7 +31,10 @@ function Statistics() {
       </Tooltip>
 
       <Dialog open={open} onClose={closeDialog} fullWidth maxWidth="xl">
-        <DialogTitle>Statistics</DialogTitle>
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
+          <div>Statistics</div>
+          <div>{getWeekRange(mondayKey)}</div>
+        </DialogTitle>
 
         <DialogContent>
           <StatsContent />

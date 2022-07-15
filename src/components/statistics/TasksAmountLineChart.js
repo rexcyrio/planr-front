@@ -42,7 +42,7 @@ const labels = [
   "3 weeks before",
   "2 weeks before",
   "1 week before",
-  "Current week",
+  "Reference week",
   "1 week after",
   "2 weeks after",
   "3 weeks after",
