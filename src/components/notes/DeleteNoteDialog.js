@@ -3,6 +3,7 @@ import { Dialog } from "@mui/material";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
@@ -11,47 +12,47 @@ import React, { useState } from "react";
 
 DeleteNoteDialog.propTypes = {
   self: PropTypes.shape({
-    id: PropTypes.string,
-    text: PropTypes.string,
-    isEditMode: PropTypes.bool,
-  }),
-  deleteNote: PropTypes.func,
+    _id: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
+    isEditMode: PropTypes.bool.isRequired,
+  }).isRequired,
+
+  deleteNote: PropTypes.func.isRequired,
 };
 
 function DeleteNoteDialog({ self, deleteNote }) {
-  const [deleteNoteDialogOpen, setDeleteNoteDialogOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  function confirmDeleteNoteHandler(self) {
-    setDeleteNoteDialogOpen(false);
+  function handleOpen() {
+    setOpen(true);
+  }
+
+  function handleClose() {
+    setOpen(false);
+  }
+
+  function confirmDeleteNote() {
+    setOpen(false);
     deleteNote(self);
   }
 
   return (
     <>
       <Tooltip title="Delete">
-        <IconButton
-          edge="end"
-          aria-label="delete"
-          onClick={() => setDeleteNoteDialogOpen(true)}
-        >
+        <IconButton edge="end" aria-label="delete" onClick={handleOpen}>
           <DeleteIcon />
         </IconButton>
       </Tooltip>
-      <Dialog
-        open={deleteNoteDialogOpen}
-        onClose={() => setDeleteNoteDialogOpen(false)}
-        maxWidth="md"
-      >
-        <DialogTitle>Delete Note</DialogTitle>
+
+      <Dialog open={open} onClose={handleClose} maxWidth="md">
+        <DialogTitle>Delete note?</DialogTitle>
         <DialogContent>
-          <p>Delete note from list?</p>
+          <DialogContentText>This action cannot be undone.</DialogContentText>
         </DialogContent>
+
         <DialogActions>
-          <Button onClick={() => setDeleteNoteDialogOpen(false)}>Cancel</Button>
-          <Button
-            sx={{ color: "red" }}
-            onClick={() => confirmDeleteNoteHandler(self)}
-          >
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button sx={{ color: "red" }} onClick={confirmDeleteNote}>
             Delete
           </Button>
         </DialogActions>

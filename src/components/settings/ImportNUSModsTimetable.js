@@ -1,6 +1,7 @@
 import DoneIcon from "@mui/icons-material/Done";
 import ErrorIcon from "@mui/icons-material/Error";
 import WarningIcon from "@mui/icons-material/Warning";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -14,7 +15,10 @@ import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { importNUSModsTimetable, resetSettingsState } from "../../store/slices/NUSModsURLSlice";
+import {
+  importNUSModsTimetable,
+  resetNUSModsURLStatus
+} from "../../store/slices/NUSModsURLSlice";
 
 function ImportNUSModsTimetable() {
   const dispatch = useDispatch();
@@ -36,14 +40,22 @@ function ImportNUSModsTimetable() {
   }
 
   function handleChange(event) {
-    setIsValidNUSModsURL(true)
-    setNUSModsURL(event.target.value)
-    dispatch(resetSettingsState())
+    setIsValidNUSModsURL(true);
+    setNUSModsURL(event.target.value);
+
+    if (status !== "NONE") {
+      dispatch(resetNUSModsURLStatus());
+    }
   }
 
   return (
     <>
       <h4>Import NUSMods Timetable</h4>
+
+      <Alert severity="warning">
+        When importing a new NUSMods timetable, tasks that were associated with
+        old modules will be converted to &quot;Others&quot; automatically.
+      </Alert>
 
       <Box component="form" onSubmit={handleSubmit}>
         <TextField
@@ -58,6 +70,7 @@ function ImportNUSModsTimetable() {
           helperText={isValidNUSModsURL ? " " : "Invalid NUSMods URL"}
           error={!isValidNUSModsURL}
           placeholder="e.g. https://nusmods.com/timetable/sem-1/share?..."
+          sx={{ mt: "1.5rem" }}
         />
         <br />
         <div
@@ -107,12 +120,12 @@ function WarningPopup({ NUSModsURL }) {
       <DialogTitle>Timetable clash detected!</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          There are scheduled tasks that clash with the NUSMods timetable that
-          you&apos;re trying to import.
+          The NUSMods timetable that you&apos;re trying to import clashes with
+          other scheduled tasks.
           <br />
           <br />
-          Either cancel this operation and manually move the tasks away, or
-          continue and have the tasks automatically unscheduled.
+          If you choose to continue, the tasks that clash with the incoming
+          NUSMods timetable will be automatically unscheduled.
         </DialogContentText>
       </DialogContent>
       <DialogActions>

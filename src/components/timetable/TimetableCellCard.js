@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
-import { batch, useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getBackgroundColour } from "../../helper/themeHelper";
 import {
   blackenCells,
@@ -64,20 +64,18 @@ function TimetableCellCard({ self }) {
             values.push([row + i, col, "0"]);
           }
 
-          batch(() => {
-            dispatch(setMatrix(values));
+          dispatch(setMatrix(values));
 
-            dispatch(
-              updateTaskFields(self._id, {
-                row: -1,
-                col: -1,
-              })
-            );
-            
-            if (self.dueDate === "--") {
-              dispatch(blackenCells());
-            }
-          });
+          dispatch(
+            updateTaskFields(self._id, {
+              row: -1,
+              col: -1,
+            })
+          );
+
+          if (self.dueDate === "--") {
+            dispatch(blackenCells());
+          }
         }, 0);
 
         return { task: self };

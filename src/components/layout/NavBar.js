@@ -64,8 +64,6 @@ function NavBar() {
               <Settings />
             </>
           )}
-          {/* {isAuthenticated && <HelpWindow />}
-          {isAuthenticated && <Settings />} */}
 
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {isAuthenticated ? (

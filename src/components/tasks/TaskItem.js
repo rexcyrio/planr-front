@@ -223,6 +223,8 @@ function TaskItem({ self }) {
           <div
             style={{
               visibility: isMouseOver && !isDragging ? "visible" : "hidden",
+              display: "flex",
+              alignItems: "flex-end",
             }}
           >
             <TaskEditor self={self} />
