@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import getWeekRange from "../../helper/getWeekRangeHelper";
 import {
   goToNextWeek,
   goToPreviousWeek,
@@ -70,24 +71,6 @@ function TimetableNavigator() {
       </div>
     </div>
   );
-}
-
-function getWeekRange(mondayKey) {
-  const [dateNumber, monthNumber, yearNumber] = mondayKey;
-
-  const monday = new Date(yearNumber, monthNumber, dateNumber);
-  const sunday = new Date(yearNumber, monthNumber, dateNumber + 6);
-  return `${convertToDateString(monday)} - ${convertToDateString(sunday)}`;
-}
-
-function convertToDateString(dateObject) {
-  // "Wed Jul 28 1993"
-  const str = dateObject.toDateString();
-
-  // ["Jul", "28", "1993"]
-  const [shortMonthName, date, year] = str.split(" ").slice(1);
-
-  return `${date} ${shortMonthName} ${year}`;
 }
 
 export default TimetableNavigator;
