@@ -30,10 +30,10 @@ function Statistics() {
         </IconButton>
       </Tooltip>
 
-      <Dialog open={open} onClose={closeDialog} fullWidth maxWidth="xl">
+      <Dialog open={open} onClose={closeDialog} fullWidth maxWidth="md">
         <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
           <div>Statistics</div>
-          <div>{getWeekRange(mondayKey)}</div>
+          <div>{"Reference week: " + getWeekRange(mondayKey)}</div>
         </DialogTitle>
 
         <DialogContent>

@@ -9,14 +9,11 @@ function StatsContent() {
   return (
     <>
       <div className={styles.charts}>
-        <div className={styles["bar-line-grouping"]}>
-          <BarGraphSection />
-          <Divider />
-          <LineChartSection />
-        </div>
-        <div className={styles["pie-chart-div"]}>
-          <PieChartSection />
-        </div>
+        <BarGraphSection />
+        <Divider />
+        <LineChartSection />
+        <Divider />
+        <PieChartSection />
       </div>
     </>
   );

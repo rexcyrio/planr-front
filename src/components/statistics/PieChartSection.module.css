@@ -1,9 +1,7 @@
 .section-container {
   display: flex;
   flex-direction: column;
-  width: 85%;
-  margin: 2rem;
-  margin-left: 4rem;
   align-items: center;
   justify-content: center;
+  margin: 2rem;
 }
