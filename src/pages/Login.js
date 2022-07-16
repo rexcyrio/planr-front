@@ -1,10 +1,11 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
 import TextField from "@mui/material/TextField";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 import {
   setIsAuthenticated,
   setLoggedInUsername,
@@ -68,55 +69,57 @@ function Login() {
           height: "100%",
         }}
       >
-        <h1>Welcome back!</h1>
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
-            id="username"
-            label="Username"
-            type="text"
-            variant="outlined"
-            required
-            value={username}
-            onChange={(e) => {
-              setError(false);
-              setUsername(e.target.value);
-            }}
-          />
-          <br />
-          <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
-            id="password"
-            label="Password"
-            type="password"
-            variant="outlined"
-            required
-            value={password}
-            onChange={(e) => {
-              setError(false);
-              setPassword(e.target.value);
-            }}
-          />
-          <br />
-          <Button
-            sx={{ mb: "1rem" }}
-            type="submit"
-            variant="contained"
-            fullWidth
-          >
-            Log in
-          </Button>
-        </Box>
+        <Card sx={{ padding: "2rem", paddingTop: "1rem", marginTop: "1rem" }}>
+          <h1>Welcome back!</h1>
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              sx={{ mb: "1rem", width: "20rem", backgroundColor: "#fff" }}
+              id="username"
+              label="Username"
+              type="text"
+              variant="outlined"
+              required
+              value={username}
+              onChange={(e) => {
+                setError(false);
+                setUsername(e.target.value);
+              }}
+            />
+            <br />
+            <TextField
+              sx={{ mb: "1rem", width: "20rem" }}
+              id="password"
+              label="Password"
+              type="password"
+              variant="outlined"
+              required
+              value={password}
+              onChange={(e) => {
+                setError(false);
+                setPassword(e.target.value);
+              }}
+            />
+            <br />
+            <Button
+              sx={{ mb: "1rem" }}
+              type="submit"
+              variant="contained"
+              fullWidth
+            >
+              Log in
+            </Button>
+          </Box>
 
-        <p>
-          Don&apos;t have an account? <Link to="/signup">Sign up</Link>
-        </p>
+          <p>
+            Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+          </p>
 
-        {error ? (
-          <Alert severity="error">Username or password is incorrect.</Alert>
-        ) : (
-          <></>
-        )}
+          {error ? (
+            <Alert severity="error">Username or password is incorrect.</Alert>
+          ) : (
+            <></>
+          )}
+        </Card>
       </Box>
     </>
   );
