@@ -7,7 +7,7 @@ import Popover from "@mui/material/Popover";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   markTaskAsComplete,
   markTaskAsIncomplete,
@@ -31,13 +31,14 @@ DetailsPopover.propTypes = {
     col: PropTypes.number.isRequired,
     timeUnits: PropTypes.number.isRequired,
 
-    isCompleted: PropTypes.bool.isRequired,
+    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
     mondayKey: PropTypes.array.isRequired,
   }).isRequired,
 };
 
 function DetailsPopover({ self }) {
   const dispatch = useDispatch();
+  const mondayKey = useSelector((state) => state.time.mondayKey);
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -96,7 +97,7 @@ function DetailsPopover({ self }) {
               ) : (
                 <>
                   <TaskEditor self={self} />
-                  {self.isCompleted ? (
+                  {self.isCompleted[mondayKey] !== undefined ? (
                     <Tooltip title="Restore task">
                       <IconButton
                         size="small"
@@ -131,7 +132,12 @@ function DetailsPopover({ self }) {
           <p>Duration: {self.durationHours} hour(s)</p>
 
           {!isModuleItem(self) && (
-            <p>Status: {self.isCompleted ? "Completed" : "Not Completed"}</p>
+            <p>
+              Status:{" "}
+              {self.isCompleted[mondayKey] !== undefined
+                ? "Completed"
+                : "Not Completed"}
+            </p>
           )}
 
           {self.links.map((link) => (

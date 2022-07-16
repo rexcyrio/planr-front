@@ -108,6 +108,7 @@ function WeeklyTasksBarGraph({ taskType }) {
   const mappingModuleCodeToColourName = useSelector(
     (state) => state.mappingModuleCodeToColourName
   );
+  const mondayKey = useSelector((state) => state.time.mondayKey);
 
   const moduleCodeKeys = Object.keys(mappingModuleCodeToColourName);
   const arrayCountObject = toArrayCountObject(
@@ -116,11 +117,15 @@ function WeeklyTasksBarGraph({ taskType }) {
   );
 
   if (taskType === "Completed") {
-    currentWeekTasks = currentWeekTasks.filter((task) => task.isCompleted);
+    currentWeekTasks = currentWeekTasks.filter(
+      (task) => task.isCompleted[mondayKey] !== undefined
+    );
     modules = [];
   }
-  if (taskType === "Incompleted") {
-    currentWeekTasks = currentWeekTasks.filter((task) => !task.isCompleted);
+  if (taskType === "Incomplete") {
+    currentWeekTasks = currentWeekTasks.filter(
+      (task) => task.isCompleted[mondayKey] === undefined
+    );
     modules = [];
   }
 

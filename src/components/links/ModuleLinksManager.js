@@ -27,7 +27,7 @@ ModuleLinksManager.propTypes = {
     col: PropTypes.number.isRequired,
     timeUnits: PropTypes.number.isRequired,
 
-    isCompleted: PropTypes.bool.isRequired,
+    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
     mondayKey: PropTypes.array.isRequired,
   }).isRequired,
 };
@@ -49,7 +49,7 @@ function ModuleLinksManager({ self }) {
   }
 
   function handleOpen() {
-    resetState()
+    resetState();
     setOpen(true);
   }
 

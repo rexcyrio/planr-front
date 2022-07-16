@@ -36,6 +36,11 @@ const options = {
       text: "Workload across weeks",
     },
   },
+  scales: {
+    y: {
+      beginAtZero: true,
+    },
+  },
 };
 
 const labels = [

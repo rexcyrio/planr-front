@@ -36,7 +36,7 @@ TaskItem.propTypes = {
     col: PropTypes.number.isRequired,
     timeUnits: PropTypes.number.isRequired,
 
-    isCompleted: PropTypes.bool.isRequired,
+    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
     mondayKey: PropTypes.array.isRequired,
   }).isRequired,
 };
@@ -44,6 +44,7 @@ TaskItem.propTypes = {
 function TaskItem({ self }) {
   const dispatch = useDispatch();
   const themeName = useSelector((state) => state.themeName);
+  const mondayKey = useSelector((state) => state.time.mondayKey);
   const mappingModuleCodeToColourName = useSelector(
     (state) => state.mappingModuleCodeToColourName
   );
@@ -76,7 +77,7 @@ function TaskItem({ self }) {
   );
 
   function getDraggableState() {
-    if (self.isCompleted) {
+    if (self.isCompleted[mondayKey] !== undefined) {
       return {
         title: "Task is already completed",
         ref: null,
@@ -121,7 +122,7 @@ function TaskItem({ self }) {
             backgroundColor: getBackgroundColour(
               themeName,
               mappingModuleCodeToColourName,
-              self
+              self, mondayKey
             ),
             display: "flex",
             alignItems: "center",
@@ -156,7 +157,7 @@ function TaskItem({ self }) {
                 cursor: getDraggableState().cursor,
               }}
             >
-              {self.isCompleted ? (
+              {self.isCompleted[mondayKey] !== undefined ? (
                 <AssignmentTurnedInIcon />
               ) : self.row !== -1 ? (
                 <StickyNote2Icon />
@@ -176,7 +177,8 @@ function TaskItem({ self }) {
                     color: getAccentColour(
                       themeName,
                       mappingModuleCodeToColourName,
-                      self
+                      self,
+                      mondayKey
                     ),
                   }}
                 >
@@ -191,7 +193,8 @@ function TaskItem({ self }) {
                     color: getAccentColour(
                       themeName,
                       mappingModuleCodeToColourName,
-                      self
+                      self,
+                      mondayKey
                     ),
                   }}
                 >
@@ -204,7 +207,8 @@ function TaskItem({ self }) {
                       color: getAccentColour(
                         themeName,
                         mappingModuleCodeToColourName,
-                        self
+                        self,
+                        mondayKey
                       ),
                     }}
                   >
@@ -229,7 +233,7 @@ function TaskItem({ self }) {
           >
             <TaskEditor self={self} />
 
-            {self.isCompleted ? (
+            {self.isCompleted[mondayKey] !== undefined ? (
               <Tooltip title="Restore task">
                 <IconButton
                   size="small"

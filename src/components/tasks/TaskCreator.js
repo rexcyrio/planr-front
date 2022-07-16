@@ -49,7 +49,7 @@ function TaskCreator() {
     setTaskLinks([]);
     setLinkName("");
     setLinkURL("");
-    setIsRecurring(false)
+    setIsRecurring(false);
 
     setDurationState("NONE");
     setUrlState("NONE");
@@ -104,7 +104,7 @@ function TaskCreator() {
       col: -1,
       timeUnits: Math.ceil(Number(durationHours) * 2),
 
-      isCompleted: false,
+      isCompleted: {},
       mondayKey: isRecurring ? [] : mondayKey,
     };
 
