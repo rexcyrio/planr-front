@@ -8,6 +8,7 @@ function InitialSnackBar() {
   const tasks = useSelector((state) => state.tasks.data);
   const status = useSelector((state) => state.tasks.status);
   const isNewUser = useSelector((state) => state.isNewUser);
+  const mondayKey = useSelector((state) => state.time.mondayKey);
   const [open, setOpen] = useState(false);
 
   const [color, setColor] = useState("");
@@ -56,7 +57,7 @@ function InitialSnackBar() {
     for (const task of tasks) {
       const { dueDate, dueTime, isCompleted } = task;
 
-      if (isCompleted) {
+      if (isCompleted[mondayKey] !== undefined) {
         continue;
       }
 

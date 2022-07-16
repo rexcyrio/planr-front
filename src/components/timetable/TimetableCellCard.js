@@ -29,7 +29,7 @@ TimetableCellCard.propTypes = {
     col: PropTypes.number.isRequired,
     timeUnits: PropTypes.number.isRequired,
 
-    isCompleted: PropTypes.bool.isRequired,
+    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
     mondayKey: PropTypes.array.isRequired,
   }).isRequired,
 };
@@ -40,6 +40,7 @@ function TimetableCellCard({ self }) {
   const mappingModuleCodeToColourName = useSelector(
     (state) => state.mappingModuleCodeToColourName
   );
+  const mondayKey = useSelector((state) => state.time.mondayKey);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   function handleMouseEnter() {
@@ -105,7 +106,8 @@ function TimetableCellCard({ self }) {
           backgroundColor: getBackgroundColour(
             themeName,
             mappingModuleCodeToColourName,
-            self
+            self,
+            mondayKey
           ),
           margin: 0,
           height: `${(1.3125 + 1 / 16) * self.timeUnits - 0.1875}rem`,

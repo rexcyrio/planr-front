@@ -216,7 +216,7 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
             col: -1,
             timeUnits: 2,
 
-            isCompleted: false,
+            isCompleted: {},
             mondayKey: [],
           };
 
@@ -366,7 +366,7 @@ async function fetchModuleItems(NUSModsURL) {
           col: mappingDayToColumn[lesson.day],
           timeUnits: Math.ceil(Number(durationHours) * 2),
 
-          isCompleted: false,
+          isCompleted: {},
           mondayKey: [],
         };
 

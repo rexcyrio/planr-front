@@ -21,14 +21,19 @@ function Tasks() {
   const dispatch = useDispatch();
   const status = useSelector((state) => state.tasks.status);
   const tasks = useSelector(selectCurrentWeekTasks());
+  const mondayKey = useSelector((state) => state.time.mondayKey);
 
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
 
   function getTaskItems() {
-    const outstandingTasks = tasks.filter((each) => each.isCompleted === false);
-    const doneTasks = tasks.filter((each) => each.isCompleted === true);
+    const outstandingTasks = tasks.filter(
+      (each) => each.isCompleted[mondayKey] === undefined
+    );
+    const doneTasks = tasks.filter(
+      (each) => each.isCompleted[mondayKey] !== undefined
+    );
 
     return (
       <>
@@ -50,7 +55,7 @@ function Tasks() {
   return (
     <>
       <InitialSnackBar />
-      
+
       <div className={styles.title}>
         <div className={styles["title-update-container"]}>
           <h1>Tasks</h1>

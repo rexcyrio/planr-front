@@ -96,14 +96,15 @@ export const allColourNames = [
 export function getBackgroundColour(
   themeName,
   mappingModuleCodeToColourName,
-  self
+  self,
+  mondayKey
 ) {
   // check for EMPTY_TASK ==> used in <Skeleton>
   if (self._id === "0") {
     return "white";
   }
 
-  if (self.isCompleted) {
+  if (self.isCompleted[mondayKey] !== undefined) {
     return "lightgrey";
   }
 
@@ -116,14 +117,15 @@ export function getBackgroundColour(
 export function getAccentColour(
   themeName,
   mappingModuleCodeToColourName,
-  self
+  self,
+  mondayKey
 ) {
   // check for EMPTY_TASK ==> used in <Skeleton>
   if (self._id === "0") {
     return "white";
   }
 
-  if (self.isCompleted) {
+  if (self.isCompleted[mondayKey] !== undefined) {
     return "grey";
   }
 
