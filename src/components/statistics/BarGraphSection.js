@@ -15,9 +15,7 @@ function BarGraphSection() {
 
   return (
     <div className={styles["section-container"]}>
-      <div className={styles.graph}>
-        <WeeklyTasksBarGraph taskType={taskType} />
-      </div>
+      <WeeklyTasksBarGraph taskType={taskType} />
       <FormControl size="small" sx={{ width: "10rem", marginTop: "1rem" }}>
         <InputLabel sx={{ alignContent: "center" }}>Task Type</InputLabel>
         <Select

@@ -15,8 +15,10 @@ function PieChartSection() {
 
   return (
     <div className={styles["section-container"]}>
-      <WeeklyTasksTypesPieChart durationType={durationType} />
-      <FormControl size="small" sx={{ width: "10rem", marginTop: "2rem" }}>
+      <div style={{ width: "60%" }}>
+        <WeeklyTasksTypesPieChart durationType={durationType} />
+      </div>
+      <FormControl size="small" sx={{ width: "10rem", marginTop: "1.5rem" }}>
         <InputLabel sx={{ alignContent: "center" }}>Duration Type</InputLabel>
         <Select
           value={durationType}
