@@ -1,18 +1,19 @@
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
 import CircularProgress from "@mui/material/CircularProgress";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { setIsNewUser } from "../store/slices/isNewUserSlice";
 import {
   setIsAuthenticated,
   setLoggedInUsername,
   setUserId,
 } from "../store/slices/userSlice";
-import { setIsNewUser } from "../store/slices/isNewUserSlice";
 
 function Signup() {
   const dispatch = useDispatch();
@@ -246,70 +247,72 @@ function Signup() {
       <Box
         sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
       >
-        <h1>Create a new account</h1>
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
-            id="username"
-            label="Username"
-            type="text"
-            variant="outlined"
-            required
-            value={username}
-            onChange={handleUsernameChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {usernameStates[usernameState].icon}
-                </InputAdornment>
-              ),
-            }}
-            helperText={usernameStates[usernameState].helperText}
-            error={usernameStates[usernameState].isError}
-          />
-          <br />
-          <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
-            id="password"
-            label="Password"
-            type="password"
-            variant="outlined"
-            required
-            value={password}
-            onChange={handlePasswordChange}
-            helperText={passwordStates[passwordState].helperText}
-            error={passwordStates[passwordState].isError}
-          />
-          <br />
-          <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
-            id="verifyPassword"
-            label="verify password"
-            type="password"
-            variant="outlined"
-            required
-            value={verifyPassword}
-            onFocus={() => {
-              setVerifyPasswordGood(true);
-            }}
-            onChange={(e) => setVerifyPassword(e.target.value)}
-            helperText={verifyPasswordGood ? " " : "Passwords do not match"}
-            error={!verifyPasswordGood}
-          />
-          <br />
-          <Button
-            sx={{ mb: "1rem" }}
-            type="submit"
-            variant="contained"
-            fullWidth
-          >
-            Sign up
-          </Button>
-        </Box>
+        <Card sx={{ padding: "2rem", paddingTop: "1rem", marginTop: "1rem" }}>
+          <h1>Create a new account</h1>
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              sx={{ mb: "1rem", width: "20rem" }}
+              id="username"
+              label="Username"
+              type="text"
+              variant="outlined"
+              required
+              value={username}
+              onChange={handleUsernameChange}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {usernameStates[usernameState].icon}
+                  </InputAdornment>
+                ),
+              }}
+              helperText={usernameStates[usernameState].helperText}
+              error={usernameStates[usernameState].isError}
+            />
+            <br />
+            <TextField
+              sx={{ mb: "1rem", width: "20rem" }}
+              id="password"
+              label="Password"
+              type="password"
+              variant="outlined"
+              required
+              value={password}
+              onChange={handlePasswordChange}
+              helperText={passwordStates[passwordState].helperText}
+              error={passwordStates[passwordState].isError}
+            />
+            <br />
+            <TextField
+              sx={{ mb: "1rem", width: "20rem" }}
+              id="verifyPassword"
+              label="verify password"
+              type="password"
+              variant="outlined"
+              required
+              value={verifyPassword}
+              onFocus={() => {
+                setVerifyPasswordGood(true);
+              }}
+              onChange={(e) => setVerifyPassword(e.target.value)}
+              helperText={verifyPasswordGood ? " " : "Passwords do not match"}
+              error={!verifyPasswordGood}
+            />
+            <br />
+            <Button
+              sx={{ mb: "1rem" }}
+              type="submit"
+              variant="contained"
+              fullWidth
+            >
+              Sign up
+            </Button>
+          </Box>
 
-        <p>
-          Already have an account? <Link to="/login">Log in</Link>
-        </p>
+          <p>
+            Already have an account? <Link to="/login">Log in</Link>
+          </p>
+        </Card>
       </Box>
     </>
   );
