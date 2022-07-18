@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import LoginCarousel from "../components/carousel/LoginCarousel";
 import {
   setIsAuthenticated,
   setLoggedInUsername,
@@ -66,10 +67,9 @@ function Login() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          height: "100%",
         }}
       >
-        <Card sx={{ padding: "2rem", paddingTop: "1rem", marginTop: "1rem" }}>
+        <Card sx={{ padding: "2rem", paddingTop: "0rem", marginTop: "1rem" }}>
           <h1>Welcome back!</h1>
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
@@ -120,6 +120,9 @@ function Login() {
             <></>
           )}
         </Card>
+        <div style={{ marginTop: "10rem" }}>
+          <LoginCarousel />
+        </div>
       </Box>
     </>
   );
