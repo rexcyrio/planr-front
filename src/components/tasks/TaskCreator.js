@@ -36,9 +36,11 @@ function TaskCreator() {
   const [linkName, setLinkName] = useState("");
   const [linkURL, setLinkURL] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
+  const [numCopies, setNumCopies] = useState(1);
 
   const [durationState, setDurationState] = useState("NONE");
   const [urlState, setUrlState] = useState("NONE");
+  const [numCopiesState, setNumCopiesState] = useState("NONE");
 
   function resetState() {
     setName("");
@@ -50,9 +52,11 @@ function TaskCreator() {
     setLinkName("");
     setLinkURL("");
     setIsRecurring(false);
+    setNumCopies(1);
 
     setDurationState("NONE");
     setUrlState("NONE");
+    setNumCopiesState("NONE");
   }
 
   function handleOpen() {
@@ -81,10 +85,27 @@ function TaskCreator() {
     setDurationState("NONE");
   }
 
+  function handleCountChange(event) {
+    const newCount = event.target.value;
+    setNumCopies(newCount);
+
+    if (!newCount.match(positiveIntegerRegex)) {
+      setNumCopiesState("ERROR");
+      return;
+    }
+
+    if (Number(newCount) > 10) {
+      setNumCopiesState("TOO_LARGE");
+      return;
+    }
+
+    setNumCopiesState("NONE");
+  }
+
   function handleSubmit(event) {
     event.preventDefault();
 
-    if (durationState !== "NONE") {
+    if (durationState !== "NONE" || numCopiesState !== "NONE") {
       return;
     }
 
@@ -109,6 +130,31 @@ function TaskCreator() {
     };
 
     dispatch(addTask(newTask));
+
+    if (numCopies === 1) {
+      return;
+    }
+
+    // need to assign new uuid for both the task item and its associated task links
+    for (let i = 1; i < numCopies; i++) {
+      // deep copying task links
+      const taskLinksCopy = [];
+
+      for (const link of newTask.links) {
+        taskLinksCopy.push({
+          ...link,
+          _id: uuidv4(),
+        });
+      }
+
+      const newTaskCopy = {
+        ...newTask,
+        _id: uuidv4(),
+        links: taskLinksCopy,
+      };
+
+      dispatch(addTask(newTaskCopy));
+    }
   }
 
   return (
@@ -209,6 +255,20 @@ function TaskCreator() {
               onChange={(e) => setDueTime(e.target.value)}
               helperText=" "
             />
+            <br />
+            <TextField
+              fullWidth
+              margin="dense"
+              id="numCopies"
+              label="Number of copies (useful when scheduling task over multiple days)"
+              type="text"
+              variant="outlined"
+              required
+              value={numCopies}
+              onChange={handleCountChange}
+              helperText={numCopiesStates[numCopiesState].helperText}
+              error={numCopiesStates[numCopiesState].error}
+            />
             <TaskLinksCreator
               taskLinks={taskLinks}
               setTaskLinks={setTaskLinks}
@@ -259,6 +319,21 @@ const durationStates = {
   },
 };
 
+const numCopiesStates = {
+  NONE: {
+    helperText: " ",
+    error: false,
+  },
+  ERROR: {
+    helperText: "Please enter a valid quantity",
+    error: true,
+  },
+  TOO_LARGE: {
+    helperText: "Largest valid value is 10",
+    error: true,
+  },
+};
+
 // matches
 // 1
 // 99
@@ -280,5 +355,7 @@ const durationStates = {
 // 00.01
 const unsignedFloatRegex =
   /(^0\.\d*[1-9]\d*$)|(^[1-9]\d*\.\d+$)|(^[1-9]\d*$)/gm;
+
+const positiveIntegerRegex = /^[1-9]\d*$/;
 
 export default TaskCreator;
