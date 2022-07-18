@@ -35,6 +35,22 @@ const tasksSlice = createSlice({
       state.data.push(newTask);
       return state;
     },
+    _markTaskAsComplete: (state, action) => {
+      const tasks = state.data;
+      const { taskId, mondayKey } = action.payload;
+
+      const task = tasks.find((each) => each._id === taskId);
+      task.isCompleted[mondayKey] = true;
+      return state;
+    },
+    _markTaskAsIncomplete: (state, action) => {
+      const tasks = state.data;
+      const { taskId, mondayKey } = action.payload;
+
+      const task = tasks.find((each) => each._id === taskId);
+      delete task.isCompleted[mondayKey];
+      return state;
+    },
     _updateTaskFields: (state, action) => {
       const tasks = state.data;
       const { taskId, newKeyValuePairs } = action.payload;
@@ -45,24 +61,6 @@ const tasksSlice = createSlice({
       }
 
       const index = tasks.findIndex((each) => each._id === taskId);
-
-      // special case for marking task as complete/incomplete
-      if (newKeyValuePairs.markTaskAsComplete !== undefined) {
-        const completedObject = tasks[index]["isCompleted"];
-        if (newKeyValuePairs.markTaskAsComplete) {
-          const newCompletedObject = { ...completedObject };
-          newCompletedObject[newKeyValuePairs.mondayKey] = true;
-          tasks[index]["isCompleted"] = newCompletedObject;
-        } else {
-          const mondayKey = newKeyValuePairs.mondayKey.toString();
-          const { [mondayKey]: toBeRemovedMondayKey, ...newCompletedObject } =
-            completedObject;
-          tasks[index]["isCompleted"] = newCompletedObject;
-        }
-
-        return state;
-      }
-
       for (const [key, value] of Object.entries(newKeyValuePairs)) {
         tasks[index][key] = value;
       }
@@ -111,8 +109,6 @@ const tasksSlice = createSlice({
       }
 
       for (const newLink of newTaskLinks) {
-        // can change to deep copying if bugs occur
-
         if (newLink.name === "") {
           newLink.name = newLink.url;
         }
@@ -121,7 +117,7 @@ const tasksSlice = createSlice({
           !newLink.url.startsWith("https://") &&
           !newLink.url.startsWith("http://")
         ) {
-          newLink.url = "http://".concat(newLink.url);
+          newLink.url = "http://" + newLink.url;
         }
 
         const { _id: newTaskLinkId } = newLink;
@@ -138,38 +134,6 @@ const tasksSlice = createSlice({
       }
 
       return state;
-
-      // for (const link of newTaskLinks) {
-      //   if (link.name === "") {
-      //     link.name = link.url;
-      //   }
-
-      //   let finalURL = link.url;
-      //   if (
-      //     !link.url.startsWith("https://") &&
-      //     !link.url.startsWith("http://")
-      //   ) {
-      //     finalURL = "http://".concat(link.url);
-      //   }
-
-      //   const newLink = {
-      //     ...link,
-      //     url: finalURL,
-      //   };
-      //   loop2: for (const task of state.data) {
-      //     for (let i = 0; i < task.links.length; i++) {
-      //       if (link._id === task.links[i]._id) {
-      //         if (link._toBeDeleted) {
-      //           task.links = task.links.filter((each) => each._id !== link._id);
-      //         } else {
-      //           task.links[i] = newLink;
-      //         }
-      //         break loop2;
-      //       }
-      //     }
-      //   }
-      // }
-      // return state;
     },
     _unscheduleTasks: (state, action) => {
       const tasks = state.data;
@@ -217,6 +181,8 @@ export const { _setTasks } = tasksSlice.actions;
 // private functions
 const {
   _addTask,
+  _markTaskAsComplete,
+  _markTaskAsIncomplete,
   _updateTaskFields,
   _deleteTask,
   _deleteCompletedTasks,
@@ -293,16 +259,16 @@ export function deleteCompletedTasks() {
 export function markTaskAsComplete(taskId) {
   return function thunk(dispatch, getState) {
     const mondayKey = getState().time.mondayKey;
-    dispatch(updateTaskFields(taskId, { mondayKey, markTaskAsComplete: true }));
+    const payload = { taskId, mondayKey };
+    dispatch(_markTaskAsComplete(payload));
   };
 }
 
 export function markTaskAsIncomplete(taskId) {
   return function thunk(dispatch, getState) {
     const mondayKey = getState().time.mondayKey;
-    dispatch(
-      updateTaskFields(taskId, { mondayKey, markTaskAsComplete: false })
-    );
+    const payload = { taskId, mondayKey };
+    dispatch(_markTaskAsIncomplete(payload));
   };
 }
 
