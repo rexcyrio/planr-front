@@ -244,10 +244,28 @@ function Signup() {
 
   return (
     <>
-      <Box
-        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      <div
+        style={{
+          height: "calc(100vh - 3rem - 1px)",
+          width: "100vw",
+          overflow: "auto",
+          padding: "2.8rem 0",
+
+          display: "flex",
+          justifyContent: "center",
+        }}
       >
-        <Card sx={{ padding: "2rem", paddingTop: "1rem", marginTop: "1rem" }}>
+        <Card
+          sx={{
+            width: "20rem",
+            p: "0 2rem 0.5rem",
+
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            margin: "2.8rem 0",
+          }}
+        >
           <h1>Create a new account</h1>
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
@@ -286,7 +304,7 @@ function Signup() {
             <TextField
               sx={{ mb: "1rem", width: "20rem" }}
               id="verifyPassword"
-              label="verify password"
+              label="Verify Password"
               type="password"
               variant="outlined"
               required
@@ -313,7 +331,7 @@ function Signup() {
             Already have an account? <Link to="/login">Log in</Link>
           </p>
         </Card>
-      </Box>
+      </div>
     </>
   );
 }
