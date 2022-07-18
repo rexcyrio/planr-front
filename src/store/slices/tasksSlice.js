@@ -260,7 +260,9 @@ export function markTaskAsComplete(taskId) {
   return function thunk(dispatch, getState) {
     const mondayKey = getState().time.mondayKey;
     const payload = { taskId, mondayKey };
+
     dispatch(_markTaskAsComplete(payload));
+    dispatch(updateTasksInDatabase());
   };
 }
 
@@ -268,7 +270,9 @@ export function markTaskAsIncomplete(taskId) {
   return function thunk(dispatch, getState) {
     const mondayKey = getState().time.mondayKey;
     const payload = { taskId, mondayKey };
+
     dispatch(_markTaskAsIncomplete(payload));
+    dispatch(updateTasksInDatabase());
   };
 }
 
