@@ -1,6 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Alert } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -8,7 +7,6 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
-import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
@@ -26,9 +24,7 @@ function Links() {
   const status = useSelector((state) => state.links.status);
   const [newName, setNewName] = useState("");
   const [newURL, setNewURL] = useState("");
-  const [add_open, add_setOpen] = useState(false);
-
-  const [openSyncErrorSnackbar, setOpenSyncErrorSnackbar] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchPermLinks());
@@ -40,35 +36,22 @@ function Links() {
     }
   }
 
-  const add_openDialog = () => {
-    add_setOpen(true);
+  const handleOpen = () => {
+    setOpen(true);
   };
 
-  const add_closeDialog = () => {
-    add_setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
     setNewName("");
     setNewURL("");
   };
 
   function addNewLink() {
-    dispatch(addNewPermLink(newURL, newName));
+    dispatch(addNewPermLink(newName, newURL));
   }
-
-  const closeSnackbar = () => {
-    setOpenSyncErrorSnackbar(false);
-  };
 
   return (
     <>
-      <Snackbar
-        open={openSyncErrorSnackbar}
-        autoHideDuration={6000}
-        onClose={closeSnackbar}
-      >
-        <Alert onClose={closeSnackbar} severity="error" sx={{ width: "100%" }}>
-          Something went wrong! Your links might not be saved
-        </Alert>
-      </Snackbar>
       <div className={styles.title}>
         <div className={styles["title-update-container"]}>
           <h1>Links</h1>
@@ -77,21 +60,21 @@ function Links() {
         <div>
           <LinksEditor />
           <Tooltip title="Add">
-            <IconButton onClick={add_openDialog}>
+            <IconButton onClick={handleOpen}>
               <AddIcon />
             </IconButton>
           </Tooltip>
         </div>
       </div>
 
-      <Dialog open={add_open} onClose={add_closeDialog} maxWidth="md">
+      <Dialog open={open} onClose={handleClose} maxWidth="md">
         <DialogTitle>Add a new link</DialogTitle>
         <Box
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
             addNewLink();
-            add_closeDialog();
+            handleClose();
           }}
         >
           <DialogContent>
@@ -120,7 +103,7 @@ function Links() {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={add_closeDialog}>Cancel</Button>
+            <Button onClick={handleClose}>Cancel</Button>
             <Button type="submit">Add</Button>
           </DialogActions>
         </Box>

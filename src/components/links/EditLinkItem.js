@@ -10,9 +10,9 @@ import React from "react";
 EditLinkItem.propTypes = {
   self: PropTypes.shape({
     _id: PropTypes.string.isRequired,
+    _toBeDeleted: PropTypes.bool.isRequired,
     name: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
-    _toBeDeleted: PropTypes.bool.isRequired,
   }).isRequired,
   
   setTempLinks: PropTypes.func.isRequired,

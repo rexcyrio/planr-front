@@ -23,22 +23,22 @@ function LinksEditor() {
   const permLinks = useSelector((state) => state.links.permLinks);
   const modulesLinks = useSelector(selectModuleLinks());
   const tasksLinks = useSelector(selectTaskLinks());
-  const [edit_open, edit_setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [tempPermLinks, setTempPermLinks] = useState([]);
   const [tempTasksLinks, setTempTasksLinks] = useState([]);
   const [tempModulesLinks, setTempModulesLinks] = useState([]);
 
-  const edit_openDialog = () => {
+  const handleOpen = () => {
     if (permLinks.length + modulesLinks.length + tasksLinks.length > 0) {
       setTempPermLinks([...permLinks]);
       setTempModulesLinks([...modulesLinks]);
       setTempTasksLinks([...tasksLinks]);
-      edit_setOpen(true);
+      setOpen(true);
     }
   };
 
-  const edit_closeDialog = (saveChanges) => {
-    edit_setOpen(false);
+  const closeDialog = (saveChanges) => {
+    setOpen(false);
 
     if (saveChanges) {
       dispatch(saveEditedPermLinks(tempPermLinks));
@@ -50,56 +50,39 @@ function LinksEditor() {
   return (
     <>
       <Tooltip title="Edit">
-        <IconButton onClick={edit_openDialog}>
+        <IconButton onClick={handleOpen}>
           <EditIcon />
         </IconButton>
       </Tooltip>
 
-      <Dialog
-        open={edit_open}
-        onClose={() => edit_closeDialog(false)}
-        maxWidth="md"
-      >
+      <Dialog open={open} onClose={() => closeDialog(false)} maxWidth="md">
         <DialogTitle>Edit your links</DialogTitle>
         <Box
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
-            edit_closeDialog(true);
+            closeDialog(true);
           }}
         >
           <DialogContent>
-            {tempPermLinks
-              .map((self) => (
-                <React.Fragment key={self._id}>
-                  <EditLinkItem self={self} setTempLinks={setTempPermLinks} />
-                </React.Fragment>
-              ))
-              .concat(
-                tempModulesLinks.map((self) => (
-                  <React.Fragment key={self._id}>
-                    <EditLinkItem
-                      self={self}
-                      setTempLinks={setTempModulesLinks}
-                    />
-                  </React.Fragment>
-                ))
-              )
-              .concat(
-                tempTasksLinks.map((self) => (
-                  <React.Fragment key={self._id}>
-                    <EditLinkItem
-                      self={self}
-                      setTempLinks={setTempTasksLinks}
-                    />
-                  </React.Fragment>
-                ))
-              )}
+            {tempPermLinks.map((self) => (
+              <React.Fragment key={self._id}>
+                <EditLinkItem self={self} setTempLinks={setTempPermLinks} />
+              </React.Fragment>
+            ))}
+            {tempModulesLinks.map((self) => (
+              <React.Fragment key={self._id}>
+                <EditLinkItem self={self} setTempLinks={setTempModulesLinks} />
+              </React.Fragment>
+            ))}
+            {tempTasksLinks.map((self) => (
+              <React.Fragment key={self._id}>
+                <EditLinkItem self={self} setTempLinks={setTempTasksLinks} />
+              </React.Fragment>
+            ))}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => edit_closeDialog(false)}>
-              Discard Changes
-            </Button>
+            <Button onClick={() => closeDialog(false)}>Discard Changes</Button>
             <Button type="submit">Save</Button>
           </DialogActions>
         </Box>
