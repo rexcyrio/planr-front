@@ -51,57 +51,70 @@ function HelpWindow() {
               <HelpIcon fontSize="small" />{" "}
             </InlineIcon>
             icon at the top right hand corner.
-            <h4>Timetable Scheduler</h4>
-            <ol>
-              <li style={{ margin: "0.75rem 0" }}>
-                Import your{" "}
-                <span style={{ color: "#ff5138", fontWeight: "bold" }}>
-                  NUSMods
-                </span>{" "}
-                timetable via the Settings icon{" "}
-                <InlineIcon>
-                  <SettingsIcon fontSize="small" />{" "}
-                </InlineIcon>
-                at the top right hand corner.
-              </li>
-              <li style={{ margin: "0.75rem 0" }}>
-                Create tasks using the{" "}
-                <InlineIcon>
-                  <AddIcon fontSize="small" />{" "}
-                </InlineIcon>
-                button at the bottom right corner.
-              </li>
-              <li style={{ margin: "0.75rem 0" }}>
-                Using the drag handle{" "}
-                <InlineIcon>
-                  <DragIndicatorIcon fontSize="small" />
-                </InlineIcon>
-                , drag and drop tasks directly onto your timetable to schedule
-                them.
-              </li>
-            </ol>
-            <h4>Lessons</h4>
-            <ul>
-              <li>
-                Add a Zoom link to your lessons via the Details{" "}
-                <InlineIcon>
-                  <InfoOutlinedIcon fontSize="small" />
-                </InlineIcon>{" "}
-                popup.
-              </li>
-            </ul>
-            <h4>Links</h4>
-            <ul>
-              <li>
-                Links associated with today&apos;s tasks / lessons will
-                automatically appear here.
-              </li>
-            </ul>
-            <h4>Notes</h4>
-            <ul>
-              <li>Double click on the note text to edit it.</li>
-            </ul>
           </DialogContentText>
+
+          <h4>Timetable Scheduler</h4>
+          <ol>
+            <DialogContentText component="li" sx={{ margin: "0.75rem 0" }}>
+              Import your{" "}
+              <span style={{ color: "#ff5138", fontWeight: "bold" }}>
+                NUSMods
+              </span>{" "}
+              timetable via the Settings icon{" "}
+              <InlineIcon>
+                <SettingsIcon fontSize="small" />{" "}
+              </InlineIcon>
+              at the top right hand corner.
+            </DialogContentText>
+            <DialogContentText component="li" sx={{ margin: "0.75rem 0" }}>
+              Create tasks using the{" "}
+              <InlineIcon>
+                <AddIcon fontSize="small" />{" "}
+              </InlineIcon>
+              button at the bottom right corner.
+            </DialogContentText>
+            <DialogContentText component="li" sx={{ margin: "0.75rem 0" }}>
+              Using the drag handle{" "}
+              <InlineIcon>
+                <DragIndicatorIcon fontSize="small" />
+              </InlineIcon>
+              , drag and drop tasks directly onto your timetable to schedule
+              them.
+            </DialogContentText>
+          </ol>
+
+          <h4>Lessons</h4>
+          <ul>
+            <DialogContentText component="li">
+              Add a Zoom link to your lessons via the Details{" "}
+              <InlineIcon>
+                <InfoOutlinedIcon fontSize="small" />
+              </InlineIcon>{" "}
+              popup.
+            </DialogContentText>
+          </ul>
+
+          <h4>Links</h4>
+          <ul>
+            <DialogContentText component="li">
+              Links associated with today&apos;s tasks / lessons will
+              automatically appear here.
+            </DialogContentText>
+          </ul>
+
+          <h4>Notes</h4>
+          <ul>
+            <DialogContentText component="li">
+              Double click on the note text to edit it.
+            </DialogContentText>
+          </ul>
+
+          <h4>Statistics</h4>
+          <ul>
+            <DialogContentText component="li">
+              Navigate to different weeks to view the stats for that week.
+            </DialogContentText>
+          </ul>
         </DialogContent>
 
         <DialogActions>
@@ -113,7 +126,7 @@ function HelpWindow() {
 }
 
 InlineIcon.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node.isRequired,
 };
 
 function InlineIcon(props) {
