@@ -29,20 +29,23 @@ export const { _setMappingModuleCodeToColourName } =
 // private functions
 const { _updateModuleColour } = mappingModuleCodeToColourNameSlice.actions;
 
-export function setModulesInTheme(newModuleItems) {
+export function setModulesInTheme(moduleCodes) {
   return function thunk(dispatch, getState) {
     const old_mappingModuleCodeToColourName =
       getState().mappingModuleCodeToColourName;
     const new_mappingModuleCodeToColourName = {};
 
-    // filter out duplicated module codes
-    const moduleCodes = [
-      ...new Set(newModuleItems.map((each) => each.moduleCode)),
-    ];
-
     // retain colour mapping for "Others"
     new_mappingModuleCodeToColourName["Others"] =
       old_mappingModuleCodeToColourName["Others"];
+
+    // can stop here if no module codes were provided
+    if (moduleCodes.length === 0) {
+      dispatch(
+        _setMappingModuleCodeToColourName(new_mappingModuleCodeToColourName)
+      );
+      return;
+    }
 
     // retain colour mapping for old modules
     for (const moduleCode of moduleCodes) {
@@ -68,6 +71,8 @@ export function setModulesInTheme(newModuleItems) {
       }
     }
 
+    // need to find a new theme colour for these module codes since they did not
+    // exist in the old theme mapping
     const newModuleCodes = moduleCodes.filter(
       (each) => !(each in new_mappingModuleCodeToColourName)
     );

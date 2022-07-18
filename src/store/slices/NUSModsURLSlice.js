@@ -160,16 +160,15 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         }
       }
 
-      const oldModuleCodes = selectModuleCodes()(getState());
+      const oldModuleCodes = selectModuleCodes()(getState()).filter(
+        (each) => each.moduleCode !== "Others"
+      );
 
-      dispatch(_setNUSModsURL(NUSModsURL));
-      dispatch(setNUSModsURLInDatabase(NUSModsURL));
-
-      dispatch(unscheduleTasks(offendingTaskIds));
-      dispatch(setModulesInTheme(moduleItems));
-      dispatch(setModules(moduleItems));
-
-      const newModuleCodes = selectModuleCodes()(getState());
+      // using `Set()` to remove duplicates since a module item can have multiple
+      // lessons
+      const newModuleCodes = [
+        ...new Set(moduleItems.map((each) => each.moduleCode)),
+      ];
 
       const moduleCodesNoLongerInUse = oldModuleCodes.filter(
         (each) => !newModuleCodes.includes(each)
@@ -188,13 +187,26 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         }
       }
 
+      dispatch(_setNUSModsURL(NUSModsURL));
+      dispatch(setNUSModsURLInDatabase(NUSModsURL));
+
+      dispatch(unscheduleTasks(offendingTaskIds));
+      dispatch(setModulesInTheme(newModuleCodes));
+      dispatch(setModules(moduleItems));
+
       // ======================================================================
       // Auto generate tutorial tasks
       // ======================================================================
 
+      // need to call `getState()` again since the `dispatch()` above would have
+      // modified the tasks data
+      const updatedTasks = getState().tasks.data;
+
       // remove previously auto generated tutorial tasks
       dispatch(
-        _setTasks(tasks.filter((each) => each._id.slice(0, 9) !== "auto-gen-"))
+        _setTasks(
+          updatedTasks.filter((each) => each._id.slice(0, 9) !== "auto-gen-")
+        )
       );
 
       // generate new tutorial tasks
@@ -230,6 +242,40 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
       console.error(error);
       dispatch(_setStatus("FETCH_FAILURE"));
     }
+  };
+}
+
+export function removeNUSModsTimetable() {
+  return function thunk(dispatch, getState) {
+    const tasks = getState().tasks.data;
+
+    // change all tasks to "Others"
+    for (const task of tasks) {
+      const { _id, moduleCode } = task;
+
+      if (moduleCode !== "Others") {
+        dispatch(updateTaskFields(_id, { moduleCode: "Others" }));
+      }
+    }
+
+    dispatch(_setNUSModsURL(""));
+    dispatch(setNUSModsURLInDatabase(""));
+
+    dispatch(setModulesInTheme([]));
+    dispatch(setModules([]));
+
+    // need to call `getState()` again since the `dispatch()` above would have
+    // modified the tasks data
+    const updatedTasks = getState().tasks.data;
+
+    // remove previously auto generated tutorial tasks
+    dispatch(
+      _setTasks(
+        updatedTasks.filter((each) => each._id.slice(0, 9) !== "auto-gen-")
+      )
+    );
+
+    dispatch(refreshMatrix());
   };
 }
 
