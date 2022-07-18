@@ -47,36 +47,26 @@ function TaskLinksCreator({
   const [isAddingLink, setIsAddingLink] = useState(false);
 
   const addTaskLinkHandler = () => {
-    if (linkName === "" && linkURL === "") {
-      return;
-    }
-
     if (linkURL === "") {
       setUrlState("EMPTY");
       return;
     }
 
-    let finalURL = linkURL;
-    if (!linkURL.startsWith("https://") && !linkURL.startsWith("http://")) {
-      finalURL = "http://".concat(linkURL);
-    }
+    const finalName = linkName || linkURL;
+    const finalURL =
+      linkURL.startsWith("https://") || linkURL.startsWith("http://")
+        ? linkURL
+        : "http://" + linkURL;
+
+    const newLink = {
+      _id: uuidv4(),
+      _toBeDeleted: false,
+      name: finalName,
+      url: finalURL,
+    };
 
     setIsAddingLink(false);
-    setTaskLinks((prev) => {
-      const newLink = {
-        _id: uuidv4(),
-        _toBeDeleted: false,
-        name: linkName,
-        url: finalURL,
-      };
-
-      if (linkName === "") {
-        newLink._name = linkURL;
-        newLink.name = linkURL;
-      }
-
-      return [...prev, newLink];
-    });
+    setTaskLinks((prev) => [...prev, newLink]);
     setLinkName("");
     setLinkURL("");
   };
@@ -126,7 +116,7 @@ function TaskLinksCreator({
             onChange={(e) => setLinkName(e.target.value)}
           />
           <TextField
-            sx={{ width: "20rem" }}
+            sx={{ width: "19.25rem" }}
             margin="dense"
             id="url"
             label="URL"
@@ -139,7 +129,10 @@ function TaskLinksCreator({
             helperText={urlStates[urlState].helperText}
             error={urlStates[urlState].error}
           />
-          <Button onClick={addTaskLinkHandler} sx={{ marginTop: "1rem" }}>
+          <Button
+            onClick={addTaskLinkHandler}
+            sx={{ ml: "0.5rem", marginTop: "1.1rem" }}
+          >
             Add Link
           </Button>
         </>

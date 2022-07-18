@@ -29,8 +29,10 @@ const linksSlice = createSlice({
       return state;
     },
     _saveEditedPermLinks: (state, action) => {
-      const newLinks = [];
-      for (const link of action.payload) {
+      const newPermLinks = [];
+      const links = action.payload;
+
+      for (const link of links) {
         if (link._toBeDeleted) {
           continue;
         }
@@ -39,21 +41,17 @@ const linksSlice = createSlice({
           link.name = link.url;
         }
 
-        let finalURL = link.url;
         if (
           !link.url.startsWith("https://") &&
           !link.url.startsWith("http://")
         ) {
-          finalURL = "http://".concat(link.url);
+          link.url = "http://" + link.url;
         }
 
-        const newLink = {
-          ...link,
-          url: finalURL,
-        };
-        newLinks.push(newLink);
+        newPermLinks.push(link);
       }
-      state.permLinks = newLinks;
+
+      state.permLinks = newPermLinks;
       return state;
     },
   },
@@ -79,21 +77,18 @@ const linksSlice = createSlice({
 const { _setPermLinks, _addNewPermLink, _saveEditedPermLinks } =
   linksSlice.actions;
 
-export function addNewPermLink(newURL, newName) {
+export function addNewPermLink(newName, newURL) {
   return function thunk(dispatch) {
-    let finalURL = newURL;
-    if (!newURL.startsWith("https://") && !newURL.startsWith("http://")) {
-      finalURL = "http://".concat(newURL);
-    }
-
-    if (newName === "") {
-      newName = newURL;
-    }
+    const finalName = newName || newURL;
+    const finalURL =
+      newURL.startsWith("https://") || newURL.startsWith("http://")
+        ? newURL
+        : "http://" + newURL;
 
     const newLink = {
       _id: uuidv4(),
       _toBeDeleted: false,
-      name: newName,
+      name: finalName,
       url: finalURL,
     };
 

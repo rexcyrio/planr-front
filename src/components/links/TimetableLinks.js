@@ -4,15 +4,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { setTimetableColumn } from "../../store/slices/timeSlice";
 import {
   selectModuleLinks,
-  selectTaskLinks
+  selectTaskLinks,
 } from "../../store/storeHelpers/selectors";
 import LinkItem from "./LinkItem";
 
 TimetableLinks.propTypes = {
-  emptyPermLinks: PropTypes.bool.isRequired,
+  isPermLinksEmpty: PropTypes.bool.isRequired,
 };
 
-function TimetableLinks(props) {
+function TimetableLinks({ isPermLinksEmpty }) {
   const dispatch = useDispatch();
 
   // links from modules that are scheduled today
@@ -32,24 +32,23 @@ function TimetableLinks(props) {
   }, [dispatch]);
 
   // rendered below perm links
-  return props.emptyPermLinks &&
+  return isPermLinksEmpty &&
     modulesLinks.length === 0 &&
     tasksLinks.length === 0 ? (
     <div>There are no links.</div>
   ) : (
-    modulesLinks
-      .map((self) => (
+    <>
+      {modulesLinks.map((self) => (
         <React.Fragment key={self._id}>
           <LinkItem self={self} />
         </React.Fragment>
-      ))
-      .concat(
-        tasksLinks.map((self) => (
-          <React.Fragment key={self._id}>
-            <LinkItem self={self} />
-          </React.Fragment>
-        ))
-      )
+      ))}
+      {tasksLinks.map((self) => (
+        <React.Fragment key={self._id}>
+          <LinkItem self={self} />
+        </React.Fragment>
+      ))}
+    </>
   );
 }
 

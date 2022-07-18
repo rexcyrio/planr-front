@@ -21,39 +21,51 @@ const modulesSlice = createSlice({
       }
     },
     _saveEditedModulesLinks: (state, action) => {
-      const newLinks = action.payload;
-      for (const link of newLinks) {
-        if (link.name === "") {
-          link.name = link.url;
-        }
+      const modules = state;
+      const newModuleLinks = action.payload;
 
-        let finalURL = link.url;
-        if (
-          !link.url.startsWith("https://") &&
-          !link.url.startsWith("http://")
-        ) {
-          finalURL = "http://".concat(link.url);
-        }
+      const mappingModuleLinkIdToModuleIndex = {};
 
-        const newLink = {
-          ...link,
-          url: finalURL,
-        };
-        loop2: for (const module of state) {
-          for (let i = 0; i < module.links.length; i++) {
-            if (link._id === module.links[i]._id) {
-              if (link._toBeDeleted) {
-                module.links = module.links.filter(
-                  (each) => each._id !== link._id
-                );
-              } else {
-                module.links[i] = newLink;
-              }
-              break loop2;
-            }
-          }
+      for (let i = 0; i < modules.length; i++) {
+        const module = modules[i];
+        const oldModuleLinks = module.links;
+
+        for (const oldModuleLink of oldModuleLinks) {
+          const { _id: oldModuleLinkId } = oldModuleLink;
+          mappingModuleLinkIdToModuleIndex[oldModuleLinkId] = i;
         }
       }
+
+      const allBuckets = [];
+      for (let i = 0; i < modules.length; i++) {
+        allBuckets.push([]);
+      }
+
+      for (const newLink of newModuleLinks) {
+        if (newLink.name === "") {
+          newLink.name = newLink.url;
+        }
+
+        if (
+          !newLink.url.startsWith("https://") &&
+          !newLink.url.startsWith("http://")
+        ) {
+          newLink.url = "http://" + newLink.url;
+        }
+
+        const { _id: newModuleLinkId } = newLink;
+        const index = mappingModuleLinkIdToModuleIndex[newModuleLinkId];
+        allBuckets[index].push(newLink);
+      }
+
+      for (let i = 0; i < allBuckets.length; i++) {
+        const bucket = allBuckets[i];
+        // state          => array of all module items
+        // state[i]       => a particular module item
+        // state[i].links => array of links associated with this particular module item
+        state[i].links = bucket.filter((each) => !each._toBeDeleted);
+      }
+
       return state;
     },
   },

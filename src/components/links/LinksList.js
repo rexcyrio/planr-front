@@ -21,6 +21,7 @@ const DUMMY_LINK_ITEM = (
 function LinksList() {
   const links = useSelector((state) => state.links.permLinks);
   const status = useSelector((state) => state.links.status);
+
   return (
     <div className={styles["links-container"]}>
       <Stack spacing={1} sx={{ scrollSnapType: "y mandatory" }}>
@@ -35,7 +36,7 @@ function LinksList() {
                 <LinkItem self={self} />
               </React.Fragment>
             ))}
-            <TasksLinks emptyPermLinks={links.length === 0} />
+            <TasksLinks isPermLinksEmpty={links.length === 0} />
           </>
         )}
       </Stack>

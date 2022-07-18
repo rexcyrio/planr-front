@@ -219,7 +219,7 @@ function Notes() {
       >
         <TextField
           id="New note"
-          label="create new note"
+          label="Create a new note"
           variant="filled"
           placeholder="Press enter to add"
           autoComplete="off"
