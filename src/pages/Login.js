@@ -63,21 +63,29 @@ function Login() {
   return (
     <>
       <div
+        className="hide-scrollbar"
         style={{
-          height: "calc(100vh - 3rem - 1px - 2.8rem * 2)",
+          height: "calc(100vh - 3rem - 1px)",
           width: "100vw",
           overflow: "auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "2.8rem 0",
 
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
         <Card
           sx={{
             width: "20rem",
             p: "0 2rem 0.5rem",
+            m: "2rem 0",
+
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+
+            overflow: "visible",
+            height: "fit-content",
           }}
         >
           <h1>Welcome back!</h1>
@@ -125,7 +133,9 @@ function Login() {
           </p>
 
           {error ? (
-            <Alert severity="error">Username or password is incorrect.</Alert>
+            <Alert severity="error" sx={{ mb: "0.5rem" }}>
+              Username or password is incorrect.
+            </Alert>
           ) : (
             <></>
           )}
