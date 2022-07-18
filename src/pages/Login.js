@@ -62,14 +62,24 @@ function Login() {
 
   return (
     <>
-      <Box
-        sx={{
+      <div
+        style={{
+          height: "calc(100vh - 3rem - 1px - 2.8rem * 2)",
+          width: "100vw",
+          overflow: "auto",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
+          padding: "2.8rem 0",
+
         }}
       >
-        <Card sx={{ padding: "2rem", paddingTop: "0rem", marginTop: "1rem" }}>
+        <Card
+          sx={{
+            width: "20rem",
+            p: "0 2rem 0.5rem",
+          }}
+        >
           <h1>Welcome back!</h1>
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
@@ -123,7 +133,7 @@ function Login() {
         <div style={{ marginTop: "10rem" }}>
           <LoginCarousel />
         </div>
-      </Box>
+      </div>
     </>
   );
 }
