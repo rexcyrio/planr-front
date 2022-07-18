@@ -103,15 +103,12 @@ function Tasks() {
 
       <Stack
         spacing={1}
+        className="hide-scrollbar"
         sx={{
           marginX: "0.5rem",
           overflowY: "auto",
           marginBottom: "10rem",
           height: "calc(100% - 8.15rem)",
-          "&::-webkit-scrollbar": {
-            display: "none",
-          } /* Chrome */,
-          scrollbarWidth: "none" /* Firefox */,
         }}
       >
         {status === FETCH_FAILURE ? (

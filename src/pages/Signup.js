@@ -245,11 +245,11 @@ function Signup() {
   return (
     <>
       <div
+        className="hide-scrollbar"
         style={{
           height: "calc(100vh - 3rem - 1px)",
           width: "100vw",
           overflow: "auto",
-          padding: "2.8rem 0",
 
           display: "flex",
           justifyContent: "center",
@@ -259,11 +259,14 @@ function Signup() {
           sx={{
             width: "20rem",
             p: "0 2rem 0.5rem",
+            m: "2rem 0",
 
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            margin: "2.8rem 0",
+
+            overflow: "visible",
+            height: "fit-content",
           }}
         >
           <h1>Create a new account</h1>
