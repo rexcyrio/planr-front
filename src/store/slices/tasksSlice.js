@@ -77,13 +77,14 @@ const tasksSlice = createSlice({
       tasks.splice(index, 1);
       return state;
     },
-    _deleteCompletedTasks: (state) => {
+    _deleteCompletedTasks: (state, action) => {
       const tasks = state.data;
+      const mondayKey = action.payload;
 
       const cleanedTasks = tasks.filter(
         (each) =>
           each.mondayKey.length === 0 ||
-          Object.keys(each.isCompleted).length === 0
+          each.isCompleted[mondayKey] === undefined
       );
       state.data = cleanedTasks;
       return state;
@@ -267,10 +268,10 @@ export function deleteTask(taskId) {
 export function deleteCompletedTasks() {
   return function thunk(dispatch, getState) {
     const tasks = getState().tasks.data;
+    const mondayKey = getState().time.mondayKey;
     const completedTasks = tasks.filter(
       (each) =>
-        each.mondayKey.length !== 0 &&
-        Object.keys(each.isCompleted).length !== 0
+        each.mondayKey.length !== 0 && each.isCompleted[mondayKey] !== undefined
     );
 
     // remove completed tasks from matrix
@@ -284,7 +285,7 @@ export function deleteCompletedTasks() {
     }
 
     dispatch(setMatrix(values));
-    dispatch(_deleteCompletedTasks());
+    dispatch(_deleteCompletedTasks(mondayKey));
     dispatch(updateTasksInDatabase());
   };
 }

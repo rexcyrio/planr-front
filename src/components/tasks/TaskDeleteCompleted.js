@@ -30,14 +30,14 @@ function TaskDeleteCompleted() {
 
   return (
     <>
-      <Tooltip title="Delete completed tasks">
+      <Tooltip title="Delete completed tasks for this week">
         <IconButton onClick={handleOpen}>
           <RemoveDoneIcon />
         </IconButton>
       </Tooltip>
 
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Delete all completed tasks?</DialogTitle>
+        <DialogTitle>Delete completed tasks for this week?</DialogTitle>
 
         <DialogContent>
           <DialogContentText>This action cannot be undone.</DialogContentText>
