@@ -35,11 +35,11 @@ export function selectCurrentWeekTasks() {
     const mondayKey = state.time.mondayKey;
     const tasks = state.tasks.data;
 
-    const recurringTasks = tasks.filter((each) => {
-      return each.mondayKey.length === 0;
-    });
-
     const currentWeekTasks = tasks.filter((each) => {
+      if (each.mondayKey.length === 0) {
+        return true;
+      }
+
       for (let i = 0; i < 3; i++) {
         if (each.mondayKey[i] !== mondayKey[i]) {
           return false;
@@ -48,7 +48,7 @@ export function selectCurrentWeekTasks() {
       return true;
     });
 
-    return recurringTasks.concat(currentWeekTasks);
+    return currentWeekTasks;
   };
 }
 
