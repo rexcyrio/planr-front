@@ -8,7 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
@@ -76,7 +76,7 @@ function TaskItem({ self }) {
     [self]
   );
 
-  function getDraggableState() {
+  const getDraggableState = useCallback(() => {
     if (self.isCompleted[mondayKey] !== undefined) {
       return {
         title: "Task is already completed",
@@ -100,7 +100,7 @@ function TaskItem({ self }) {
       ref: drag,
       cursor: "grab",
     };
-  }
+  }, [self, drag, mondayKey]);
 
   function handleMouseEnter() {
     setIsMouseOver(true);
@@ -114,6 +114,84 @@ function TaskItem({ self }) {
     preview(getEmptyImage(), { captureDraggingState: true });
   }, [preview]);
 
+  const taskItemDescription = useMemo(
+    () => (
+      <div style={{ marginLeft: "0.5rem", wordBreak: "break-word" }}>
+        <div className={classes["task-paragraph"]}>
+          <span
+            style={{
+              color: getAccentColour(
+                themeName,
+                mappingModuleCodeToColourName,
+                self,
+                mondayKey
+              ),
+            }}
+          >
+            [{self.moduleCode}]
+          </span>{" "}
+          {self.name} ({self.durationHours} hr)
+        </div>
+
+        {self.dueDate === "--" ? (
+          <span
+            style={{
+              color: getAccentColour(
+                themeName,
+                mappingModuleCodeToColourName,
+                self,
+                mondayKey
+              ),
+            }}
+          >
+            Recurring
+          </span>
+        ) : (
+          <div>
+            <span
+              style={{
+                color: getAccentColour(
+                  themeName,
+                  mappingModuleCodeToColourName,
+                  self,
+                  mondayKey
+                ),
+              }}
+            >
+              due on:
+            </span>{" "}
+            {self.dueDate}@{convert_24H_to_12H(self.dueTime)}
+          </div>
+        )}
+      </div>
+    ),
+    [self, mappingModuleCodeToColourName, themeName, mondayKey]
+  );
+
+  const dragIcon = useMemo(
+    () => (
+      <div
+        title={getDraggableState().title}
+        ref={getDraggableState().ref}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: getDraggableState().cursor,
+        }}
+      >
+        {self.isCompleted[mondayKey] !== undefined ? (
+          <AssignmentTurnedInIcon />
+        ) : self.row !== -1 ? (
+          <StickyNote2Icon />
+        ) : (
+          <DragIndicatorIcon />
+        )}
+      </div>
+    ),
+    [self, mondayKey, getDraggableState]
+  );
+
   return (
     <Grow in={true}>
       <Paper onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
@@ -122,7 +200,8 @@ function TaskItem({ self }) {
             backgroundColor: getBackgroundColour(
               themeName,
               mappingModuleCodeToColourName,
-              self, mondayKey
+              self,
+              mondayKey
             ),
             display: "flex",
             alignItems: "center",
@@ -143,81 +222,8 @@ function TaskItem({ self }) {
               justifyContent: "center",
             }}
           >
-            {/* =========================================================== */}
-            {/* Drag Icon */}
-            {/* =========================================================== */}
-
-            <div
-              title={getDraggableState().title}
-              ref={getDraggableState().ref}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: getDraggableState().cursor,
-              }}
-            >
-              {self.isCompleted[mondayKey] !== undefined ? (
-                <AssignmentTurnedInIcon />
-              ) : self.row !== -1 ? (
-                <StickyNote2Icon />
-              ) : (
-                <DragIndicatorIcon />
-              )}
-            </div>
-
-            {/* =========================================================== */}
-            {/* Text */}
-            {/* =========================================================== */}
-
-            <div style={{ marginLeft: "0.5rem", wordBreak: "break-word" }}>
-              <div className={classes["task-paragraph"]}>
-                <span
-                  style={{
-                    color: getAccentColour(
-                      themeName,
-                      mappingModuleCodeToColourName,
-                      self,
-                      mondayKey
-                    ),
-                  }}
-                >
-                  [{self.moduleCode}]
-                </span>{" "}
-                {self.name} ({self.durationHours} hr)
-              </div>
-
-              {self.dueDate === "--" ? (
-                <span
-                  style={{
-                    color: getAccentColour(
-                      themeName,
-                      mappingModuleCodeToColourName,
-                      self,
-                      mondayKey
-                    ),
-                  }}
-                >
-                  Recurring
-                </span>
-              ) : (
-                <div>
-                  <span
-                    style={{
-                      color: getAccentColour(
-                        themeName,
-                        mappingModuleCodeToColourName,
-                        self,
-                        mondayKey
-                      ),
-                    }}
-                  >
-                    due on:
-                  </span>{" "}
-                  {self.dueDate}@{convert_24H_to_12H(self.dueTime)}
-                </div>
-              )}
-            </div>
+            {dragIcon}
+            {taskItemDescription}
           </div>
 
           {/* ============================================================= */}
@@ -291,4 +297,4 @@ function getTime(row) {
   return `${hour}:${min}`;
 }
 
-export default TaskItem;
+export default React.memo(TaskItem);

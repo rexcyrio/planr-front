@@ -54,4 +54,4 @@ function TaskDeleteCompleted() {
   );
 }
 
-export default TaskDeleteCompleted;
+export default React.memo(TaskDeleteCompleted);

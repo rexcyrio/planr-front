@@ -32,4 +32,4 @@ function BarGraphSection() {
   );
 }
 
-export default BarGraphSection;
+export default React.memo(BarGraphSection);

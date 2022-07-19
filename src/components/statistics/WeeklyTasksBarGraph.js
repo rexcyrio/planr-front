@@ -148,4 +148,4 @@ function WeeklyTasksBarGraph({ taskType }) {
   return <Bar options={options} data={data} />;
 }
 
-export default WeeklyTasksBarGraph;
+export default React.memo(WeeklyTasksBarGraph);

@@ -1,7 +1,7 @@
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
 import generateSkeletons from "../../helper/skeletonHelper";
@@ -68,6 +68,27 @@ function Tasks() {
     );
   }
 
+  const sortTaskSelector = useMemo(
+    () => (
+      <TextField
+        id="sortBy"
+        select
+        label="Sort by"
+        value={sortBy}
+        size="small"
+        sx={{ width: "14rem" }}
+        onChange={(e) => setSortBy(e.target.value)}
+      >
+        {Object.keys(mappingSortByToSortFunction).map((each) => (
+          <MenuItem key={each} value={each}>
+            {each}
+          </MenuItem>
+        ))}
+      </TextField>
+    ),
+    [sortBy]
+  );
+
   return (
     <>
       <InitialSnackBar />
@@ -82,21 +103,7 @@ function Tasks() {
       </div>
 
       <div style={{ padding: "0 0.5rem 0.5rem" }}>
-        <TextField
-          id="sortBy"
-          select
-          label="Sort by"
-          value={sortBy}
-          size="small"
-          sx={{ width: "14rem" }}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          {Object.keys(mappingSortByToSortFunction).map((each) => (
-            <MenuItem key={each} value={each}>
-              {each}
-            </MenuItem>
-          ))}
-        </TextField>
+        {sortTaskSelector}
 
         {/* TODO: filtering */}
       </div>
@@ -233,4 +240,4 @@ const mappingSortByToSortFunction = {
   },
 };
 
-export default Tasks;
+export default React.memo(Tasks);

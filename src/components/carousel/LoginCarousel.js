@@ -28,4 +28,4 @@ function LoginCarousel() {
   );
 }
 
-export default LoginCarousel;
+export default React.memo(LoginCarousel);

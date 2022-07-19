@@ -1,34 +1,43 @@
+import { createSelector } from "@reduxjs/toolkit";
 import isCurrentWeek from "../../helper/isCurrentWeekHelper";
 
-export function selectModuleLinks() {
-  return (state) => {
-    const timetableColumn = state.time.timetableColumn;
-    return state.modules
+export const selectModuleLinks = createSelector(
+  (state) => state.time.timetableColumn,
+  (state) => state.modules,
+  (timetableColumn, modules) => {
+    return modules
       .filter(
         (module) =>
           module.col === timetableColumn && isCurrentWeek(module.mondayKey)
       )
       .flatMap((module) => module.links);
-  };
-}
+  }
+);
 
-export function selectTaskLinks() {
-  return (state) => {
-    const timetableColumn = state.time.timetableColumn;
-
-    const scheduledRecurringTasksLinks = state.tasks.data
+export const selectTaskLinks = createSelector(
+  (state) => state.time.timetableColumn,
+  (state) => state.tasks.data,
+  (timetableColumn, tasks) => {
+    const scheduledRecurringTasksLinks = tasks
       .filter((task) => task.col !== -1 && task.dueDate === "--")
       .flatMap((task) => task.links);
 
-    const currentWeekTasksLinks = state.tasks.data
+    const currentWeekTasksLinks = tasks
       .filter(
         (task) => task.col === timetableColumn && isCurrentWeek(task.mondayKey)
       )
       .flatMap((task) => task.links);
 
     return scheduledRecurringTasksLinks.concat(currentWeekTasksLinks);
-  };
-}
+  }
+);
+
+export const selectModuleCodes = createSelector(
+  (state) => state.mappingModuleCodeToColourName,
+  (mappingModuleCodeToColourName) => {
+    return Object.keys(mappingModuleCodeToColourName);
+  }
+);
 
 export function selectCurrentWeekTasks() {
   return (state) => {
@@ -50,8 +59,4 @@ export function selectCurrentWeekTasks() {
 
     return currentWeekTasks;
   };
-}
-
-export function selectModuleCodes() {
-  return (state) => Object.keys(state.mappingModuleCodeToColourName);
 }

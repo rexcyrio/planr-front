@@ -120,4 +120,4 @@ function TasksAmountLineChart() {
   return <Line options={options} data={data} />;
 }
 
-export default TasksAmountLineChart;
+export default React.memo(TasksAmountLineChart);

@@ -99,4 +99,4 @@ function WeeklyTasksTypesPieChart({ durationType }) {
   return <Pie data={data} options={options} />;
 }
 
-export default WeeklyTasksTypesPieChart;
+export default React.memo(WeeklyTasksTypesPieChart);

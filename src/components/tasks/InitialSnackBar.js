@@ -1,6 +1,6 @@
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { FETCH_SUCCESS } from "../helperComponents/DataStatus";
 
@@ -14,44 +14,7 @@ function InitialSnackBar() {
   const [color, setColor] = useState("");
   const [numTasks, setNumTasks] = useState(0);
 
-  useEffect(() => {
-    if (status === FETCH_SUCCESS && !isNewUser) {
-      init();
-      setOpen(true);
-    }
-  }, [status, isNewUser]);
-
-  function handleClose() {
-    setOpen(false);
-  }
-
-  function getText() {
-    if (color === "error") {
-      if (numTasks === 1) {
-        return `There is 1 overdue task`;
-      } else {
-        return `There are ${numTasks} overdue tasks`;
-      }
-    } else if (color === "warning") {
-      if (numTasks === 1) {
-        return `There is 1 task due soon`;
-      } else {
-        return `There are ${numTasks} tasks due soon`;
-      }
-    } else if (color === "info") {
-      if (numTasks === 0) {
-        return "There is no outstanding tasks";
-      } else if (numTasks === 1) {
-        return "There is 1 outstanding task";
-      } else {
-        return `There are ${numTasks} outstanding tasks`;
-      }
-    } else {
-      return "";
-    }
-  }
-
-  function init() {
+  const init = useCallback(() => {
     const mappingTaskEpochDueTimeToCount = {};
 
     for (const task of tasks) {
@@ -111,6 +74,43 @@ function InitialSnackBar() {
       setColor("info");
       setNumTasks(dueMuchLaterCount);
     }
+  }, [mondayKey, tasks]);
+
+  useEffect(() => {
+    if (status === FETCH_SUCCESS && !isNewUser) {
+      init();
+      setOpen(true);
+    }
+  }, [status, isNewUser, init]);
+
+  function handleClose() {
+    setOpen(false);
+  }
+
+  function getText() {
+    if (color === "error") {
+      if (numTasks === 1) {
+        return `There is 1 overdue task`;
+      } else {
+        return `There are ${numTasks} overdue tasks`;
+      }
+    } else if (color === "warning") {
+      if (numTasks === 1) {
+        return `There is 1 task due soon`;
+      } else {
+        return `There are ${numTasks} tasks due soon`;
+      }
+    } else if (color === "info") {
+      if (numTasks === 0) {
+        return "There is no outstanding tasks";
+      } else if (numTasks === 1) {
+        return "There is 1 outstanding task";
+      } else {
+        return `There are ${numTasks} outstanding tasks`;
+      }
+    } else {
+      return "";
+    }
   }
 
   return (
@@ -127,4 +127,4 @@ function InitialSnackBar() {
   );
 }
 
-export default InitialSnackBar;
+export default React.memo(InitialSnackBar);

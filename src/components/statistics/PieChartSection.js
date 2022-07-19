@@ -33,4 +33,4 @@ function PieChartSection() {
   );
 }
 
-export default PieChartSection;
+export default React.memo(PieChartSection);
