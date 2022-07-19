@@ -15,7 +15,7 @@ import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setTaskEditorPopupWarningOpen } from "../../store/slices/TaskEditorPopupSlice";
 import { deleteTask, saveEditedTask } from "../../store/slices/tasksSlice";
@@ -44,7 +44,7 @@ TaskEditor.propTypes = {
 
 function TaskEditor({ self }) {
   const dispatch = useDispatch();
-  const moduleCodes = useSelector(selectModuleCodes());
+  const moduleCodes = useSelector((state) => selectModuleCodes(state));
 
   const [name, setName] = useState(self.name);
   const [dueDate, setDueDate] = useState(self.dueDate);
@@ -59,7 +59,7 @@ function TaskEditor({ self }) {
   const [durationState, setDurationState] = useState("NONE");
   const [urlState, setUrlState] = useState("NONE");
 
-  function resetState() {
+  const resetState = useCallback(() => {
     setName(self.name);
     setDueDate(self.dueDate);
     setDueTime(self.dueTime);
@@ -71,18 +71,18 @@ function TaskEditor({ self }) {
 
     setDurationState("NONE");
     setUrlState("NONE");
-  }
+  }, [self]);
 
-  function handleOpen() {
+  const handleOpen = useCallback(() => {
     resetState();
     setOpen(true);
-  }
+  }, [resetState]);
 
-  function handleClose() {
+  const handleClose = useCallback(() => {
     setOpen(false);
-  }
+  }, []);
 
-  function handleDurationHoursChange(event) {
+  const handleDurationHoursChange = useCallback((event) => {
     const newDuration = event.target.value;
     setDurationHours(newDuration);
 
@@ -97,7 +97,7 @@ function TaskEditor({ self }) {
     }
 
     setDurationState("NONE");
-  }
+  }, []);
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -149,92 +149,156 @@ function TaskEditor({ self }) {
     dispatch(saveEditedTask(self, newTask, true, handleClose));
   }
 
-  return (
-    <>
+  const editIcon = useMemo(
+    () => (
       <Tooltip title="Edit">
         <IconButton size="small" onClick={handleOpen}>
           <EditIcon />
         </IconButton>
       </Tooltip>
+    ),
+    [handleOpen]
+  );
+
+  const moduleCodesSelector = useMemo(
+    () => (
+      <FormControl sx={{ width: "10rem", mr: "1rem" }} margin="dense">
+        <InputLabel id="Module Code">Module Code</InputLabel>
+        <Select
+          labelId="Module Code"
+          id="moduleCode"
+          value={moduleCode}
+          label="Module Code"
+          onChange={(e) => setModuleCode(e.target.value)}
+          required
+        >
+          {moduleCodes.map((moduleCode) => (
+            <MenuItem key={moduleCode} value={moduleCode}>
+              {moduleCode}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    ),
+    [moduleCode, moduleCodes]
+  );
+
+  const taskNameTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ width: "25rem" }}
+        margin="dense"
+        id="name"
+        label="Name"
+        type="text"
+        variant="outlined"
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        autoComplete="off"
+      />
+    ),
+    [name]
+  );
+
+  const taskDurationTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ width: "15rem", mr: "1rem" }}
+        margin="dense"
+        id="durationHours"
+        label="Time needed"
+        type="text"
+        variant="outlined"
+        required
+        value={durationHours}
+        onChange={handleDurationHoursChange}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">hour(s)</InputAdornment>,
+        }}
+        helperText={durationStates[durationState].helperText}
+        error={durationStates[durationState].error}
+      />
+    ),
+    [durationHours, handleDurationHoursChange, durationState]
+  );
+
+  const taskDueDateTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ mr: "1rem" }}
+        margin="dense"
+        id="dueDate"
+        label="Due date"
+        type="date"
+        variant="outlined"
+        required
+        value={dueDate}
+        placeholder=""
+        onChange={(e) => setDueDate(e.target.value)}
+        helperText=" "
+      />
+    ),
+    [dueDate]
+  );
+
+  const taskDueTimeTextField = useMemo(
+    () => (
+      <TextField
+        margin="dense"
+        id="dueTime"
+        label="Due time"
+        type="time"
+        variant="outlined"
+        required
+        value={dueTime}
+        onChange={(e) => setDueTime(e.target.value)}
+        helperText=" "
+      />
+    ),
+    [dueTime]
+  );
+
+  const dialogAction = useMemo(
+    () => (
+      <DialogActions sx={{ justifyContent: "space-between" }}>
+        <Box sx={{ ml: "0.5rem" }}>
+          <Button
+            sx={{ color: "red" }}
+            onClick={(e) => {
+              e.preventDefault();
+              handleClose();
+              dispatch(deleteTask(self._id));
+            }}
+          >
+            Delete
+          </Button>
+        </Box>
+        <Box>
+          <Button onClick={handleClose}>Discard Changes</Button>
+          <Button type="submit">Save</Button>
+        </Box>
+      </DialogActions>
+    ),
+    [self, handleClose, dispatch]
+  );
+
+  return (
+    <>
+      {editIcon}
 
       <Dialog open={open} onClose={handleClose} maxWidth="md">
         <DialogTitle>Edit your Task</DialogTitle>
         <Box component="form" onSubmit={handleSubmit}>
           <DialogContent>
-            <FormControl sx={{ width: "10rem", mr: "1rem" }} margin="dense">
-              <InputLabel id="Module Code">Module Code</InputLabel>
-              <Select
-                labelId="Module Code"
-                id="moduleCode"
-                value={moduleCode}
-                label="Module Code"
-                onChange={(e) => setModuleCode(e.target.value)}
-                required
-              >
-                {moduleCodes.map((moduleCode) => (
-                  <MenuItem key={moduleCode} value={moduleCode}>
-                    {moduleCode}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              sx={{ width: "25rem" }}
-              margin="dense"
-              id="name"
-              label="Name"
-              type="text"
-              variant="outlined"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="off"
-            />
+            {moduleCodesSelector}
+            {taskNameTextField}
             <br />
-            <TextField
-              sx={{ width: "15rem", mr: "1rem" }}
-              margin="dense"
-              id="durationHours"
-              label="Time needed"
-              type="text"
-              variant="outlined"
-              required
-              value={durationHours}
-              onChange={handleDurationHoursChange}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">hour(s)</InputAdornment>
-                ),
-              }}
-              helperText={durationStates[durationState].helperText}
-              error={durationStates[durationState].error}
-            />
+            {taskDurationTextField}
             {dueDate !== "--" && (
               <>
-                <TextField
-                  sx={{ mr: "1rem" }}
-                  margin="dense"
-                  id="dueDate"
-                  label="Due date"
-                  type="date"
-                  variant="outlined"
-                  required
-                  value={dueDate}
-                  placeholder=""
-                  onChange={(e) => setDueDate(e.target.value)}
-                  helperText=" "
-                />
-                <TextField
-                  margin="dense"
-                  id="dueTime"
-                  label="Due time"
-                  type="time"
-                  variant="outlined"
-                  required
-                  value={dueTime}
-                  onChange={(e) => setDueTime(e.target.value)}
-                  helperText=" "
-                />
+                {taskDueDateTextField}
+                {taskDueTimeTextField}
               </>
             )}
             <TaskLinksCreator
@@ -248,24 +312,7 @@ function TaskEditor({ self }) {
               setUrlState={setUrlState}
             />
           </DialogContent>
-          <DialogActions sx={{ justifyContent: "space-between" }}>
-            <Box sx={{ ml: "0.5rem" }}>
-              <Button
-                sx={{ color: "red" }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleClose();
-                  dispatch(deleteTask(self._id));
-                }}
-              >
-                Delete
-              </Button>
-            </Box>
-            <Box>
-              <Button onClick={handleClose}>Discard Changes</Button>
-              <Button type="submit">Save</Button>
-            </Box>
-          </DialogActions>
+          {dialogAction}
         </Box>
 
         <AutoUnscheduleSelfPopup continueFunction={continueFunction} />

@@ -10,4 +10,4 @@ function LineChartSection() {
   );
 }
 
-export default LineChartSection;
+export default React.memo(LineChartSection);

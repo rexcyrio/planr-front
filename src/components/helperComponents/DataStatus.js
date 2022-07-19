@@ -78,7 +78,7 @@ function DataStatus({ status }) {
   }
 }
 
-export default DataStatus;
+export default React.memo(DataStatus);
 
 export const FETCHING = "FETCHING";
 export const FETCH_SUCCESS = "FETCH_SUCCESS";

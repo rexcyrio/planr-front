@@ -16,10 +16,10 @@ function TimetableLinks({ isPermLinksEmpty }) {
   const dispatch = useDispatch();
 
   // links from modules that are scheduled today
-  const modulesLinks = useSelector(selectModuleLinks());
+  const modulesLinks = useSelector((state) => selectModuleLinks(state));
 
   // links from tasks that are scheduled today
-  const tasksLinks = useSelector(selectTaskLinks());
+  const tasksLinks = useSelector((state) => selectTaskLinks(state));
 
   useEffect(() => {
     // set interval till the next day

@@ -44,4 +44,4 @@ function LinksList() {
   );
 }
 
-export default LinksList;
+export default React.memo(LinksList);

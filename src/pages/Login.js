@@ -1,9 +1,9 @@
+import { TextField } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import TextField from "@mui/material/TextField";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import LoginCarousel from "../components/carousel/LoginCarousel";
@@ -60,6 +60,63 @@ function Login() {
       });
   }
 
+  // ============================================================================
+  // Memo functions
+  // ============================================================================
+  const usernameChangeHandler = useCallback((e) => {
+    setError(false);
+    setUsername(e.target.value);
+  }, []);
+
+  const passwordChangeHandler = useCallback((e) => {
+    setError(false);
+    setPassword(e.target.value);
+  }, []);
+
+  // ============================================================================
+  // Memo components
+  // ============================================================================
+  const loginUsernameTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ mb: "1rem", width: "20rem" }}
+        id="username"
+        label="Username"
+        type="text"
+        variant="outlined"
+        required
+        value={username}
+        onChange={usernameChangeHandler}
+      />
+    ),
+    [username, usernameChangeHandler]
+  );
+
+  const loginPasswordTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ mb: "1rem", width: "20rem" }}
+        id="password"
+        label="Password"
+        type="password"
+        variant="outlined"
+        required
+        value={password}
+        onChange={passwordChangeHandler}
+      />
+    ),
+    [password, passwordChangeHandler]
+  );
+
+  const button = useMemo(
+    () => (
+      <Button sx={{ mb: "1rem" }} type="submit" variant="contained" fullWidth>
+        Log in
+      </Button>
+    ),
+    []
+  );
+
   return (
     <>
       <div
@@ -90,42 +147,11 @@ function Login() {
         >
           <h1>Welcome back!</h1>
           <Box component="form" onSubmit={handleSubmit}>
-            <TextField
-              sx={{ mb: "1rem", width: "20rem", backgroundColor: "#fff" }}
-              id="username"
-              label="Username"
-              type="text"
-              variant="outlined"
-              required
-              value={username}
-              onChange={(e) => {
-                setError(false);
-                setUsername(e.target.value);
-              }}
-            />
+            {loginUsernameTextField}
             <br />
-            <TextField
-              sx={{ mb: "1rem", width: "20rem" }}
-              id="password"
-              label="Password"
-              type="password"
-              variant="outlined"
-              required
-              value={password}
-              onChange={(e) => {
-                setError(false);
-                setPassword(e.target.value);
-              }}
-            />
+            {loginPasswordTextField}
             <br />
-            <Button
-              sx={{ mb: "1rem" }}
-              type="submit"
-              variant="contained"
-              fullWidth
-            >
-              Log in
-            </Button>
+            {button}
           </Box>
 
           <p>

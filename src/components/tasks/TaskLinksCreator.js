@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import AddLinkIcon from "@mui/icons-material/AddLink";
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -46,7 +46,38 @@ function TaskLinksCreator({
 }) {
   const [isAddingLink, setIsAddingLink] = useState(false);
 
-  const addTaskLinkHandler = () => {
+  const deleteTaskLinkHandler = useCallback(
+    (linkId) => {
+      setTaskLinks((prev) => prev.filter((each) => each._id !== linkId));
+    },
+    [setTaskLinks]
+  );
+
+  const generateTaskLinks = useCallback(() => {
+    return taskLinks.map((link) => (
+      <React.Fragment key={link._id}>
+        <ListItem
+          divider={true}
+          secondaryAction={
+            <Tooltip title="Remove link">
+              <IconButton onClick={() => deleteTaskLinkHandler(link._id)}>
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          }
+        >
+          <ListItemText
+            primary={link.name}
+            secondary={link.url}
+            sx={{ margin: 0 }}
+          />
+        </ListItem>
+        <Divider />
+      </React.Fragment>
+    ));
+  }, [taskLinks, deleteTaskLinkHandler]);
+
+  const addTaskLinkHandler = useCallback(() => {
     if (linkURL === "") {
       setUrlState("EMPTY");
       return;
@@ -69,66 +100,68 @@ function TaskLinksCreator({
     setTaskLinks((prev) => [...prev, newLink]);
     setLinkName("");
     setLinkURL("");
-  };
+  }, [linkName, linkURL, setLinkName, setLinkURL, setTaskLinks, setUrlState]);
 
-  const deleteTaskLinkHandler = (linkId) => {
-    setTaskLinks((prev) => prev.filter((each) => each._id !== linkId));
-  };
+  const linksList = useMemo(
+    () => <List disablePadding={true}>{generateTaskLinks()}</List>,
+    [generateTaskLinks]
+  );
 
-  function generateTaskLinks() {
-    return taskLinks.map((link) => (
-      <React.Fragment key={link._id}>
-        <ListItem
-          divider={true}
-          secondaryAction={
-            <Tooltip title="Remove link">
-              <IconButton onClick={() => deleteTaskLinkHandler(link._id)}>
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-          }
-        >
-          <ListItemText
-            primary={link.name}
-            secondary={link.url}
-            sx={{ margin: 0 }}
-          />
-        </ListItem>
-        <Divider />
-      </React.Fragment>
-    ));
-  }
+  const linkNameTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ marginRight: "1rem", width: "10rem" }}
+        margin="dense"
+        id="name"
+        label="Link Name"
+        type="text"
+        variant="outlined"
+        value={linkName}
+        autoComplete="off"
+        onChange={(e) => setLinkName(e.target.value)}
+      />
+    ),
+    [linkName, setLinkName]
+  );
+
+  const linkURLTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ width: "19.25rem" }}
+        margin="dense"
+        id="url"
+        label="URL"
+        type="text"
+        variant="outlined"
+        value={linkURL}
+        autoComplete="off"
+        onChange={(e) => setLinkURL(e.target.value)}
+        onFocus={() => setUrlState("NONE")}
+        helperText={urlStates[urlState].helperText}
+        error={urlStates[urlState].error}
+      />
+    ),
+    [linkURL, urlState, setLinkURL, setUrlState]
+  );
+
+  const startAddingLinkButton = useMemo(
+    () => (
+      <Tooltip title="Add link (optional)">
+        <IconButton onClick={() => setIsAddingLink(true)}>
+          <AddLinkIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    []
+  );
 
   return (
     <>
-      <List disablePadding={true}>{generateTaskLinks()}</List>
+      {linksList}
       {isAddingLink ? (
         <>
-          <TextField
-            sx={{ marginRight: "1rem", width: "10rem" }}
-            margin="dense"
-            id="name"
-            label="Link Name"
-            type="text"
-            variant="outlined"
-            value={linkName}
-            autoComplete="off"
-            onChange={(e) => setLinkName(e.target.value)}
-          />
-          <TextField
-            sx={{ width: "19.25rem" }}
-            margin="dense"
-            id="url"
-            label="URL"
-            type="text"
-            variant="outlined"
-            value={linkURL}
-            autoComplete="off"
-            onChange={(e) => setLinkURL(e.target.value)}
-            onFocus={() => setUrlState("NONE")}
-            helperText={urlStates[urlState].helperText}
-            error={urlStates[urlState].error}
-          />
+          {linkNameTextField}
+          {linkURLTextField}
           <Button
             onClick={addTaskLinkHandler}
             sx={{ ml: "0.5rem", marginTop: "1.1rem" }}
@@ -137,14 +170,10 @@ function TaskLinksCreator({
           </Button>
         </>
       ) : (
-        <Tooltip title="Add link (optional)">
-          <IconButton onClick={() => setIsAddingLink(true)}>
-            <AddLinkIcon />
-          </IconButton>
-        </Tooltip>
+        <>{startAddingLinkButton}</>
       )}
     </>
   );
 }
 
-export default TaskLinksCreator;
+export default React.memo(TaskLinksCreator);

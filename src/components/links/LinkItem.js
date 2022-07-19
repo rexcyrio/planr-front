@@ -38,4 +38,4 @@ function LinkItem({ self }) {
   );
 }
 
-export default LinkItem;
+export default React.memo(LinkItem);

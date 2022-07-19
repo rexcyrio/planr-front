@@ -11,7 +11,7 @@ import { selectModuleCodes } from "../../store/storeHelpers/selectors";
 import ColourIcon from "./ColourIcon";
 
 function MappingModuleCodeToColourName() {
-  const moduleCodes = useSelector(selectModuleCodes());
+  const moduleCodes = useSelector((state) => selectModuleCodes(state));
 
   return (
     <>

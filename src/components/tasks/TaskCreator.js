@@ -14,17 +14,18 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { addTask } from "../../store/slices/tasksSlice";
-import { selectModuleCodes } from "../../store/storeHelpers/selectors";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 function TaskCreator() {
   const dispatch = useDispatch();
   const mondayKey = useSelector((state) => state.time.mondayKey);
-  const moduleCodes = useSelector(selectModuleCodes());
+  const mappingModuleCodeToColourName = useSelector(
+    (state) => state.mappingModuleCodeToColourName
+  );
 
   const [name, setName] = useState("");
   const [dueDate, setDueDate] = useState(getDateNowString());
@@ -56,49 +57,6 @@ function TaskCreator() {
 
     setDurationState("NONE");
     setUrlState("NONE");
-    setNumCopiesState("NONE");
-  }
-
-  function handleOpen() {
-    resetState();
-    setOpen(true);
-  }
-
-  function handleClose() {
-    setOpen(false);
-  }
-
-  function handleDurationHoursChange(event) {
-    const newDuration = event.target.value;
-    setDurationHours(newDuration);
-
-    if (!newDuration.match(unsignedFloatRegex)) {
-      setDurationState("ERROR");
-      return;
-    }
-
-    if (Number(newDuration) > 24) {
-      setDurationState("TOO_LARGE");
-      return;
-    }
-
-    setDurationState("NONE");
-  }
-
-  function handleCountChange(event) {
-    const newCount = event.target.value;
-    setNumCopies(newCount);
-
-    if (!newCount.match(positiveIntegerRegex)) {
-      setNumCopiesState("ERROR");
-      return;
-    }
-
-    if (Number(newCount) > 10) {
-      setNumCopiesState("TOO_LARGE");
-      return;
-    }
-
     setNumCopiesState("NONE");
   }
 
@@ -156,9 +114,53 @@ function TaskCreator() {
       dispatch(addTask(newTaskCopy));
     }
   }
+  // ============================================================================
+  // Memo functions
+  // ============================================================================
+  const handleOpen = useCallback(() => {
+    resetState();
+    setOpen(true);
+  }, []);
 
-  return (
-    <>
+  const handleDurationHoursChange = useCallback((event) => {
+    const newDuration = event.target.value;
+    setDurationHours(newDuration);
+
+    if (!newDuration.match(unsignedFloatRegex)) {
+      setDurationState("ERROR");
+      return;
+    }
+
+    if (Number(newDuration) > 24) {
+      setDurationState("TOO_LARGE");
+      return;
+    }
+
+    setDurationState("NONE");
+  }, []);
+
+  const handleCountChange = useCallback((event) => {
+    const newCount = event.target.value;
+    setNumCopies(newCount);
+
+    if (!newCount.match(positiveIntegerRegex)) {
+      setNumCopiesState("ERROR");
+      return;
+    }
+
+    if (Number(newCount) > 10) {
+      setNumCopiesState("TOO_LARGE");
+      return;
+    }
+
+    setNumCopiesState("NONE");
+  }, []);
+
+  // ============================================================================
+  // Memo components
+  // ============================================================================
+  const fab = useMemo(
+    () => (
       <Fab
         color="primary"
         aria-label="add"
@@ -167,108 +169,171 @@ function TaskCreator() {
       >
         <AddIcon />
       </Fab>
+    ),
+    [handleOpen]
+  );
 
-      <Dialog open={open} onClose={handleClose} maxWidth="md">
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-          <div>Add a new Task</div>
-          <FormControlLabel
-            control={
-              <Switch
-                onChange={(event) => setIsRecurring(event.target.checked)}
-              />
-            }
-            label="Recurring"
-          />
-        </DialogTitle>
+  const dialogTitle = useMemo(
+    () => (
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
+        <div>Add a new Task</div>
+        <FormControlLabel
+          control={
+            <Switch
+              onChange={(event) => setIsRecurring(event.target.checked)}
+            />
+          }
+          label="Recurring"
+        />
+      </DialogTitle>
+    ),
+    []
+  );
+
+  const taskModuleCodeSelector = useMemo(
+    () => (
+      <FormControl sx={{ width: "10rem", mr: "1rem" }} margin="dense">
+        <InputLabel id="Module Code">Module Code</InputLabel>
+        <Select
+          labelId="Module Code"
+          id="moduleCode"
+          value={moduleCode}
+          label="Module Code"
+          onChange={(e) => setModuleCode(e.target.value)}
+          required
+        >
+          {Object.keys(mappingModuleCodeToColourName).map((moduleCode) => (
+            <MenuItem key={moduleCode} value={moduleCode}>
+              {moduleCode}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    ),
+    [moduleCode, mappingModuleCodeToColourName]
+  );
+
+  const taskNameTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ width: "25rem" }}
+        margin="dense"
+        id="name"
+        label="Name"
+        type="text"
+        variant="outlined"
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        autoComplete="off"
+      />
+    ),
+    [name]
+  );
+
+  const taskDurationTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ width: "15rem", mr: "1rem" }}
+        margin="dense"
+        id="durationHours"
+        label="Time needed"
+        type="text"
+        variant="outlined"
+        required
+        value={durationHours}
+        onChange={handleDurationHoursChange}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">hour(s)</InputAdornment>,
+        }}
+        helperText={durationStates[durationState].helperText}
+        error={durationStates[durationState].error}
+      />
+    ),
+    [durationHours, handleDurationHoursChange, durationState]
+  );
+
+  const taskDueDateTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ mr: "1rem" }}
+        margin="dense"
+        id="dueDate"
+        label="Due date"
+        type="date"
+        variant="outlined"
+        required={!isRecurring}
+        disabled={isRecurring}
+        value={dueDate}
+        onChange={(e) => setDueDate(e.target.value)}
+        helperText=" "
+      />
+    ),
+    [isRecurring, dueDate]
+  );
+
+  const taskDueTimeTextField = useMemo(
+    () => (
+      <TextField
+        margin="dense"
+        id="dueTime"
+        label="Due time"
+        type="time"
+        variant="outlined"
+        required={!isRecurring}
+        disabled={isRecurring}
+        value={dueTime}
+        onChange={(e) => setDueTime(e.target.value)}
+        helperText=" "
+      />
+    ),
+    [isRecurring, dueTime]
+  );
+
+  const taskNumCopiesTextField = useMemo(
+    () => (
+      <TextField
+        fullWidth
+        margin="dense"
+        id="numCopies"
+        label="Number of copies"
+        type="text"
+        variant="outlined"
+        required
+        value={numCopies}
+        onChange={handleCountChange}
+        helperText={numCopiesStates[numCopiesState].helperText}
+        error={numCopiesStates[numCopiesState].error}
+      />
+    ),
+    [numCopies, handleCountChange, numCopiesState]
+  );
+
+  const dialogActions = useMemo(
+    () => (
+      <DialogActions>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
+        <Button type="submit">Add</Button>
+      </DialogActions>
+    ),
+    []
+  );
+
+  return (
+    <>
+      {fab}
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md">
+        {dialogTitle}
         <Box component="form" onSubmit={handleSubmit}>
           <DialogContent>
-            <FormControl sx={{ width: "10rem", mr: "1rem" }} margin="dense">
-              <InputLabel id="Module Code">Module Code</InputLabel>
-              <Select
-                labelId="Module Code"
-                id="moduleCode"
-                value={moduleCode}
-                label="Module Code"
-                onChange={(e) => setModuleCode(e.target.value)}
-                required
-              >
-                {moduleCodes.map((moduleCode) => (
-                  <MenuItem key={moduleCode} value={moduleCode}>
-                    {moduleCode}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              sx={{ width: "25rem" }}
-              margin="dense"
-              id="name"
-              label="Name"
-              type="text"
-              variant="outlined"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="off"
-            />
+            {taskModuleCodeSelector}
+            {taskNameTextField}
             <br />
-            <TextField
-              sx={{ width: "15rem", mr: "1rem" }}
-              margin="dense"
-              id="durationHours"
-              label="Time needed"
-              type="text"
-              variant="outlined"
-              required
-              value={durationHours}
-              onChange={handleDurationHoursChange}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">hour(s)</InputAdornment>
-                ),
-              }}
-              helperText={durationStates[durationState].helperText}
-              error={durationStates[durationState].error}
-            />
-            <TextField
-              sx={{ mr: "1rem" }}
-              margin="dense"
-              id="dueDate"
-              label="Due date"
-              type="date"
-              variant="outlined"
-              required={!isRecurring}
-              disabled={isRecurring}
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              helperText=" "
-            />
-            <TextField
-              margin="dense"
-              id="dueTime"
-              label="Due time"
-              type="time"
-              variant="outlined"
-              required={!isRecurring}
-              disabled={isRecurring}
-              value={dueTime}
-              onChange={(e) => setDueTime(e.target.value)}
-              helperText=" "
-            />
+            {taskDurationTextField}
+            {taskDueDateTextField}
+            {taskDueTimeTextField}
             <br />
-            <TextField
-              fullWidth
-              margin="dense"
-              id="numCopies"
-              label="Number of copies (useful when scheduling task over multiple days)"
-              type="text"
-              variant="outlined"
-              required
-              value={numCopies}
-              onChange={handleCountChange}
-              helperText={numCopiesStates[numCopiesState].helperText}
-              error={numCopiesStates[numCopiesState].error}
-            />
+            {taskNumCopiesTextField}
             <TaskLinksCreator
               taskLinks={taskLinks}
               setTaskLinks={setTaskLinks}
@@ -280,10 +345,7 @@ function TaskCreator() {
               setUrlState={setUrlState}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit">Add</Button>
-          </DialogActions>
+          {dialogActions}
         </Box>
       </Dialog>
     </>
@@ -358,4 +420,4 @@ const unsignedFloatRegex =
 
 const positiveIntegerRegex = /^[1-9]\d*$/;
 
-export default TaskCreator;
+export default React.memo(TaskCreator);

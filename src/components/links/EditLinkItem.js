@@ -105,4 +105,4 @@ function EditLinkItem({ self, setTempLinks }) {
   );
 }
 
-export default EditLinkItem;
+export default React.memo(EditLinkItem);

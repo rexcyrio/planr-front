@@ -10,7 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addNewPermLink, fetchPermLinks } from "../../store/slices/linksSlice";
 import DataStatus from "../helperComponents/DataStatus";
@@ -30,25 +30,97 @@ function Links() {
     dispatch(fetchPermLinks());
   }, [dispatch]);
 
-  function openAllLinks() {
-    for (const link of links) {
-      window.open(link.url, "_blank");
-    }
-  }
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setNewName("");
-    setNewURL("");
-  };
-
   function addNewLink() {
     dispatch(addNewPermLink(newName, newURL));
   }
+
+  const handleOpen = useCallback(() => {
+    setOpen(true);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setOpen(false);
+    setNewName("");
+    setNewURL("");
+  }, []);
+
+  const openAllLinks = useCallback(() => {
+    for (const link of links) {
+      window.open(link.url, "_blank");
+    }
+  }, [links]);
+
+  const addIcon = useMemo(
+    () => (
+      <Tooltip title="Add">
+        <IconButton onClick={handleOpen}>
+          <AddIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    [handleOpen]
+  );
+
+  const linkNameTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ marginRight: "1rem", width: "13rem" }}
+        margin="dense"
+        id="name"
+        label="Link Name"
+        type="text"
+        variant="outlined"
+        value={newName}
+        autoComplete="off"
+        onChange={(e) => setNewName(e.target.value)}
+      />
+    ),
+    [newName]
+  );
+
+  const linkURLTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ width: "27rem" }}
+        margin="dense"
+        id="url"
+        label="URL"
+        type="text"
+        variant="outlined"
+        required
+        value={newURL}
+        autoComplete="off"
+        onChange={(e) => setNewURL(e.target.value)}
+      />
+    ),
+    [newURL]
+  );
+
+  const dialogActions = useMemo(
+    () => (
+      <DialogActions>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button type="submit">Add</Button>
+      </DialogActions>
+    ),
+    [handleClose]
+  );
+
+  const openAllLinksButton = useMemo(
+    () => (
+      <Stack justifyContent="flex-end" direction="row" padding="0.5em">
+        <Button
+          variant="contained"
+          endIcon={<ArrowForwardIcon />}
+          onClick={openAllLinks}
+          color="secondary"
+        >
+          OPEN ALL
+        </Button>
+      </Stack>
+    ),
+    [openAllLinks]
+  );
 
   return (
     <>
@@ -59,11 +131,7 @@ function Links() {
         </div>
         <div>
           <LinksEditor />
-          <Tooltip title="Add">
-            <IconButton onClick={handleOpen}>
-              <AddIcon />
-            </IconButton>
-          </Tooltip>
+          {addIcon}
         </div>
       </div>
 
@@ -78,51 +146,18 @@ function Links() {
           }}
         >
           <DialogContent>
-            <TextField
-              sx={{ marginRight: "1rem", width: "13rem" }}
-              margin="dense"
-              id="name"
-              label="Link Name"
-              type="text"
-              variant="outlined"
-              value={newName}
-              autoComplete="off"
-              onChange={(e) => setNewName(e.target.value)}
-            />
-            <TextField
-              sx={{ width: "27rem" }}
-              margin="dense"
-              id="url"
-              label="URL"
-              type="text"
-              variant="outlined"
-              required
-              value={newURL}
-              autoComplete="off"
-              onChange={(e) => setNewURL(e.target.value)}
-            />
+            {linkNameTextField}
+            {linkURLTextField}
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit">Add</Button>
-          </DialogActions>
+          {dialogActions}
         </Box>
       </Dialog>
 
       <LinksList />
 
-      <Stack justifyContent="flex-end" direction="row" padding="0.5em">
-        <Button
-          variant="contained"
-          endIcon={<ArrowForwardIcon />}
-          onClick={openAllLinks}
-          color="secondary"
-        >
-          OPEN ALL
-        </Button>
-      </Stack>
+      {openAllLinksButton}
     </>
   );
 }
 
-export default Links;
+export default React.memo(Links);

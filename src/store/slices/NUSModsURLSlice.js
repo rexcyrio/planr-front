@@ -160,7 +160,7 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         }
       }
 
-      const oldModuleCodes = selectModuleCodes()(getState()).filter(
+      const oldModuleCodes = selectModuleCodes(getState()).filter(
         (each) => each.moduleCode !== "Others"
       );
 
