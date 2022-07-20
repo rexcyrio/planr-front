@@ -4,126 +4,47 @@ import List from "@mui/material/List";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
 import React, { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { v4 as uuidv4 } from "uuid";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addNote,
+  deleteNote,
+  fetchNotes,
+  saveNote,
+} from "../../store/slices/notesSlice";
 import DataStatus, {
   FETCHING,
   FETCH_FAILURE,
-  FETCH_SUCCESS,
-  UPDATE_FAILURE,
-  UPDATE_SUCCESS,
-  UPDATING,
 } from "../helperComponents/DataStatus";
 import NoteItem from "./NoteItem";
 import styles from "./Notes.module.css";
 
 function Notes() {
-  const { userId } = useSelector((state) => state.user);
-  const [notes, setNotes] = useState([]);
+  const dispatch = useDispatch();
+  const notes = useSelector((state) => state.notes.data);
+  const dataState = useSelector((state) => state.notes.status);
   const [newNoteText, setNewNoteText] = useState("");
-  const [dataState, setDataState] = useState(FETCHING);
 
   useEffect(() => {
-    fetch(`/api/private/notes?id=${userId}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setNotes(json.notes);
-        setDataState(FETCH_SUCCESS);
-      });
-  }, []);
+    dispatch(fetchNotes());
+  }, [dispatch]);
 
   function insertNote() {
-    const trimmedText = newNoteText.trim();
-
-    if (trimmedText !== "") {
-      const newNote = {
-        _id: uuidv4(),
-        text: trimmedText,
-      };
-
-      setDataState(UPDATING);
-      addNoteToDatabase(newNote);
-      setNotes([...notes, newNote]);
-    }
-
+    dispatch(addNote(newNoteText));
     setNewNoteText("");
   }
 
-  function addNoteToDatabase(note) {
-    fetch("/api/private/notes", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId, note }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.error) {
-          setDataState(UPDATE_FAILURE);
-          alert(json.error);
-          return;
-        }
-
-        setDataState(UPDATE_SUCCESS);
-      });
-  }
-
-  const updateNotesInDatabase = useCallback(
-    (notes) => {
-      fetch("/api/private/notes", {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, notes }),
-      })
-        .then((res) => {
-          return res.json();
-        })
-        .then((json) => {
-          if (json.error) {
-            setDataState(UPDATE_FAILURE);
-            alert(json.error);
-            return;
-          }
-
-          setDataState(UPDATE_SUCCESS);
-        });
-    },
-    [userId]
-  );
-
-  const deleteNote = useCallback(
+  const removeNote = useCallback(
     (self) => {
-      const newNotes = notes.filter((each) => each._id !== self._id);
-      setDataState(UPDATING);
-      updateNotesInDatabase(newNotes);
-      setNotes(newNotes);
+      dispatch(deleteNote(self));
     },
-    [notes, updateNotesInDatabase]
+    [dispatch]
   );
 
   const exitEditMode = useCallback(
     (self, tempNote) => {
-      const newNote = {
-        _id: self._id,
-        text: tempNote.trim(),
-      };
-
-      const index = notes.findIndex((each) => each._id === self._id);
-      const newNotes = [
-        ...notes.slice(0, index),
-        newNote,
-        ...notes.slice(index + 1, notes.length),
-      ];
-      setDataState(UPDATING);
-      updateNotesInDatabase(newNotes);
-      setNotes(newNotes);
+      dispatch(saveNote(self, tempNote));
     },
-    [notes, updateNotesInDatabase]
+    [dispatch]
   );
 
   return (
@@ -152,7 +73,7 @@ function Notes() {
               <React.Fragment key={self._id}>
                 <NoteItem
                   self={self}
-                  deleteNote={deleteNote}
+                  deleteNote={removeNote}
                   exitEditMode={exitEditMode}
                 />
               </React.Fragment>
