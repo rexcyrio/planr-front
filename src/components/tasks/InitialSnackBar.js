@@ -1,14 +1,17 @@
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import React, { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { FETCH_SUCCESS } from "../helperComponents/DataStatus";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsInitialSnackBarOpen } from "../../store/slices/isInitialSnackBarOpenSlice";
 
 function InitialSnackBar() {
+  const dispatch = useDispatch();
   const tasks = useSelector((state) => state.tasks.data);
-  const status = useSelector((state) => state.tasks.status);
   const isNewUser = useSelector((state) => state.isNewUser);
   const mondayKey = useSelector((state) => state.time.mondayKey);
+  const isInitialSnackBarOpen = useSelector(
+    (state) => state.isInitialSnackBarOpen
+  );
   const [open, setOpen] = useState(false);
 
   const [color, setColor] = useState("");
@@ -77,13 +80,14 @@ function InitialSnackBar() {
   }, [mondayKey, tasks]);
 
   useEffect(() => {
-    if (status === FETCH_SUCCESS && !isNewUser) {
+    if (isInitialSnackBarOpen === true && !isNewUser) {
       init();
       setOpen(true);
     }
-  }, [status, isNewUser, init]);
+  }, [isInitialSnackBarOpen, isNewUser, init]);
 
   function handleClose() {
+    dispatch(setIsInitialSnackBarOpen(false));
     setOpen(false);
   }
 
