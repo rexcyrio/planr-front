@@ -1,17 +1,22 @@
-import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
 import generateSkeletons from "../../helper/skeletonHelper";
+import {
+  getFilterStateFromLocalStorage,
+  mappingFilterOptionToFilterFunction,
+} from "../../store/slices/filteringTasksSlice";
+import { mappingSortByToSortFunction } from "../../store/slices/sortingTasksSlice";
 import { fetchTasks } from "../../store/slices/tasksSlice";
 import { selectCurrentWeekTasks } from "../../store/storeHelpers/selectors";
 import DataStatus, {
   FETCHING,
   FETCH_FAILURE,
 } from "../helperComponents/DataStatus";
+import FilteringTasks from "./FilteringTasks";
 import InitialSnackBar from "./InitialSnackBar";
+import SortingTasks from "./SortingTasks";
 import TaskCreator from "./TaskCreator";
 import TaskDeleteCompleted from "./TaskDeleteCompleted";
 import TaskItem from "./TaskItem";
@@ -24,25 +29,103 @@ function Tasks() {
   const status = useSelector((state) => state.tasks.status);
   const tasks = useSelector(selectCurrentWeekTasks());
   const mondayKey = useSelector((state) => state.time.mondayKey);
-  const [sortBy, setSortBy] = useState("Date created (oldest)");
+
+  const filterState = useSelector((state) => state.filteringTasks);
+  const sortBy = useSelector((state) => state.sortingTasks.sortBy);
 
   useEffect(() => {
     dispatch(fetchTasks());
+    dispatch(getFilterStateFromLocalStorage());
   }, [dispatch]);
 
+  function filterTasks(tasks) {
+    const { filterMode, anyAll, filterOptions } = filterState;
+
+    if (filterMode === "Show all") {
+      // no need to apply filtering
+      return tasks;
+    }
+
+    if (anyAll === "any") {
+      const taskIdsToShow = {};
+
+      for (const [filterOption, isChecked] of Object.entries(filterOptions)) {
+        if (!isChecked) {
+          continue;
+        }
+
+        const filterFunction =
+          mappingFilterOptionToFilterFunction[filterOption];
+
+        let filteredTasks;
+
+        if (
+          filterOption === "is completed" ||
+          filterOption === "is incomplete"
+        ) {
+          // need to supply mondayKey before filtering
+          filteredTasks = tasks.filter((each) =>
+            filterFunction(mondayKey)(each)
+          );
+        } else {
+          filteredTasks = tasks.filter((each) => filterFunction(each));
+        }
+
+        for (const task of filteredTasks) {
+          const { _id } = task;
+          taskIdsToShow[_id] = true;
+        }
+      }
+
+      return tasks.filter((each) => each._id in taskIdsToShow);
+    }
+
+    if (anyAll === "all") {
+      let tasksToShow = [...tasks];
+
+      for (const [filterOption, isChecked] of Object.entries(filterOptions)) {
+        if (!isChecked) {
+          continue;
+        }
+
+        const filterFunction =
+          mappingFilterOptionToFilterFunction[filterOption];
+
+        if (
+          filterOption === "is completed" ||
+          filterOption === "is incomplete"
+        ) {
+          // need to supply mondayKey before filtering
+          tasksToShow = tasksToShow.filter((each) =>
+            filterFunction(mondayKey)(each)
+          );
+        } else {
+          tasksToShow = tasksToShow.filter((each) => filterFunction(each));
+        }
+      }
+
+      return tasksToShow;
+    }
+
+    throw new Error("Invalid `anyAll` value");
+  }
+
+  function sortTasks(tasks) {
+    if (sortBy === "Date created (oldest)") {
+      return tasks;
+    }
+
+    if (sortBy === "Date created (newest)") {
+      return tasks.reverse();
+    }
+
+    const sortFunction = mappingSortByToSortFunction[sortBy];
+    return tasks.sort(sortFunction);
+  }
+
   function getTaskItems() {
-    const sortedTasks = (() => {
-      if (sortBy === "Date created (oldest)") {
-        return tasks;
-      }
-
-      if (sortBy === "Date created (newest)") {
-        return tasks.reverse();
-      }
-
-      const sortFunction = mappingSortByToSortFunction[sortBy];
-      return tasks.sort(sortFunction);
-    })();
+    const filteredTasks = filterTasks(tasks);
+    const sortedTasks = sortTasks(filteredTasks);
 
     const outstandingTasks = sortedTasks.filter(
       (each) => each.isCompleted[mondayKey] === undefined
@@ -68,27 +151,6 @@ function Tasks() {
     );
   }
 
-  const sortTaskSelector = useMemo(
-    () => (
-      <TextField
-        id="sortBy"
-        select
-        label="Sort by"
-        value={sortBy}
-        size="small"
-        sx={{ width: "14rem" }}
-        onChange={(e) => setSortBy(e.target.value)}
-      >
-        {Object.keys(mappingSortByToSortFunction).map((each) => (
-          <MenuItem key={each} value={each}>
-            {each}
-          </MenuItem>
-        ))}
-      </TextField>
-    ),
-    [sortBy]
-  );
-
   return (
     <>
       <InitialSnackBar />
@@ -102,10 +164,16 @@ function Tasks() {
         <TaskDeleteCompleted />
       </div>
 
-      <div style={{ padding: "0 0.5rem 0.5rem" }}>
-        {sortTaskSelector}
-
-        {/* TODO: filtering */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 0.5rem 0.5rem",
+        }}
+      >
+        <SortingTasks />
+        <FilteringTasks />
       </div>
 
       <Stack
@@ -135,109 +203,5 @@ function Tasks() {
     </>
   );
 }
-
-function getEpochDueTime(task) {
-  const { dueDate, dueTime } = task;
-
-  if (dueDate === "--") {
-    return 0;
-  }
-
-  const [year, month, date] = dueDate.split("-");
-  const [hour, min] = dueTime.split(":");
-
-  // need to convert `month` back to 0-index for Date constructor to work
-  const epochDueTime = new Date(year, month - 1, date, hour, min).getTime();
-  return epochDueTime;
-}
-
-const mappingSortByToSortFunction = {
-  "Name (A - Z)": (firstTask, secondTask) => {
-    const firstName = firstTask.name.toUpperCase();
-    const secondName = secondTask.name.toUpperCase();
-
-    if (firstName < secondName) {
-      return -1;
-    }
-
-    if (firstName > secondName) {
-      return 1;
-    }
-
-    return 0;
-  },
-  "Name (Z - A)": (firstTask, secondTask) => {
-    const firstName = firstTask.name.toUpperCase();
-    const secondName = secondTask.name.toUpperCase();
-
-    if (firstName < secondName) {
-      return 1;
-    }
-
-    if (firstName > secondName) {
-      return -1;
-    }
-
-    return 0;
-  },
-  "Due date": (firstTask, secondTask) => {
-    const firstEpochDueTime = getEpochDueTime(firstTask);
-    const secondEpochDueTime = getEpochDueTime(secondTask);
-
-    if (firstEpochDueTime < secondEpochDueTime) {
-      return -1;
-    }
-
-    if (firstEpochDueTime > secondEpochDueTime) {
-      return 1;
-    }
-
-    return 0;
-  },
-  "Module code": (firstTask, secondTask) => {
-    const firstModuleCode = firstTask.moduleCode;
-    const secondModuleCode = secondTask.moduleCode;
-
-    if (firstModuleCode < secondModuleCode) {
-      return -1;
-    }
-
-    if (firstModuleCode > secondModuleCode) {
-      return 1;
-    }
-
-    return 0;
-  },
-  "Date created (newest)": 0,
-  "Date created (oldest)": 0,
-  "Task duration (longest)": (firstTask, secondTask) => {
-    const firstTimeUnits = firstTask.timeUnits;
-    const secondTimeUnits = secondTask.timeUnits;
-
-    if (firstTimeUnits < secondTimeUnits) {
-      return 1;
-    }
-
-    if (firstTimeUnits > secondTimeUnits) {
-      return -1;
-    }
-
-    return 0;
-  },
-  "Task duration (shortest)": (firstTask, secondTask) => {
-    const firstTimeUnits = firstTask.timeUnits;
-    const secondTimeUnits = secondTask.timeUnits;
-
-    if (firstTimeUnits < secondTimeUnits) {
-      return -1;
-    }
-
-    if (firstTimeUnits > secondTimeUnits) {
-      return 1;
-    }
-
-    return 0;
-  },
-};
 
 export default React.memo(Tasks);
