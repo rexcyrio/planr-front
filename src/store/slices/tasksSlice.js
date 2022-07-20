@@ -10,6 +10,7 @@ import {
   UPDATE_SUCCESS_REDUCER,
   UPDATING_REDUCER,
 } from "../storeHelpers/statusHelpers";
+import { setIsInitialSnackBarOpen } from "./isInitialSnackBarOpenSlice";
 import { _setMappingModuleCodeToColourName } from "./mappingModuleCodeToColourNameSlice";
 import { refreshMatrix, setMatrix } from "./matrixSlice";
 import { _setModules } from "./modulesSlice";
@@ -407,6 +408,8 @@ export const fetchTasks = createAsyncThunk(
 
       // refresh the matrix after fetching the task and module objects from database
       dispatch(refreshMatrix());
+
+      dispatch(setIsInitialSnackBarOpen(true));
     } catch (error) {
       alert(error);
       console.error(error);
