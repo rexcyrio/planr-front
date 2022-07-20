@@ -66,7 +66,7 @@ function Notes() {
             sx={{ margin: "5%", marginTop: 0 }}
           />
         ) : notes.length > 0 ? (
-          <List dense={true} sx={{ maxWidth: "15rem", p: "0px" }}>
+          <List dense={true} sx={{ p: "0px" }}>
             <Divider />
 
             {notes.map((self) => (

@@ -94,7 +94,7 @@ Private
   display: grid;
   grid-template:
     "links timetable tasks" 40%
-    "notes timetable tasks" 60% / 15rem auto 1fr;
+    "notes timetable tasks" 60% / minmax(13.5rem, 1fr) 50rem 2fr;
   grid-gap: var(--grid-gap);
 }
 
