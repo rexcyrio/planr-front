@@ -71,11 +71,11 @@ function generateWeeksTasksDistribution(tasks, modules, mondayKey) {
   }
 
   for (const task of tasks) {
-    if (countObject[task.mondayKey]) {
+    if (countObject[task.mondayKey] !== undefined) {
       countObject[task.mondayKey] += task.timeUnits / 2;
     }
   }
-
+  console.log(countObject);
   return Object.values(countObject);
 }
 
