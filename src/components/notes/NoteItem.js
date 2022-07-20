@@ -7,7 +7,7 @@ import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import DeleteNoteDialog from "./DeleteNoteDialog";
 import styles from "./NoteItem.module.css";
 
@@ -15,82 +15,94 @@ NoteItem.propTypes = {
   self: PropTypes.shape({
     _id: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired,
-    isEditMode: PropTypes.bool.isRequired,
   }).isRequired,
 
   deleteNote: PropTypes.func.isRequired,
-  updateEditMode: PropTypes.func.isRequired,
   exitEditMode: PropTypes.func.isRequired,
-  cancelEditMode: PropTypes.func.isRequired,
-  updateText: PropTypes.func.isRequired,
 };
 
-function NoteItem({
-  self,
-  deleteNote,
-  updateEditMode,
-  exitEditMode,
-  cancelEditMode,
-  updateText,
-}) {
-  const [originalNote, setOriginalNote] = useState("");
+function NoteItem({ self, deleteNote, exitEditMode }) {
+  const [tempNote, setTempNote] = useState(self.text);
+  const [editMode, setEditMode] = useState(false);
 
   function handleDoubleClick(self) {
-    if (self.isEditMode) {
+    if (editMode) {
       // double clicking in edit mode should NOT exit edit mode
       // the user might be double clicking to select an entire word
       return;
     }
-    setOriginalNote(self.text);
-    updateEditMode(self, true);
+    setEditMode(true);
   }
 
-  const confirmEditHandler = (e) => {
-    if (self.text === "") {
-      deleteNote(self);
-    } else {
-      exitEditMode(self);
-    }
-  };
+  const confirmEditHandler = useCallback(
+    (e) => {
+      if (e.target.value === "") {
+        deleteNote(self);
+      } else {
+        exitEditMode(self, tempNote);
+        setTempNote(self.text);
+      }
+      setEditMode(false);
+    },
+    [self, deleteNote, exitEditMode, tempNote]
+  );
 
-  const cancelEditHandler = () => {
-    cancelEditMode(self, originalNote);
-  };
+  const cancelEditHandler = useCallback(() => {
+    setEditMode(false);
+    setTempNote(self.text);
+  }, [self]);
+
+  const confirmEditIcon = useMemo(
+    () => (
+      <Tooltip title="Confirm">
+        <IconButton onClick={confirmEditHandler}>
+          <CheckIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    [confirmEditHandler]
+  );
+
+  const cancelEditIcon = useMemo(
+    () => (
+      <Tooltip title="Cancel">
+        <IconButton onClick={cancelEditHandler}>
+          <CloseIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    [cancelEditHandler]
+  );
+
+  const secondaryAction = useMemo(
+    () => <DeleteNoteDialog self={self} deleteNote={deleteNote} />,
+    [self, deleteNote]
+  );
 
   return (
     <>
       <ListItem
         sx={{ overflowWrap: "break-word" }}
         onDoubleClick={() => handleDoubleClick(self)}
-        secondaryAction={
-          <DeleteNoteDialog self={self} deleteNote={deleteNote} />
-        }
+        secondaryAction={secondaryAction}
       >
-        {self.isEditMode ? (
+        {editMode ? (
           <div className={styles["edit-box"]}>
             <TextField
               autoFocus={true}
               id="editMode"
               variant="outlined"
               autoComplete="off"
-              value={self.text}
+              value={tempNote}
               fullWidth
               size="small"
               multiline={true}
               maxRows={8}
-              onChange={(e) => updateText(self, e.target.value)}
+              onChange={(e) => setTempNote(e.target.value)}
             />
             <div>
-              <Tooltip title="Confirm">
-                <IconButton onClick={confirmEditHandler}>
-                  <CheckIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Cancel">
-                <IconButton onClick={cancelEditHandler}>
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
+              {confirmEditIcon}
+              {cancelEditIcon}
             </div>
           </div>
         ) : (
@@ -102,4 +114,4 @@ function NoteItem({
   );
 }
 
-export default NoteItem;
+export default React.memo(NoteItem);
