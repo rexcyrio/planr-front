@@ -4,6 +4,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import PropTypes from "prop-types";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { allThemes } from "../../helper/themeHelper";
@@ -30,16 +31,7 @@ function ThemeName() {
             dispatch(setThemeName(e.target.value));
           }}
           renderValue={(themeName) => (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <div>{themeName}</div>
-              <AllColourIcons themeName={themeName} />
-            </div>
+            <SelectRenderValue themeName={themeName} />
           )}
         >
           {Object.keys(allThemes).map((themeName) => (
@@ -53,6 +45,25 @@ function ThemeName() {
         </Select>
       </FormControl>
     </>
+  );
+}
+
+SelectRenderValue.propTypes = {
+  themeName: PropTypes.string.isRequired,
+};
+
+function SelectRenderValue({ themeName }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <div>{themeName}</div>
+      <AllColourIcons themeName={themeName} />
+    </div>
   );
 }
 

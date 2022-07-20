@@ -15,32 +15,30 @@ function MappingModuleCodeToColourName() {
 
   return (
     <>
-      {moduleCodes.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: "1rem",
-          }}
-        >
-          <div>
-            {getHalfOfArray(moduleCodes, 0).map((moduleCode, index) => (
-              <React.Fragment key={moduleCode}>
-                {index !== 0 && <br />}
-                <ModuleColourSelect moduleCode={moduleCode} />
-              </React.Fragment>
-            ))}
-          </div>
-          <div>
-            {getHalfOfArray(moduleCodes, 1).map((moduleCode, index) => (
-              <React.Fragment key={moduleCode}>
-                {index !== 0 && <br />}
-                <ModuleColourSelect moduleCode={moduleCode} />
-              </React.Fragment>
-            ))}
-          </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "1rem",
+        }}
+      >
+        <div>
+          {getHalfOfArray(moduleCodes, 0).map((moduleCode, index) => (
+            <React.Fragment key={moduleCode}>
+              {index !== 0 && <br />}
+              <ModuleColourSelect moduleCode={moduleCode} />
+            </React.Fragment>
+          ))}
         </div>
-      )}
+        <div>
+          {getHalfOfArray(moduleCodes, 1).map((moduleCode, index) => (
+            <React.Fragment key={moduleCode}>
+              {index !== 0 && <br />}
+              <ModuleColourSelect moduleCode={moduleCode} />
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
     </>
   );
 }
@@ -69,17 +67,7 @@ function ModuleColourSelect({ moduleCode }) {
 
       <Select
         renderValue={(colourName) => (
-          <div
-            style={{
-              width: "5.5rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div>{getDisplayName(colourName)}</div>
-            <ColourIcon themeName={themeName} colourName={colourName} />
-          </div>
+          <SelectRenderValue themeName={themeName} colourName={colourName} />
         )}
         id={`${moduleCode}_colourName`}
         value={mappingModuleCodeToColourName[moduleCode]}
@@ -96,6 +84,27 @@ function ModuleColourSelect({ moduleCode }) {
           </MenuItem>
         ))}
       </Select>
+    </div>
+  );
+}
+
+SelectRenderValue.propTypes = {
+  themeName: PropTypes.string.isRequired,
+  colourName: PropTypes.string.isRequired,
+};
+
+function SelectRenderValue({ themeName, colourName }) {
+  return (
+    <div
+      style={{
+        width: "5.5rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <div>{getDisplayName(colourName)}</div>
+      <ColourIcon themeName={themeName} colourName={colourName} />
     </div>
   );
 }

@@ -1,7 +1,8 @@
-import styles from "./Timetable.module.css";
 import React from "react";
-import isCurrentWeek from "../../helper/isCurrentWeekHelper";
 import { useSelector } from "react-redux";
+import isCurrentWeek from "../../helper/isCurrentWeekHelper";
+import styles from "./Timetable.module.css";
+import TimetableBackgroundCell from "./TimetableBackgroundCell";
 
 function TimetableBackground() {
   const matrix = useSelector((state) => state.matrix);
@@ -50,34 +51,26 @@ function TimetableBackground() {
               <td className={styles["cell"]}></td>
 
               {[0, 1, 2, 3, 4].map((col) => (
-                <React.Fragment key={`(${row}, ${col})`}>
-                  <td
-                    className={styles["cell"]}
-                    style={{
-                      backgroundColor:
-                        matrix[row][col] === "black"
-                          ? "grey"
-                          : getAlternatingBackgroundColour(row, col),
-                    }}
-                  >
-                    &nbsp;
-                  </td>
+                <React.Fragment key={`${row},${col}`}>
+                  <TimetableBackgroundCell
+                    backgroundColor={
+                      matrix[row][col] === "black"
+                        ? "grey"
+                        : getAlternatingBackgroundColour(row, col)
+                    }
+                  />
                 </React.Fragment>
               ))}
 
               {[5, 6].map((col) => (
-                <React.Fragment key={`(${row}, ${col})`}>
-                  <td
-                    className={styles["cell"]}
-                    style={{
-                      backgroundColor:
-                        matrix[row][col] === "black"
-                          ? "grey"
-                          : getAlternatingBackgroundColour(row, col),
-                    }}
-                  >
-                    &nbsp;
-                  </td>
+                <React.Fragment key={`${row},${col}`}>
+                  <TimetableBackgroundCell
+                    backgroundColor={
+                      matrix[row][col] === "black"
+                        ? "grey"
+                        : getAlternatingBackgroundColour(row, col)
+                    }
+                  />
                 </React.Fragment>
               ))}
             </tr>

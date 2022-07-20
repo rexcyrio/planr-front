@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import isCurrentWeek from "../../helper/isCurrentWeekHelper";
 
 const circleStyle = {
   height: "0.5rem",
@@ -68,6 +70,7 @@ function getTop(hour, min) {
 
 function LineMarker() {
   const [date, setDate] = useState(new Date());
+  const mondayKey = useSelector((state) => state.time.mondayKey);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -76,6 +79,10 @@ function LineMarker() {
 
     return () => clearInterval(interval);
   }, []);
+
+  if (!isCurrentWeek(mondayKey)) {
+    return null;
+  }
 
   return (
     <div
