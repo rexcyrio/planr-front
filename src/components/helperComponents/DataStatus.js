@@ -74,7 +74,7 @@ function DataStatus({ status }) {
       );
 
     default:
-      throw Error("Invalid data status");
+      throw new Error("Invalid data status");
   }
 }
 

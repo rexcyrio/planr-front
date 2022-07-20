@@ -42,6 +42,11 @@ const NUSModsURLSlice = createSlice({
       return state;
     },
     _setStatus: (state, action) => {
+      // skip unnecessary updates
+      if (state.status === action.payload) {
+        return state;
+      }
+
       state.status = action.payload;
       return state;
     },
@@ -92,7 +97,7 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         const _moduleItems = await fetchModuleItems(NUSModsURL);
 
         if (_moduleItems.length === 0) {
-          throw Error("Invalid NUSMods URL");
+          throw new Error("Invalid NUSMods URL");
         }
 
         // cache the moduleItems
