@@ -5,7 +5,12 @@ import MyDragLayer from "../components/helperComponents/MyDragLayer";
 import Links from "../components/links/Links";
 import Notes from "../components/notes/Notes";
 import Tasks from "../components/tasks/Tasks";
+import LineMarker from "../components/timetable/LineMarker";
 import Timetable from "../components/timetable/Timetable";
+import TimetableBackground from "../components/timetable/TimetableBackground";
+import TimetableNavigator from "../components/timetable/TimetableNavigator";
+import styles from "../components/timetable/Timetable.module.css";
+import TimetableStickyHeader from "../components/timetable/TimetableStickyHeader";
 
 function Private() {
   return (
@@ -24,7 +29,15 @@ function Private() {
               <Tasks />
             </div>
             <div className="timetable-section">
-              <Timetable />
+              <TimetableNavigator />
+              <TimetableStickyHeader/>
+
+              <div className={styles["timetable-container"]}>
+                <TimetableBackground />
+                <LineMarker />
+
+                <Timetable />
+              </div>
             </div>
           </div>
         </div>
