@@ -12,6 +12,7 @@ import tasksReducer from "./slices/tasksSlice";
 import themeNameReducer from "./slices/themeNameSlice";
 import timeReducer from "./slices/timeSlice";
 import userReducer from "./slices/userSlice";
+import notesReducer from "./slices/notesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ export const store = configureStore({
     matrix: matrixReducer,
     modules: modulesReducer,
     time: timeReducer,
+    notes: notesReducer,
 
     // settings
     NUSModsURL: NUSModsURLReducer,
