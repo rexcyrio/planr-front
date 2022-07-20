@@ -35,4 +35,4 @@ function SortingTasks() {
   );
 }
 
-export default SortingTasks;
+export default React.memo(SortingTasks);

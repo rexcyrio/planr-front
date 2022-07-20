@@ -186,4 +186,4 @@ function ModuleDivider() {
   );
 }
 
-export default FilteringTasks;
+export default React.memo(FilteringTasks);
