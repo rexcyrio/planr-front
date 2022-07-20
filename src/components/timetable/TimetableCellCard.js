@@ -1,7 +1,7 @@
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import Card from "@mui/material/Card";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
@@ -43,13 +43,20 @@ function TimetableCellCard({ self }) {
   const mondayKey = useSelector((state) => state.time.mondayKey);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
-  function handleMouseEnter() {
+  const handleMouseEnter = useCallback(() => {
     setIsMouseOver(true);
-  }
+  }, []);
 
-  function handleMouseLeave() {
+  const handleMouseLeave = useCallback(() => {
     setIsMouseOver(false);
-  }
+  }, []);
+
+  const memoDragIndicatorIcon = useMemo(
+    () => (
+      <DragIndicatorIcon fontSize="inherit" sx={{ color: "hsl(0, 0%, 25%)" }} />
+    ),
+    []
+  );
 
   const [, drag, preview] = useDrag(
     () => ({
@@ -141,10 +148,7 @@ function TimetableCellCard({ self }) {
                 fontSize: "0.95rem",
               }}
             >
-              <DragIndicatorIcon
-                fontSize="inherit"
-                sx={{ color: "hsl(0, 0%, 25%)" }}
-              />
+              {memoDragIndicatorIcon}
             </div>
           )}
           <DetailsPopover self={self} />

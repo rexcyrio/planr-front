@@ -6,7 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   markTaskAsComplete,
@@ -42,18 +42,18 @@ function DetailsPopover({ self }) {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleClick = (event) => {
+  const handleClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
     setOpen(true);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
     setOpen(false);
-  };
+  }, []);
 
-  return (
-    <>
+  const detailsIcon = useMemo(
+    () => (
       <Tooltip title="View details">
         <IconButton
           aria-label="details"
@@ -67,6 +67,41 @@ function DetailsPopover({ self }) {
           <InfoOutlinedIcon fontSize="inherit" />
         </IconButton>
       </Tooltip>
+    ),
+    [handleClick]
+  );
+
+  const markTaskAsIncompleteButton = useMemo(
+    () => (
+      <Tooltip title="Restore task">
+        <IconButton
+          size="small"
+          onClick={() => dispatch(markTaskAsIncomplete(self._id))}
+        >
+          <RestoreIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    [dispatch, self._id]
+  );
+
+  const markTaskAsCompleteButton = useMemo(
+    () => (
+      <Tooltip title="Mark task as complete">
+        <IconButton
+          size="small"
+          onClick={() => dispatch(markTaskAsComplete(self._id))}
+        >
+          <DoneIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    [dispatch, self._id]
+  );
+
+  return (
+    <>
+      {detailsIcon}
 
       <Popover
         open={open}
@@ -97,30 +132,14 @@ function DetailsPopover({ self }) {
               ) : (
                 <>
                   <TaskEditor self={self} />
-                  {self.isCompleted[mondayKey] !== undefined ? (
-                    <Tooltip title="Restore task">
-                      <IconButton
-                        size="small"
-                        onClick={() => dispatch(markTaskAsIncomplete(self._id))}
-                      >
-                        <RestoreIcon />
-                      </IconButton>
-                    </Tooltip>
-                  ) : (
-                    <Tooltip title="Mark task as complete">
-                      <IconButton
-                        size="small"
-                        onClick={() => dispatch(markTaskAsComplete(self._id))}
-                      >
-                        <DoneIcon />
-                      </IconButton>
-                    </Tooltip>
-                  )}
+                  {self.isCompleted[mondayKey] !== undefined
+                    ? markTaskAsIncompleteButton
+                    : markTaskAsCompleteButton}
                 </>
               )}
             </div>
           </div>
-
+          
           <p className={styles["task-name-paragraph"]}>{self.name}</p>
 
           {!isModuleItem(self) && (
@@ -158,4 +177,4 @@ function isModuleItem(self) {
   return self._id.slice(0, 2) === "__";
 }
 
-export default DetailsPopover;
+export default React.memo(DetailsPopover);

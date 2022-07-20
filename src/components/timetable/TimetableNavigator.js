@@ -3,7 +3,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import React from "react";
+import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import getWeekRange from "../../helper/getWeekRangeHelper";
 import {
@@ -16,8 +16,8 @@ function TimetableNavigator() {
   const dispatch = useDispatch();
   const mondayKey = useSelector((state) => state.time.mondayKey);
 
-  return (
-    <div style={{ position: "relative" }}>
+  const todayButton = useMemo(
+    () => (
       <Button
         variant="outlined"
         size="small"
@@ -30,6 +30,44 @@ function TimetableNavigator() {
       >
         Today
       </Button>
+    ),
+    [dispatch]
+  );
+
+  const previousWeekButton = useMemo(
+    () => (
+      <Tooltip
+        title="Previous week"
+        placement="left"
+        onClick={() => dispatch(goToPreviousWeek())}
+      >
+        <IconButton size="small">
+          <ArrowBackIosNewIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    ),
+    [dispatch]
+  );
+
+  const nextWeekButton = useMemo(
+    () => (
+      <Tooltip
+        title="Next week"
+        placement="right"
+        onClick={() => dispatch(goToNextWeek())}
+      >
+        <IconButton size="small">
+          <ArrowForwardIosIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    ),
+    [dispatch]
+  );
+
+  return (
+    <div style={{ position: "relative" }}>
+      {todayButton}
+
       <div
         style={{
           display: "flex",
@@ -38,15 +76,7 @@ function TimetableNavigator() {
           padding: "0.5rem 0",
         }}
       >
-        <Tooltip
-          title="Previous week"
-          placement="left"
-          onClick={() => dispatch(goToPreviousWeek())}
-        >
-          <IconButton size="small">
-            <ArrowBackIosNewIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        {previousWeekButton}
 
         <div
           style={{
@@ -59,15 +89,7 @@ function TimetableNavigator() {
           {getWeekRange(mondayKey)}
         </div>
 
-        <Tooltip
-          title="Next week"
-          placement="right"
-          onClick={() => dispatch(goToNextWeek())}
-        >
-          <IconButton size="small">
-            <ArrowForwardIosIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        {nextWeekButton}
       </div>
     </div>
   );

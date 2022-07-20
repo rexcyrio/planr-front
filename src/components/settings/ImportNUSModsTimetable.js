@@ -20,7 +20,7 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   importNUSModsTimetable,
@@ -36,28 +36,35 @@ function ImportNUSModsTimetable() {
   );
   const [isValidNUSModsURL, setIsValidNUSModsURL] = useState(true);
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
 
-    if (NUSModsURL.indexOf("nusmods.com/timetable/") === -1) {
-      setIsValidNUSModsURL(false);
-    } else {
+      if (NUSModsURL.indexOf("nusmods.com/timetable/") === -1) {
+        setIsValidNUSModsURL(false);
+      } else {
+        setIsValidNUSModsURL(true);
+        dispatch(importNUSModsTimetable(NUSModsURL, false));
+      }
+    },
+    [dispatch, NUSModsURL]
+  );
+
+  const handleChange = useCallback(
+    (event) => {
       setIsValidNUSModsURL(true);
-      dispatch(importNUSModsTimetable(NUSModsURL, false));
-    }
-  }
-
-  function handleChange(event) {
-    setIsValidNUSModsURL(true);
-    setNUSModsURL(event.target.value);
-
-    if (status !== "NONE") {
+      setNUSModsURL(event.target.value);
       dispatch(resetNUSModsURLStatus());
-    }
-  }
+    },
+    [dispatch]
+  );
 
-  return (
-    <>
+  // ==========================================================================
+  // Memoised React components
+  // ==========================================================================
+
+  const title = useMemo(
+    () => (
       <div
         style={{
           display: "flex",
@@ -66,30 +73,58 @@ function ImportNUSModsTimetable() {
         }}
       >
         <h4>Import NUSMods Timetable</h4>
-
         <MoreMenu />
       </div>
+    ),
+    []
+  );
 
+  const alertMessage = useMemo(
+    () => (
       <Alert severity="warning">
         When importing a new NUSMods timetable, tasks that were associated with
         old modules will be converted to &quot;Others&quot; automatically.
       </Alert>
+    ),
+    []
+  );
+
+  const urlTextField = useMemo(
+    () => (
+      <TextField
+        id="NUSModsURL"
+        type="url"
+        variant="outlined"
+        value={NUSModsURL}
+        label="NUSMods URL"
+        fullWidth
+        required
+        onChange={handleChange}
+        helperText={isValidNUSModsURL ? " " : "Invalid NUSMods URL"}
+        error={!isValidNUSModsURL}
+        placeholder="e.g. https://nusmods.com/timetable/sem-1/share?..."
+        sx={{ mt: "1.5rem" }}
+      />
+    ),
+    [NUSModsURL, isValidNUSModsURL, handleChange]
+  );
+
+  const submitButton = useMemo(
+    () => (
+      <Button type="submit" variant="contained" sx={{ m: "1rem 0" }}>
+        Import Timetable
+      </Button>
+    ),
+    []
+  );
+
+  return (
+    <>
+      {title}
+      {alertMessage}
 
       <Box component="form" onSubmit={handleSubmit}>
-        <TextField
-          id="NUSModsURL"
-          type="url"
-          variant="outlined"
-          value={NUSModsURL}
-          label="NUSMods URL"
-          fullWidth
-          required
-          onChange={handleChange}
-          helperText={isValidNUSModsURL ? " " : "Invalid NUSMods URL"}
-          error={!isValidNUSModsURL}
-          placeholder="e.g. https://nusmods.com/timetable/sem-1/share?..."
-          sx={{ mt: "1.5rem" }}
-        />
+        {urlTextField}
         <br />
         <div
           style={{
@@ -97,9 +132,7 @@ function ImportNUSModsTimetable() {
             alignItems: "center",
           }}
         >
-          <Button type="submit" variant="contained" sx={{ m: "1rem 0" }}>
-            Import Timetable
-          </Button>
+          {submitButton}
           {mappingStatusToIcon[status]}
         </div>
       </Box>
@@ -162,21 +195,21 @@ function MoreMenu() {
   const [openDialog, setOpenDialog] = useState(false);
   const openPopover = Boolean(anchorEl);
 
-  const handleOpenMenu = (event) => {
+  const handleOpenMenu = useCallback((event) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleCloseMenu = () => {
+  const handleCloseMenu = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  const handleOpenDialog = () => {
+  const handleOpenDialog = useCallback(() => {
     setOpenDialog(true);
-  };
+  }, []);
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = useCallback(() => {
     setOpenDialog(false);
-  };
+  }, []);
 
   return (
     <>
