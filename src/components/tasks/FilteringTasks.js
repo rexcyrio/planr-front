@@ -15,7 +15,6 @@ import {
   setFilterState,
 } from "../../store/slices/filteringTasksSlice";
 import FilteringTasksCheckbox from "./FilteringTasksCheckbox";
-import FilteringTasksModuleDivider from "./FilteringTasksModuleDivider";
 
 function FilteringTasks() {
   const dispatch = useDispatch();
@@ -165,8 +164,6 @@ function FilteringTasks() {
             {Object.entries(tempFilterOptions).map(
               ([filterOption, isChecked], index) => (
                 <React.Fragment key={filterOption}>
-                  {index === 6 && <FilteringTasksModuleDivider />}
-
                   <FilteringTasksCheckbox
                     tempFilterMode={tempFilterMode}
                     filterOption={filterOption}
