@@ -24,4 +24,4 @@ function AllColourIcons({ themeName }) {
   );
 }
 
-export default AllColourIcons;
+export default React.memo(AllColourIcons);

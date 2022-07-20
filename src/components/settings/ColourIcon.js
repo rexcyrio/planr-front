@@ -22,4 +22,4 @@ function ColourIcon({ themeName, colourName }) {
   );
 }
 
-export default ColourIcon;
+export default React.memo(ColourIcon);
