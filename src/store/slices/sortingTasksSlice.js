@@ -8,19 +8,21 @@ const sortingTasksSlice = createSlice({
   name: "sortingTasks",
   initialState,
   reducers: {
+    _setState: (state, action) => action.payload,
     _setSortBy: (state, action) => {
-      state = action.payload;
+      state.sortBy = action.payload;
       return state;
     },
   },
 });
 
-const { _setSortBy } = sortingTasksSlice.actions;
+const { _setState, _setSortBy } = sortingTasksSlice.actions;
 
 export function setSortBy(sortBy) {
   return function thunk(dispatch, getState) {
     dispatch(_setSortBy(sortBy));
 
+    // store entire state object into local storage
     window.localStorage.setItem(
       "sortBy",
       JSON.stringify(getState().sortingTasks)
@@ -30,13 +32,14 @@ export function setSortBy(sortBy) {
 
 export function getSortByFromLocalStorage() {
   return function thunk(dispatch, getState) {
-    const sortBy = window.localStorage.getItem("sortBy");
+    // recover entire state object from local storage
+    const state = window.localStorage.getItem("sortBy");
 
-    if (sortBy === null) {
+    if (state === null) {
       return;
     }
 
-    dispatch(_setSortBy(JSON.parse(sortBy)));
+    dispatch(_setState(JSON.parse(state)));
   };
 }
 
