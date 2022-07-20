@@ -9,7 +9,7 @@ const sortingTasksSlice = createSlice({
   initialState,
   reducers: {
     _setSortBy: (state, action) => {
-      state.sortBy = action.payload;
+      state = action.payload;
       return state;
     },
   },
@@ -20,7 +20,7 @@ const { _setSortBy } = sortingTasksSlice.actions;
 export function setSortBy(sortBy) {
   return function thunk(dispatch, getState) {
     dispatch(_setSortBy(sortBy));
-    
+
     window.localStorage.setItem(
       "sortBy",
       JSON.stringify(getState().sortingTasks)
