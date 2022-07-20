@@ -75,7 +75,7 @@ function generateWeeksTasksDistribution(tasks, modules, mondayKey) {
       countObject[task.mondayKey] += task.timeUnits / 2;
     }
   }
-  console.log(countObject);
+
   return Object.values(countObject);
 }
 
