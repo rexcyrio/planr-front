@@ -3,7 +3,7 @@ import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import DataStatus, {
@@ -12,7 +12,7 @@ import DataStatus, {
   FETCH_SUCCESS,
   UPDATE_FAILURE,
   UPDATE_SUCCESS,
-  UPDATING
+  UPDATING,
 } from "../helperComponents/DataStatus";
 import NoteItem from "./NoteItem";
 import styles from "./Notes.module.css";
@@ -39,7 +39,6 @@ function Notes() {
       const newNote = {
         _id: uuidv4(),
         text: trimmedText,
-        isEditMode: false,
       };
 
       setDataState(UPDATING);
@@ -71,104 +70,61 @@ function Notes() {
       });
   }
 
-  function deleteNote(self) {
-    const newNotes = notes.filter((each) => each._id !== self._id);
-    setDataState(UPDATING);
-    updateNotesInDatabase(newNotes);
-    setNotes(newNotes);
-  }
-
-  function updateText(self, text) {
-    const newNote = {
-      _id: self._id,
-      text: text,
-      isEditMode: self.isEditMode,
-    };
-
-    setNotes((prev) => {
-      const index = prev.findIndex((each) => each._id === self._id);
-      return [
-        ...prev.slice(0, index),
-        newNote,
-        ...prev.slice(index + 1, prev.length),
-      ];
-    });
-  }
-
-  function updateEditMode(self, newMode) {
-    const newNote = {
-      _id: self._id,
-      text: self.text,
-      isEditMode: newMode,
-    };
-
-    setNotes((prev) => {
-      const index = prev.findIndex((each) => each._id === self._id);
-      return [
-        ...prev.slice(0, index),
-        newNote,
-        ...prev.slice(index + 1, prev.length),
-      ];
-    });
-  }
-
-  function exitEditMode(self) {
-    const newNote = {
-      _id: self._id,
-      text: self.text.trim(),
-      isEditMode: false,
-    };
-
-    const index = notes.findIndex((each) => each._id === self._id);
-    const newNotes = [
-      ...notes.slice(0, index),
-      newNote,
-      ...notes.slice(index + 1, notes.length),
-    ];
-    setDataState(UPDATING);
-    updateNotesInDatabase(newNotes);
-    setNotes(newNotes);
-  }
-
-  function cancelEditMode(self, prevText) {
-    const newNote = {
-      _id: self._id,
-      text: prevText,
-      isEditMode: false,
-    };
-
-    setNotes((prev) => {
-      const index = prev.findIndex((each) => each._id === self._id);
-      return [
-        ...prev.slice(0, index),
-        newNote,
-        ...prev.slice(index + 1, prev.length),
-      ];
-    });
-  }
-
-  function updateNotesInDatabase(notes) {
-    fetch("/api/private/notes", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId, notes }),
-    })
-      .then((res) => {
-        return res.json();
+  const updateNotesInDatabase = useCallback(
+    (notes) => {
+      fetch("/api/private/notes", {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, notes }),
       })
-      .then((json) => {
-        if (json.error) {
-          setDataState(UPDATE_FAILURE);
-          alert(json.error);
-          return;
-        }
+        .then((res) => {
+          return res.json();
+        })
+        .then((json) => {
+          if (json.error) {
+            setDataState(UPDATE_FAILURE);
+            alert(json.error);
+            return;
+          }
 
-        setDataState(UPDATE_SUCCESS);
-      });
-  }
+          setDataState(UPDATE_SUCCESS);
+        });
+    },
+    [userId]
+  );
+
+  const deleteNote = useCallback(
+    (self) => {
+      const newNotes = notes.filter((each) => each._id !== self._id);
+      setDataState(UPDATING);
+      updateNotesInDatabase(newNotes);
+      setNotes(newNotes);
+    },
+    [notes, updateNotesInDatabase]
+  );
+
+  const exitEditMode = useCallback(
+    (self, tempNote) => {
+      const newNote = {
+        _id: self._id,
+        text: tempNote.trim(),
+      };
+
+      const index = notes.findIndex((each) => each._id === self._id);
+      const newNotes = [
+        ...notes.slice(0, index),
+        newNote,
+        ...notes.slice(index + 1, notes.length),
+      ];
+      setDataState(UPDATING);
+      updateNotesInDatabase(newNotes);
+      setNotes(newNotes);
+    },
+    [notes, updateNotesInDatabase]
+  );
 
   return (
     <>
@@ -197,10 +153,7 @@ function Notes() {
                 <NoteItem
                   self={self}
                   deleteNote={deleteNote}
-                  updateEditMode={updateEditMode}
                   exitEditMode={exitEditMode}
-                  cancelEditMode={cancelEditMode}
-                  updateText={updateText}
                 />
               </React.Fragment>
             ))}

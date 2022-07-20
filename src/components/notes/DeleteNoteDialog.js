@@ -14,7 +14,6 @@ DeleteNoteDialog.propTypes = {
   self: PropTypes.shape({
     _id: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired,
-    isEditMode: PropTypes.bool.isRequired,
   }).isRequired,
 
   deleteNote: PropTypes.func.isRequired,
@@ -61,4 +60,4 @@ function DeleteNoteDialog({ self, deleteNote }) {
   );
 }
 
-export default React.memo(DeleteNoteDialog);
+export default DeleteNoteDialog;
