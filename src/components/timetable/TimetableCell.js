@@ -160,4 +160,4 @@ const mappingTimeUnitsToRemUnits = {
   9: 12.4,
 };
 
-export default TimetableCell;
+export default React.memo(TimetableCell);
