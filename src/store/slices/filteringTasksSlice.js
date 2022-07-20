@@ -10,7 +10,6 @@ const initialState = {
     "is incomplete": false,
     "is recurring": false,
     "is one-off": false,
-    'has type "Others"': false,
   },
 };
 
@@ -54,8 +53,6 @@ export const mappingFilterOptionToFilterFunction = {
 
   "is recurring": (each) => each.dueDate === "--",
   "is one-off": (each) => each.dueDate !== "--",
-
-  'has type "Others"': (each) => each.moduleCode === "Others",
 };
 
 export default filteringTasksSlice.reducer;
