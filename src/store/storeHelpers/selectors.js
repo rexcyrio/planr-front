@@ -6,10 +6,7 @@ export const selectModuleLinks = createSelector(
   (state) => state.modules,
   (timetableColumn, modules) => {
     return modules
-      .filter(
-        (module) =>
-          module.col === timetableColumn && isCurrentWeek(module.mondayKey)
-      )
+      .filter((module) => module.col === timetableColumn)
       .flatMap((module) => module.links);
   }
 );
