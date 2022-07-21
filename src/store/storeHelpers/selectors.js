@@ -19,7 +19,7 @@ export const selectTaskLinks = createSelector(
   (state) => state.tasks.data,
   (timetableColumn, tasks) => {
     const scheduledRecurringTasksLinks = tasks
-      .filter((task) => task.col !== -1 && task.dueDate === "--")
+      .filter((task) => task.col === timetableColumn && task.dueDate === "--")
       .flatMap((task) => task.links);
 
     const currentWeekTasksLinks = tasks
