@@ -22,17 +22,16 @@ const modulesSlice = createSlice({
     },
     _saveEditedModulesLinks: (state, action) => {
       const modules = state;
-      const newModuleLinks = action.payload;
+      const allNewLinks = action.payload;
 
-      const mappingModuleLinkIdToModuleIndex = {};
+      const mappingOldLinkIdToModulesIndex = {};
 
       for (let i = 0; i < modules.length; i++) {
         const module = modules[i];
-        const oldModuleLinks = module.links;
+        const oldLinks = module.links;
 
-        for (const oldModuleLink of oldModuleLinks) {
-          const { _id: oldModuleLinkId } = oldModuleLink;
-          mappingModuleLinkIdToModuleIndex[oldModuleLinkId] = i;
+        for (const oldLink of oldLinks) {
+          mappingOldLinkIdToModulesIndex[oldLink._id] = i;
         }
       }
 
@@ -41,7 +40,7 @@ const modulesSlice = createSlice({
         allBuckets.push([]);
       }
 
-      for (const newLink of newModuleLinks) {
+      for (const newLink of allNewLinks) {
         if (newLink.name === "") {
           newLink.name = newLink.url;
         }
@@ -53,17 +52,47 @@ const modulesSlice = createSlice({
           newLink.url = "http://" + newLink.url;
         }
 
-        const { _id: newModuleLinkId } = newLink;
-        const index = mappingModuleLinkIdToModuleIndex[newModuleLinkId];
+        const index = mappingOldLinkIdToModulesIndex[newLink._id];
         allBuckets[index].push(newLink);
       }
 
       for (let i = 0; i < allBuckets.length; i++) {
         const bucket = allBuckets[i];
+        const mappingNewLinkIdToNewLink = {};
+
+        for (const newLink of bucket) {
+          mappingNewLinkIdToNewLink[newLink._id] = newLink;
+        }
+
         // state          => array of all module items
         // state[i]       => a particular module item
         // state[i].links => array of links associated with this particular module item
-        state[i].links = bucket.filter((each) => !each._toBeDeleted);
+
+        const oldModuleLinks = state[i].links;
+        const newModuleLinks = [];
+
+        for (const oldModuleLink of oldModuleLinks) {
+          if (!(oldModuleLink._id in mappingNewLinkIdToNewLink)) {
+            // the user could not have edited this task link at all
+            // just copy it over to `newModuleLinks`
+            newModuleLinks.push(oldModuleLink);
+            continue;
+          }
+
+          const newModuleLink = mappingNewLinkIdToNewLink[oldModuleLink._id];
+
+          if (newModuleLink._toBeDeleted) {
+            // skip this task link
+            continue;
+          }
+
+          newModuleLinks.push(newModuleLink);
+        }
+
+        // state          => array of all module items
+        // state[i]       => a particular module item
+        // state[i].links => array of links associated with this particular module item
+        state[i].links = newModuleLinks;
       }
 
       return state;

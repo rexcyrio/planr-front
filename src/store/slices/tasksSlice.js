@@ -90,17 +90,16 @@ const tasksSlice = createSlice({
     },
     _saveEditedTasksLinks: (state, action) => {
       const tasks = state.data;
-      const newTaskLinks = action.payload;
+      const allNewLinks = action.payload;
 
-      const mappingTaskLinkIdToTasksIndex = {};
+      const mappingOldLinkIdToTasksIndex = {};
 
       for (let i = 0; i < tasks.length; i++) {
         const task = tasks[i];
-        const oldTaskLinks = task.links;
+        const oldLinks = task.links;
 
-        for (const oldTaskLink of oldTaskLinks) {
-          const { _id: oldTaskLinkId } = oldTaskLink;
-          mappingTaskLinkIdToTasksIndex[oldTaskLinkId] = i;
+        for (const oldLink of oldLinks) {
+          mappingOldLinkIdToTasksIndex[oldLink._id] = i;
         }
       }
 
@@ -109,7 +108,7 @@ const tasksSlice = createSlice({
         allBuckets.push([]);
       }
 
-      for (const newLink of newTaskLinks) {
+      for (const newLink of allNewLinks) {
         if (newLink.name === "") {
           newLink.name = newLink.url;
         }
@@ -121,17 +120,47 @@ const tasksSlice = createSlice({
           newLink.url = "http://" + newLink.url;
         }
 
-        const { _id: newTaskLinkId } = newLink;
-        const index = mappingTaskLinkIdToTasksIndex[newTaskLinkId];
+        const index = mappingOldLinkIdToTasksIndex[newLink._id];
         allBuckets[index].push(newLink);
       }
 
       for (let i = 0; i < allBuckets.length; i++) {
         const bucket = allBuckets[i];
+        const mappingNewLinkIdToNewLink = {};
+
+        for (const newLink of bucket) {
+          mappingNewLinkIdToNewLink[newLink._id] = newLink;
+        }
+
         // state.data          => array of all task items
         // state.data[i]       => a particular task item
         // state.data[i].links => array of links associated with this particular task item
-        state.data[i].links = bucket.filter((each) => !each._toBeDeleted);
+
+        const oldTaskLinks = state.data[i].links;
+        const newTaskLinks = [];
+
+        for (const oldTaskLink of oldTaskLinks) {
+          if (!(oldTaskLink._id in mappingNewLinkIdToNewLink)) {
+            // the user could not have edited this task link at all
+            // just copy it over to `newTaskLinks`
+            newTaskLinks.push(oldTaskLink);
+            continue;
+          }
+
+          const newTaskLink = mappingNewLinkIdToNewLink[oldTaskLink._id];
+
+          if (newTaskLink._toBeDeleted) {
+            // skip this task link
+            continue;
+          }
+
+          newTaskLinks.push(newTaskLink);
+        }
+
+        // state.data          => array of all task items
+        // state.data[i]       => a particular task item
+        // state.data[i].links => array of links associated with this particular task item
+        state.data[i].links = newTaskLinks;
       }
 
       return state;
@@ -151,11 +180,10 @@ const tasksSlice = createSlice({
         const index = mappingTaskIdToIndex[taskId];
 
         // unschedule task
-        tasks[index].row = -1;
-        tasks[index].col = -1;
+        state.data[index].row = -1;
+        state.data[index].col = -1;
       }
 
-      state.data = tasks;
       return state;
     },
   },
