@@ -1,17 +1,23 @@
+import { TextField } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import React, { useContext, useState } from "react";
+import Card from "@mui/material/Card";
+import React, { useCallback, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../store/AuthContext";
+import LoginCarousel from "../components/carousel/LoginCarousel";
+import {
+  setIsAuthenticated,
+  setLoggedInUsername,
+  setUserId,
+} from "../store/slices/userSlice";
 
 function Login() {
+  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
-  const { setIsAuthenticated, setLoggedInUsername, setUserId } =
-    useContext(AuthContext);
   const navigate = useNavigate();
 
   function handleSubmit(event) {
@@ -42,9 +48,9 @@ function Login() {
 
         if (json.login_success) {
           setError(false);
-          setIsAuthenticated(true);
-          setLoggedInUsername(json.loggedInUsername);
-          setUserId(json.userId);
+          dispatch(setIsAuthenticated(true));
+          dispatch(setLoggedInUsername(json.loggedInUsername));
+          dispatch(setUserId(json.userId));
           navigate("/private", { replace: true });
         } else {
           setError(true);
@@ -54,66 +60,116 @@ function Login() {
       });
   }
 
+  // ============================================================================
+  // Memo functions
+  // ============================================================================
+  const usernameChangeHandler = useCallback((e) => {
+    setError(false);
+    setUsername(e.target.value);
+  }, []);
+
+  const passwordChangeHandler = useCallback((e) => {
+    setError(false);
+    setPassword(e.target.value);
+  }, []);
+
+  // ============================================================================
+  // Memo components
+  // ============================================================================
+  const loginUsernameTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ mb: "1rem", width: "20rem" }}
+        id="username"
+        label="Username"
+        type="text"
+        variant="outlined"
+        required
+        value={username}
+        onChange={usernameChangeHandler}
+      />
+    ),
+    [username, usernameChangeHandler]
+  );
+
+  const loginPasswordTextField = useMemo(
+    () => (
+      <TextField
+        sx={{ mb: "1rem", width: "20rem" }}
+        id="password"
+        label="Password"
+        type="password"
+        variant="outlined"
+        required
+        value={password}
+        onChange={passwordChangeHandler}
+      />
+    ),
+    [password, passwordChangeHandler]
+  );
+
+  const button = useMemo(
+    () => (
+      <Button sx={{ mb: "1rem" }} type="submit" variant="contained" fullWidth>
+        Log in
+      </Button>
+    ),
+    []
+  );
+
   return (
     <>
-      <Box
-        sx={{
+      <div
+        className="hide-scrollbar"
+        style={{
+          height: "calc(100vh - 3rem - 1px)",
+          width: "100vw",
+          overflow: "auto",
+
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          height: "100%",
         }}
       >
-        <h1>Welcome back!</h1>
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
-            id="username"
-            label="Username"
-            type="text"
-            variant="outlined"
-            required
-            value={username}
-            onChange={(e) => {
-              setError(false);
-              setUsername(e.target.value);
-            }}
-          />
-          <br />
-          <TextField
-            sx={{ mb: "1rem", width: "20rem" }}
-            id="password"
-            label="Password"
-            type="password"
-            variant="outlined"
-            required
-            value={password}
-            onChange={(e) => {
-              setError(false);
-              setPassword(e.target.value);
-            }}
-          />
-          <br />
-          <Button
-            sx={{ mb: "1rem" }}
-            type="submit"
-            variant="contained"
-            fullWidth
-          >
-            Log in
-          </Button>
-        </Box>
+        <Card
+          sx={{
+            width: "20rem",
+            p: "0 2rem 0.5rem",
+            m: "2rem 0",
 
-        <p>
-          Don&apos;t have an account? <Link to="/signup">Sign up</Link>
-        </p>
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
 
-        {error ? (
-          <Alert severity="error">Username or password is incorrect.</Alert>
-        ) : (
-          <></>
-        )}
-      </Box>
+            overflow: "visible",
+            height: "fit-content",
+          }}
+        >
+          <h1>Welcome back!</h1>
+          <Box component="form" onSubmit={handleSubmit}>
+            {loginUsernameTextField}
+            <br />
+            {loginPasswordTextField}
+            <br />
+            {button}
+          </Box>
+
+          <p>
+            Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+          </p>
+
+          {error ? (
+            <Alert severity="error" sx={{ mb: "0.5rem" }}>
+              Username or password is incorrect.
+            </Alert>
+          ) : (
+            <></>
+          )}
+        </Card>
+        <div style={{ marginTop: "5rem" }}>
+          <LoginCarousel />
+        </div>
+      </div>
     </>
   );
 }

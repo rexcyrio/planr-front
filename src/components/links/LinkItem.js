@@ -7,13 +7,11 @@ import Tooltip from "@mui/material/Tooltip";
 
 LinkItem.propTypes = {
   self: PropTypes.shape({
-    _id: PropTypes.string,
-    _toBeDeleted: PropTypes.bool,
-    _name: PropTypes.string,
-    _url: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string,
-  }),
+    _id: PropTypes.string.isRequired,
+    _toBeDeleted: PropTypes.bool.isRequired,
+    name: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 function LinkItem({ self }) {
@@ -40,4 +38,4 @@ function LinkItem({ self }) {
   );
 }
 
-export default LinkItem;
+export default React.memo(LinkItem);

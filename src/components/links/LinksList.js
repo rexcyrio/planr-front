@@ -1,48 +1,47 @@
 import React from "react";
 import styles from "./LinksList.module.css";
 import Stack from "@mui/material/Stack";
-import PropTypes from "prop-types";
 import LinkItem from "./LinkItem";
 import generateSkeletons from "../../helper/skeletonHelper";
+import TasksLinks from "./TimetableLinks";
+import { FETCHING, FETCH_FAILURE } from "../helperComponents/DataStatus";
+import { useSelector } from "react-redux";
 
 const DUMMY_LINK_ITEM = (
   <LinkItem
     self={{
       _id: "1",
       _toBeDeleted: false,
-      _name: "dummy",
-      _url: "https://google.com",
       name: "dummy",
       url: "https://google.com",
     }}
   />
 );
 
-function LinksList({ dataState, links }) {
-  LinksList.propTypes = {
-    dataState: PropTypes.string,
-    links: PropTypes.array,
-  };
+function LinksList() {
+  const links = useSelector((state) => state.links.permLinks);
+  const status = useSelector((state) => state.links.status);
 
   return (
     <div className={styles["links-container"]}>
       <Stack spacing={1} sx={{ scrollSnapType: "y mandatory" }}>
-        {dataState === "LOAD_FAILED" ? (
+        {status === FETCH_FAILURE ? (
           <div>Unable to retrieve data.</div>
-        ) : dataState === "INITIAL_LOAD" ? (
+        ) : status === FETCHING ? (
           generateSkeletons(3, DUMMY_LINK_ITEM)
-        ) : links.length > 0 ? (
-          links.map((self) => (
-            <React.Fragment key={self._id}>
-              <LinkItem self={self} />
-            </React.Fragment>
-          ))
         ) : (
-          <div>There are no links.</div>
+          <>
+            {links.map((self) => (
+              <React.Fragment key={self._id}>
+                <LinkItem self={self} />
+              </React.Fragment>
+            ))}
+            <TasksLinks isPermLinksEmpty={links.length === 0} />
+          </>
         )}
       </Stack>
     </div>
   );
 }
 
-export default LinksList;
+export default React.memo(LinksList);

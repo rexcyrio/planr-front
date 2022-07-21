@@ -12,14 +12,6 @@
   display: none;
 }
 
-.title {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding-right: 0.5rem;
-}
-
 .title-update-container {
   display: flex;
   flex-direction: row;

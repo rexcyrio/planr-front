@@ -1,19 +1,29 @@
-import React, { useState } from "react";
-import Dialog from "@mui/material/Dialog";
-import IconButton from "@mui/material/IconButton";
 import SettingsIcon from "@mui/icons-material/Settings";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import { DialogContent, DialogTitle } from "@mui/material";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { resetNUSModsURLStatus } from "../../store/slices/NUSModsURLSlice";
+import ImportNUSModsTimetable from "./ImportNUSModsTimetable";
+import MappingModuleCodeToColourName from "./MappingModuleCodeToColourName";
+import ThemeName from "./ThemeName";
 
 function Settings() {
-  const [openSettings, setOpenSettings] = useState(false);
+  const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
 
   const openDialog = () => {
-    setOpenSettings(true);
+    dispatch(resetNUSModsURLStatus());
+    setOpen(true);
   };
 
   const closeDialog = () => {
-    setOpenSettings(false);
+    setOpen(false);
   };
 
   return (
@@ -23,9 +33,19 @@ function Settings() {
           <SettingsIcon />
         </IconButton>
       </Tooltip>
-      <Dialog open={openSettings} onClose={closeDialog}>
+
+      <Dialog open={open} onClose={closeDialog} fullWidth>
         <DialogTitle>Settings</DialogTitle>
-        <DialogContent></DialogContent>
+
+        <DialogContent sx={{ overflowX: "hidden" }}>
+          <ImportNUSModsTimetable />
+          <ThemeName />
+          <MappingModuleCodeToColourName />
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={closeDialog}>Done</Button>
+        </DialogActions>
       </Dialog>
     </>
   );

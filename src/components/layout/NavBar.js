@@ -1,15 +1,23 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import React, { useContext } from "react";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../store/AuthContext";
+import {
+  setIsAuthenticated,
+  setLoggedInUsername,
+  setUserId,
+} from "../../store/slices/userSlice";
+import { resetReduxStore } from "../../store/storeHelpers/actions";
+import HelpWindow from "../helpWindow/HelpWindow";
 import Settings from "../settings/Settings";
+import Statistics from "../statistics/Statistics";
 import logo from "./../../icons/logo.svg";
 import styles from "./NavBar.module.css";
 
 function NavBar() {
-  const { isAuthenticated, setIsAuthenticated, setLoggedInUsername } =
-    useContext(AuthContext);
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   function logoutNow(event) {
@@ -30,8 +38,10 @@ function NavBar() {
           return;
         }
 
-        setIsAuthenticated(false);
-        setLoggedInUsername(null);
+        dispatch(setIsAuthenticated(false));
+        dispatch(setLoggedInUsername(null));
+        dispatch(setUserId(null));
+        dispatch(resetReduxStore());
         navigate("/login", { replace: true });
       });
   }
@@ -47,7 +57,13 @@ function NavBar() {
         </Link>
 
         <div className={styles.utility}>
-          {isAuthenticated && <Settings />}
+          {isAuthenticated && (
+            <>
+              <Statistics />
+              <HelpWindow />
+              <Settings />
+            </>
+          )}
 
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {isAuthenticated ? (

@@ -1,0 +1,12 @@
+.cell {
+  width: 5.8rem;
+  border: 0.01px solid hsl(0, 0%, 75%);
+  position: relative;
+  z-index: 5;
+}
+
+.task-name-paragraph {
+  max-height: 15rem;
+  overflow-y: auto;
+  word-break: break-word;
+}
