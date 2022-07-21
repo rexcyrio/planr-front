@@ -166,7 +166,7 @@ function Login() {
             <></>
           )}
         </Card>
-        <div style={{ marginTop: "10rem" }}>
+        <div style={{ marginTop: "5rem" }}>
           <LoginCarousel />
         </div>
       </div>
