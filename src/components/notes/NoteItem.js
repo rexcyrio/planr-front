@@ -31,16 +31,16 @@ function NoteItem({ self, deleteNote, exitEditMode }) {
       // the user might be double clicking to select an entire word
       return;
     }
+    setTempNote(self.text);
     setEditMode(true);
   }
 
   const confirmEditHandler = useCallback(
     (e) => {
-      if (e.target.value === "") {
+      if (tempNote === "") {
         deleteNote(self);
       } else {
         exitEditMode(self, tempNote);
-        setTempNote(self.text);
       }
       setEditMode(false);
     },
