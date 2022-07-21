@@ -11,10 +11,10 @@ const modulesSlice = createSlice({
     _setModules: (state, action) => action.payload,
     _addModuleLinks: (state, action) => {
       const modules = state;
-      const { moduleCode, links } = action.payload;
+      const { moduleId, links } = action.payload;
 
       for (const module of modules) {
-        if (module.moduleCode === moduleCode) {
+        if (module._id === moduleId) {
           module.links = links;
           return state;
         }
@@ -85,9 +85,9 @@ export function setModules(newModuleItems) {
   };
 }
 
-export function addModuleLinks(moduleCode, links) {
+export function addModuleLinks(moduleId, links) {
   return function thunk(dispatch, getState) {
-    const payload = { moduleCode, links };
+    const payload = { moduleId, links };
     dispatch(_addModuleLinks(payload));
     dispatch(setModulesInDatabase());
   };

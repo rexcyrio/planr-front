@@ -57,7 +57,7 @@ function ModuleLinksManager({ self }) {
     setOpen(false);
 
     if (saveChanges) {
-      dispatch(addModuleLinks(self.moduleCode, links));
+      dispatch(addModuleLinks(self._id, links));
     }
   }
 
