@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { resetReduxStore } from "../storeHelpers/actions";
 
 const initialState = {
   sortBy: "Date created (oldest)",
@@ -13,6 +14,12 @@ const sortingTasksSlice = createSlice({
       state.sortBy = action.payload;
       return state;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(resetReduxStore, (state, action) => {
+      window.localStorage.removeItem("sortBy");
+      return initialState;
+    });
   },
 });
 
