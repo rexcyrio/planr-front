@@ -69,7 +69,24 @@ function TaskLinksCreator({
           <ListItemText
             primary={link.name}
             secondary={link.url}
-            sx={{ margin: 0 }}
+            sx={{
+              margin: 0,
+              maxWidth: "30rem",
+            }}
+            primaryTypographyProps={{
+              style: {
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              },
+            }}
+            secondaryTypographyProps={{
+              style: {
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              },
+            }}
           />
         </ListItem>
         <Divider />

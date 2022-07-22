@@ -139,7 +139,7 @@ function DetailsPopover({ self }) {
               )}
             </div>
           </div>
-          
+
           <p className={styles["task-name-paragraph"]}>{self.name}</p>
 
           {!isModuleItem(self) && (
@@ -161,7 +161,18 @@ function DetailsPopover({ self }) {
 
           {self.links.map((link) => (
             <React.Fragment key={link._id}>
-              <a href={link.url} rel="noreferrer noopener" target="_blank">
+              <a
+                href={link.url}
+                rel="noreferrer noopener"
+                target="_blank"
+                style={{
+                  display: "block",
+                  maxWidth: "12rem",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
                 {link.name}
               </a>
               <br />
