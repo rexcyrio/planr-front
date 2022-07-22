@@ -324,6 +324,8 @@ const mappingLessonType = {
   TUT: "Tutorial",
   LAB: "Laboratory",
   SEC: "Sectional Teaching",
+  REC: "Recitation",
+  SEM: "Seminar-Style Module Class",
 };
 
 const mappingDayToColumn = {

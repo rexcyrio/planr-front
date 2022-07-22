@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { resetReduxStore } from "../storeHelpers/actions";
 
 const initialState = {
   filterMode: "Show all",
@@ -18,6 +19,12 @@ const filteringTasksSlice = createSlice({
   initialState,
   reducers: {
     _setFilterState: (state, action) => action.payload,
+  },
+  extraReducers: (builder) => {
+    builder.addCase(resetReduxStore, (state, action) => {
+      window.localStorage.removeItem("filterState");
+      return initialState;
+    });
   },
 });
 
