@@ -8,7 +8,13 @@ TimetableBackgroundCell.propTypes = {
 
 function TimetableBackgroundCell({ backgroundColor }) {
   return (
-    <td className={styles["cell"]} style={{ backgroundColor: backgroundColor }}>
+    <td
+      className={styles["cell"]}
+      style={{
+        backgroundColor: backgroundColor,
+        backgroundClip: "padding-box",
+      }}
+    >
       &nbsp;
     </td>
   );
