@@ -226,7 +226,7 @@ function TaskEditor({ self }) {
   const taskDueDateTextField = useMemo(
     () => (
       <TextField
-        sx={{ mr: "1rem" }}
+        sx={{ width: "10.75rem", mr: "1rem" }}
         margin="dense"
         id="dueDate"
         label="Due date"
@@ -245,6 +245,7 @@ function TaskEditor({ self }) {
   const taskDueTimeTextField = useMemo(
     () => (
       <TextField
+        sx={{ width: "8.25rem" }}
         margin="dense"
         id="dueTime"
         label="Due time"
