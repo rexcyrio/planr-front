@@ -41,6 +41,7 @@ function TimetableCellCard({ self }) {
     (state) => state.mappingModuleCodeToColourName
   );
   const mondayKey = useSelector((state) => state.time.mondayKey);
+  const devicePixelRatio = useSelector((state) => state.devicePixelRatio);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const handleMouseEnter = useCallback(() => {
@@ -50,6 +51,16 @@ function TimetableCellCard({ self }) {
   const handleMouseLeave = useCallback(() => {
     setIsMouseOver(false);
   }, []);
+
+  const getCardHeight = useCallback(() => {
+    if (devicePixelRatio < 2) {
+      return `${(1.3125 + 1 / 16) * self.timeUnits - 0.1875}rem`;
+    }
+
+    if (devicePixelRatio >= 2) {
+      return `${(1.3125 + 1 / 32) * self.timeUnits - 0.1875}rem`;
+    }
+  }, [devicePixelRatio, self.timeUnits]);
 
   const memoDragIndicatorIcon = useMemo(
     () => (
@@ -117,7 +128,7 @@ function TimetableCellCard({ self }) {
             mondayKey
           ),
           margin: 0,
-          height: `${(1.3125 + 1 / 16) * self.timeUnits - 0.1875}rem`,
+          height: getCardHeight(),
         }}
       >
         <div

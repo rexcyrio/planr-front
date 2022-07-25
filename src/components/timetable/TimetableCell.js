@@ -131,33 +131,25 @@ function getRem(timeUnits) {
     return `${mappingTimeUnitsToRemUnits[timeUnits]}rem`;
   }
 
-  const numGaps = Math.floor((timeUnits - 1) / 4);
-  const gapsRem = numGaps * 1.35;
-
-  const numChunks = Math.floor(timeUnits / 4);
-  const chunksRem = (numChunks - 1) * 4.2;
-
-  const remainder = timeUnits % 4;
-  const remainderRem = Math.max((remainder - 1) * 1.4, 0);
-
-  const total = roundOff(5.5 + gapsRem + chunksRem + remainderRem, 2);
+  const adjustments = Math.floor((timeUnits - 1) / 2) * 0.05;
+  const total = roundOff(timeUnits * 1.35 + adjustments, 2);
   return `${total}rem`;
 }
 
 const mappingTimeUnitsToRemUnits = {
   0: 0,
 
-  1: 1.3,
+  1: 1.35,
   2: 2.7,
   3: 4.1,
-  4: 5.5,
+  4: 5.45,
 
   5: 6.85,
-  6: 8.25,
-  7: 9.65,
-  8: 11.05,
+  6: 8.2,
+  7: 9.6,
+  8: 10.95,
 
-  9: 12.4,
+  9: 12.35,
 };
 
 export default React.memo(TimetableCell);
