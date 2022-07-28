@@ -1,38 +1,10 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import isCurrentWeek from "../../helper/isCurrentWeekHelper";
 import styles from "./Timetable.module.css";
 import TimetableBackgroundCell from "./TimetableBackgroundCell";
 
+const dummyMatrix = new Array(48).fill(0);
+
 function TimetableBackground() {
-  const matrix = useSelector((state) => state.matrix);
-  const mondayKey = useSelector((state) => state.time.mondayKey);
-  const timetableColumn = useSelector((state) => state.time.timetableColumn);
-
-  function getAlternatingBackgroundColour(row, col) {
-    if (isCurrentWeek(mondayKey)) {
-      if (col === timetableColumn) {
-        if (Math.floor(row / 2) % 2 === 0) {
-          return "#e5f8eb";
-        }
-        return "#d8ebdf";
-      }
-    }
-
-    if (col % 2 === 0) {
-      if (Math.floor(row / 2) % 2 === 0) {
-        return "transparent";
-      }
-      return "#f2f2f2";
-    }
-
-    if (Math.floor(row / 2) % 2 === 0) {
-      return "#f2f2f2";
-    }
-
-    return "#e6e6e6";
-  }
-
   return (
     <div
       style={{
@@ -46,31 +18,11 @@ function TimetableBackground() {
     >
       <table className={styles["timetable-table"]}>
         <tbody>
-          {new Array(48).fill(0).map((_, row) => (
+          {dummyMatrix.map((_, row) => (
             <tr key={row}>
-              <td className={styles["cell"]}></td>
-
-              {[0, 1, 2, 3, 4].map((col) => (
+              {[0, 1, 2, 3, 4, 5, 6].map((col) => (
                 <React.Fragment key={`${row},${col}`}>
-                  <TimetableBackgroundCell
-                    backgroundColor={
-                      matrix[row][col] === "black"
-                        ? "grey"
-                        : getAlternatingBackgroundColour(row, col)
-                    }
-                  />
-                </React.Fragment>
-              ))}
-
-              {[5, 6].map((col) => (
-                <React.Fragment key={`${row},${col}`}>
-                  <TimetableBackgroundCell
-                    backgroundColor={
-                      matrix[row][col] === "black"
-                        ? "grey"
-                        : getAlternatingBackgroundColour(row, col)
-                    }
-                  />
+                  <TimetableBackgroundCell row={row} col={col} />
                 </React.Fragment>
               ))}
             </tr>
@@ -81,4 +33,4 @@ function TimetableBackground() {
   );
 }
 
-export default TimetableBackground;
+export default React.memo(TimetableBackground);
