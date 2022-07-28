@@ -182,7 +182,6 @@ function Tasks() {
         sx={{
           marginX: "0.5rem",
           overflowY: "auto",
-          marginBottom: "10rem",
           height: "calc(100% - 8.15rem)",
         }}
       >
