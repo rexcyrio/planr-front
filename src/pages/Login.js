@@ -145,7 +145,7 @@ function Login() {
             height: "fit-content",
           }}
         >
-          <h1>Welcome back!</h1>
+          <h1>Welcome!</h1>
           <Box component="form" onSubmit={handleSubmit}>
             {loginUsernameTextField}
             <br />
