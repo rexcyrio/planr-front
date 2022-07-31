@@ -9,7 +9,10 @@ import {
 } from "../../store/slices/filteringTasksSlice";
 import { mappingSortByToSortFunction } from "../../store/slices/sortingTasksSlice";
 import { fetchTasks } from "../../store/slices/tasksSlice";
-import { selectCurrentWeekTasks } from "../../store/storeHelpers/selectors";
+import {
+  selectCurrentWeekTasks,
+  selectTags,
+} from "../../store/storeHelpers/selectors";
 import DataStatus, {
   FETCHING,
   FETCH_FAILURE,
@@ -27,11 +30,12 @@ const EMPTY_TASK_ITEM = <TaskItem self={EMPTY_TASK} />;
 function Tasks() {
   const dispatch = useDispatch();
   const status = useSelector((state) => state.tasks.status);
-  const tasks = useSelector(selectCurrentWeekTasks());
+  const tasks = useSelector((state) => selectCurrentWeekTasks(state));
   const mondayKey = useSelector((state) => state.time.mondayKey);
 
   const filterState = useSelector((state) => state.filteringTasks);
   const sortBy = useSelector((state) => state.sortingTasks.sortBy);
+  const tags = useSelector((state) => selectTags(state));
 
   useEffect(() => {
     dispatch(fetchTasks());
@@ -117,6 +121,27 @@ function Tasks() {
 
     if (sortBy === "Date created (newest)") {
       return tasks.reverse();
+    }
+
+    if (sortBy === "Tag name") {
+      const mappingTagToTasks = Object.fromEntries(
+        tags.map((tag) => [tag, []])
+      );
+
+      for (const task of tasks) {
+        const { tag } = task;
+        mappingTagToTasks[tag].push(task);
+      }
+
+      const sortedTasks = Object.values(mappingTagToTasks).reduce(
+        (newArray, someTasks) => {
+          newArray.push(...someTasks);
+          return newArray;
+        },
+        []
+      );
+
+      return sortedTasks;
     }
 
     const sortFunction = mappingSortByToSortFunction[sortBy];

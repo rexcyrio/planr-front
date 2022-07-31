@@ -4,7 +4,7 @@ import filteringTasksReducer from "./slices/filteringTasksSlice";
 import isInitialSnackBarOpenReducer from "./slices/isInitialSnackBarOpenSlice";
 import isNewUserReducer from "./slices/isNewUserSlice";
 import linksReducer from "./slices/linksSlice";
-import mappingModuleCodeToColourNameReducer from "./slices/mappingModuleCodeToColourNameSlice";
+import mappingTagToColourNameReducer from "./slices/mappingTagToColourNameSlice";
 import matrixReducer from "./slices/matrixSlice";
 import modulesReducer from "./slices/modulesSlice";
 import notesReducer from "./slices/notesSlice";
@@ -15,6 +15,7 @@ import tasksReducer from "./slices/tasksSlice";
 import themeNameReducer from "./slices/themeNameSlice";
 import timeReducer from "./slices/timeSlice";
 import userReducer from "./slices/userSlice";
+import userTagsReducer from "./slices/userTagsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -29,7 +30,8 @@ export const store = configureStore({
     // settings
     NUSModsURL: NUSModsURLReducer,
     themeName: themeNameReducer,
-    mappingModuleCodeToColourName: mappingModuleCodeToColourNameReducer,
+    mappingTagToColourName: mappingTagToColourNameReducer,
+    userTags: userTagsReducer,
 
     // extras
     isNewUser: isNewUserReducer,

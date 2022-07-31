@@ -29,18 +29,17 @@ export const selectTaskLinks = createSelector(
   }
 );
 
-export const selectModuleCodes = createSelector(
-  (state) => state.mappingModuleCodeToColourName,
-  (mappingModuleCodeToColourName) => {
-    return Object.keys(mappingModuleCodeToColourName);
+export const selectTags = createSelector(
+  (state) => state.mappingTagToColourName,
+  (mappingTagToColourName) => {
+    return Object.keys(mappingTagToColourName);
   }
 );
 
-export function selectCurrentWeekTasks() {
-  return (state) => {
-    const mondayKey = state.time.mondayKey;
-    const tasks = state.tasks.data;
-
+export const selectCurrentWeekTasks = createSelector(
+  (state) => state.time.mondayKey,
+  (state) => state.tasks.data,
+  (mondayKey, tasks) => {
     const currentWeekTasks = tasks.filter((each) => {
       if (each.mondayKey.length === 0) {
         return true;
@@ -51,9 +50,10 @@ export function selectCurrentWeekTasks() {
           return false;
         }
       }
+
       return true;
     });
 
     return currentWeekTasks;
-  };
-}
+  }
+);

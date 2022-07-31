@@ -93,20 +93,7 @@ export const mappingSortByToSortFunction = {
 
     return 0;
   },
-  "Module code": (firstTask, secondTask) => {
-    const firstModuleCode = firstTask.moduleCode;
-    const secondModuleCode = secondTask.moduleCode;
-
-    if (firstModuleCode < secondModuleCode) {
-      return -1;
-    }
-
-    if (firstModuleCode > secondModuleCode) {
-      return 1;
-    }
-
-    return 0;
-  },
+  "Tag name": 0,
   "Date created (newest)": 0,
   "Date created (oldest)": 0,
   "Task duration (longest)": (firstTask, secondTask) => {

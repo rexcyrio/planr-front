@@ -18,20 +18,19 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { addTask } from "../../store/slices/tasksSlice";
+import { selectTags } from "../../store/storeHelpers/selectors";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 function TaskCreator() {
   const dispatch = useDispatch();
   const mondayKey = useSelector((state) => state.time.mondayKey);
-  const mappingModuleCodeToColourName = useSelector(
-    (state) => state.mappingModuleCodeToColourName
-  );
+  const tags = useSelector((state) => selectTags(state));
 
   const [name, setName] = useState("");
   const [dueDate, setDueDate] = useState(getDateNowString());
   const [dueTime, setDueTime] = useState("23:59");
   const [durationHours, setDurationHours] = useState("");
-  const [moduleCode, setModuleCode] = useState("Others");
+  const [tag, setTag] = useState("Others");
   const [open, setOpen] = useState(false);
   const [taskLinks, setTaskLinks] = useState([]);
   const [linkName, setLinkName] = useState("");
@@ -48,7 +47,7 @@ function TaskCreator() {
     setDueDate(getDateNowString());
     setDueTime("23:59");
     setDurationHours("");
-    setModuleCode("Others");
+    setTag("Others");
     setTaskLinks([]);
     setLinkName("");
     setLinkURL("");
@@ -76,7 +75,7 @@ function TaskCreator() {
       dueDate: isRecurring ? "--" : dueDate,
       dueTime: isRecurring ? "--" : dueTime,
       durationHours: durationHours,
-      moduleCode: moduleCode,
+      tag: tag,
       links: taskLinks,
 
       row: -1,
@@ -114,9 +113,11 @@ function TaskCreator() {
       dispatch(addTask(newTaskCopy));
     }
   }
+
   // ============================================================================
   // Memo functions
   // ============================================================================
+
   const handleOpen = useCallback(() => {
     resetState();
     setOpen(true);
@@ -159,6 +160,7 @@ function TaskCreator() {
   // ============================================================================
   // Memo components
   // ============================================================================
+
   const fab = useMemo(
     () => (
       <Fab
@@ -190,27 +192,27 @@ function TaskCreator() {
     []
   );
 
-  const taskModuleCodeSelector = useMemo(
+  const taskTagSelector = useMemo(
     () => (
       <FormControl sx={{ width: "10rem", mr: "1rem" }} margin="dense">
-        <InputLabel id="Module Code">Module Code</InputLabel>
+        <InputLabel id="Tag">Tag</InputLabel>
         <Select
-          labelId="Module Code"
-          id="moduleCode"
-          value={moduleCode}
-          label="Module Code"
-          onChange={(e) => setModuleCode(e.target.value)}
+          labelId="Tag"
+          id="tag"
+          value={tag}
+          label="Tag"
+          onChange={(e) => setTag(e.target.value)}
           required
         >
-          {Object.keys(mappingModuleCodeToColourName).map((moduleCode) => (
-            <MenuItem key={moduleCode} value={moduleCode}>
-              {moduleCode}
+          {tags.map((_tag) => (
+            <MenuItem key={_tag} value={_tag}>
+              {_tag}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
     ),
-    [moduleCode, mappingModuleCodeToColourName]
+    [tag, tags]
   );
 
   const taskNameTextField = useMemo(
@@ -323,11 +325,12 @@ function TaskCreator() {
   return (
     <>
       {fab}
+      
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md">
         {dialogTitle}
         <Box component="form" onSubmit={handleSubmit}>
           <DialogContent>
-            {taskModuleCodeSelector}
+            {taskTagSelector}
             {taskNameTextField}
             <br />
             {taskDurationTextField}

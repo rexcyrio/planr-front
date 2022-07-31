@@ -2,8 +2,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 import formatErrorMessage from "../../helper/formatErrorMessage";
 import { resetReduxStore } from "../storeHelpers/actions";
-import { selectModuleCodes } from "../storeHelpers/selectors";
-import { setModulesInTheme } from "./mappingModuleCodeToColourNameSlice";
+import {
+  removeAllModulesInTheme,
+  updateModulesInTheme,
+} from "./mappingTagToColourNameSlice";
 import { refreshMatrix } from "./matrixSlice";
 import { setModules } from "./modulesSlice";
 import {
@@ -25,10 +27,12 @@ const initialState = {
   //   url: {
   //     dateLastFetched: "",
   //     moduleItems: [],
+  //     moduleCodes: [],
   //   },
   //   url2: {
   //     dateLastFetched: "",
   //     moduleItems: [],
+  //     moduleCodes: [],
   //   },
   // },
 };
@@ -42,20 +46,16 @@ const NUSModsURLSlice = createSlice({
       return state;
     },
     _setStatus: (state, action) => {
-      // skip unnecessary updates
-      if (state.status === action.payload) {
-        return state;
-      }
-
       state.status = action.payload;
       return state;
     },
     _cacheModuleItems: (state, action) => {
-      const { url, dateLastFetched, moduleItems } = action.payload;
+      const { url, dateLastFetched, moduleItems, moduleCodes } = action.payload;
 
       state.cache[url] = {
         dateLastFetched: dateLastFetched,
         moduleItems: moduleItems,
+        moduleCodes: moduleCodes,
       };
 
       return state;
@@ -82,7 +82,7 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
     dispatch(_setStatus("FETCHING"));
 
     try {
-      const moduleItems = await (async () => {
+      const [newModuleItems, newModuleCodes] = await (async () => {
         const { cache } = getState().NUSModsURL;
         const dateNow = new Date().toDateString();
 
@@ -90,13 +90,14 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
           NUSModsURL in cache &&
           cache[NUSModsURL].dateLastFetched === dateNow
         ) {
-          return cache[NUSModsURL].moduleItems;
+          const { moduleItems, moduleCodes } = cache[NUSModsURL];
+          return [moduleItems, moduleCodes];
         }
 
         // need to fetch
-        const _moduleItems = await fetchModuleItems(NUSModsURL);
+        const [moduleItems, moduleCodes] = await fetchModuleItems(NUSModsURL);
 
-        if (_moduleItems.length === 0) {
+        if (moduleCodes.length === 0) {
           throw new Error("Invalid NUSMods URL");
         }
 
@@ -104,11 +105,12 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         const payload = {
           url: NUSModsURL,
           dateLastFetched: dateNow,
-          moduleItems: _moduleItems,
+          moduleItems: moduleItems,
+          moduleCodes: moduleCodes,
         };
 
         dispatch(_cacheModuleItems(payload));
-        return _moduleItems;
+        return [moduleItems, moduleCodes];
       })();
 
       const matrix = getState().matrix;
@@ -121,8 +123,8 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
 
       // handling cases 1, 2
       if (autoRemoveTasks === false) {
-        for (const moduleItem of moduleItems) {
-          const { row, col, timeUnits } = moduleItem;
+        for (const newModuleItem of newModuleItems) {
+          const { row, col, timeUnits } = newModuleItem;
 
           for (let i = 0; i < timeUnits; i++) {
             const id = matrix[row + i][col];
@@ -143,8 +145,8 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
       const tasks = getState().tasks.data;
       const offendingTaskIds = [];
 
-      for (const moduleItem of moduleItems) {
-        const { row, col, timeUnits } = moduleItem;
+      for (const newModuleItem of newModuleItems) {
+        const { row, col, timeUnits } = newModuleItem;
 
         for (let i = 0; i < timeUnits; i++) {
           const str = `${row + i},${col}`;
@@ -165,15 +167,32 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         }
       }
 
-      const oldModuleCodes = selectModuleCodes(getState()).filter(
-        (each) => each.moduleCode !== "Others"
-      );
+      // ======================================================================
+      // getting old module codes
+      // ======================================================================
+      //
+      //   BUCKET FILL AREA: old module codes no longer in use
+      //      |
+      //      |           BUCKET FILL AREA: common module codes
+      //      |              |
+      //      |              |         BUCKET FILL AREA: never seen before module codes
+      // +----|--------------|------+     |
+      // |    |              |      |     |
+      // |    |     +--------|------|-----|----+
+      // |    |     |        |      |     |    |
+      // |   (*)    |       (*)     |    (*)   |
+      // |          |               |          |
+      // +--------------------------+          |
+      //            |                          |
+      //            +--------------------------+
+      //
+      // |__________________________|
+      //  RECTANGLE: old module codes
+      //
+      //            |__________________________|
+      //             RECTANGLE: new module codes
 
-      // using `Set()` to remove duplicates since a module item can have multiple
-      // lessons
-      const newModuleCodes = [
-        ...new Set(moduleItems.map((each) => each.moduleCode)),
-      ];
+      const oldModuleCodes = getModuleCodes(getState);
 
       const moduleCodesNoLongerInUse = oldModuleCodes.filter(
         (each) => !newModuleCodes.includes(each)
@@ -185,10 +204,10 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
 
       // set tasks with old module codes to "Others"
       for (const task of tasks) {
-        const { _id, moduleCode } = task;
+        const { _id, tag } = task;
 
-        if (moduleCode in moduleCodesNoLongerInUseObject) {
-          dispatch(updateTaskFields(_id, { moduleCode: "Others" }));
+        if (tag in moduleCodesNoLongerInUseObject) {
+          dispatch(updateTaskFields(_id, { tag: "Others" }));
         }
       }
 
@@ -196,8 +215,8 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
       dispatch(setNUSModsURLInDatabase(NUSModsURL));
 
       dispatch(unscheduleTasks(offendingTaskIds));
-      dispatch(setModulesInTheme(newModuleCodes));
-      dispatch(setModules(moduleItems));
+      dispatch(updateModulesInTheme(oldModuleCodes, newModuleCodes));
+      dispatch(setModules(newModuleItems));
 
       // ======================================================================
       // Auto generate tutorial tasks
@@ -215,18 +234,18 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
       );
 
       // generate new tutorial tasks
-      for (const moduleItem of moduleItems) {
-        if (moduleItem.name === "Tutorial") {
-          const { moduleCode } = moduleItem;
+      for (const newModuleItem of newModuleItems) {
+        if (newModuleItem.name === "Tutorial") {
+          const { tag } = newModuleItem;
 
           const newTask = {
             _id: "auto-gen-" + uuidv4(),
 
-            name: `Do ${moduleCode} Tutorial`,
+            name: `Do ${tag} Tutorial`,
             dueDate: "--",
             dueTime: "--",
             durationHours: "1",
-            moduleCode: moduleCode,
+            tag: tag,
             links: [],
 
             row: -1,
@@ -253,20 +272,25 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
 export function removeNUSModsTimetable() {
   return function thunk(dispatch, getState) {
     const tasks = getState().tasks.data;
+    const moduleCodes = getModuleCodes(getState);
+
+    const moduleCodesObject = Object.fromEntries(
+      moduleCodes.map((each) => [each, true])
+    );
 
     // change all tasks to "Others"
     for (const task of tasks) {
-      const { _id, moduleCode } = task;
+      const { _id, tag } = task;
 
-      if (moduleCode !== "Others") {
-        dispatch(updateTaskFields(_id, { moduleCode: "Others" }));
+      if (tag in moduleCodesObject) {
+        dispatch(updateTaskFields(_id, { tag: "Others" }));
       }
     }
 
     dispatch(_setNUSModsURL(""));
     dispatch(setNUSModsURLInDatabase(""));
 
-    dispatch(setModulesInTheme([]));
+    dispatch(removeAllModulesInTheme());
     dispatch(setModules([]));
 
     // need to call `getState()` again since the `dispatch()` above would have
@@ -412,7 +436,7 @@ async function fetchModuleItems(NUSModsURL) {
           dueDate: "--",
           dueTime: "--",
           durationHours: durationHours,
-          moduleCode: moduleCode,
+          tag: moduleCode,
           links: [],
 
           row: getRow(startHour, startMin),
@@ -431,7 +455,7 @@ async function fetchModuleItems(NUSModsURL) {
   });
 
   const allModuleItems = (await Promise.all(promises)).flat();
-  return allModuleItems;
+  return [allModuleItems, moduleCodes];
 }
 
 function parseNUSModsURL(NUSModsURL) {
@@ -490,5 +514,17 @@ function getRow(hour, min) {
 function isEmptyObject(obj) {
   return Object.keys(obj).length === 0;
 }
+
+function getModuleCodes(getState) {
+  const mappingTagToColourName = getState().mappingTagToColourName;
+  const userTags = getState().userTags;
+
+  const allTags = Object.keys(mappingTagToColourName);
+  const userTagsObject = Object.fromEntries(userTags.map((tag) => [tag, true]));
+
+  const moduleCodes = allTags.filter((tag) => !(tag in userTagsObject));
+  return moduleCodes;
+}
+
 
 export default NUSModsURLSlice.reducer;

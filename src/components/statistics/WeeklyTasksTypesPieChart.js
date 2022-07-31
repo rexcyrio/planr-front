@@ -31,10 +31,10 @@ function toCountObject(object, keys) {
 
 function generateWeekModuleHoursData(countObject, weekTasks, modules) {
   for (const task of weekTasks) {
-    countObject[task.moduleCode] += task.timeUnits / 2;
+    countObject[task.tag] += task.timeUnits / 2;
   }
   for (const module of modules) {
-    countObject[module.moduleCode] += module.timeUnits / 2;
+    countObject[module.tag] += module.timeUnits / 2;
   }
   return Object.values(countObject);
 }
@@ -55,38 +55,31 @@ function generateBorderColourArray(stringColourArray, themeName) {
 }
 
 WeeklyTasksTypesPieChart.propTypes = {
-  durationType: PropTypes.string,
+  durationType: PropTypes.string.isRequired,
 };
 
 function WeeklyTasksTypesPieChart({ durationType }) {
   const tasks = useSelector(
     durationType === "All"
       ? (state) => state.tasks.data
-      : selectCurrentWeekTasks()
+      : (state) => selectCurrentWeekTasks(state)
   );
   const modules = useSelector((state) => state.modules);
   const themeName = useSelector((state) => state.themeName);
-  const mappingModuleCodeToColourName = useSelector(
-    (state) => state.mappingModuleCodeToColourName
+  const mappingTagToColourName = useSelector(
+    (state) => state.mappingTagToColourName
   );
 
-  const labels = Object.keys(mappingModuleCodeToColourName);
-  const stringColourArray = Object.values(mappingModuleCodeToColourName);
-  const moduleCodeHoursObject = toCountObject(
-    mappingModuleCodeToColourName,
-    labels
-  );
+  const labels = Object.keys(mappingTagToColourName);
+  const stringColourArray = Object.values(mappingTagToColourName);
+  const tagHoursObject = toCountObject(mappingTagToColourName, labels);
 
   const data = {
     labels,
     datasets: [
       {
         label: "Module hours",
-        data: generateWeekModuleHoursData(
-          moduleCodeHoursObject,
-          tasks,
-          modules
-        ),
+        data: generateWeekModuleHoursData(tagHoursObject, tasks, modules),
         backgroundColor: generateBackgroundColourArray(
           stringColourArray,
           themeName

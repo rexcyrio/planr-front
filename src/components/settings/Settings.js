@@ -10,8 +10,9 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { resetNUSModsURLStatus } from "../../store/slices/NUSModsURLSlice";
 import ImportNUSModsTimetable from "./ImportNUSModsTimetable";
-import MappingModuleCodeToColourName from "./MappingModuleCodeToColourName";
+import MappingTagToColourName from "./MappingTagToColourName";
 import ThemeName from "./ThemeName";
+import UserTagManager from "./UserTagManager";
 
 function Settings() {
   const dispatch = useDispatch();
@@ -40,7 +41,8 @@ function Settings() {
         <DialogContent sx={{ overflowX: "hidden" }}>
           <ImportNUSModsTimetable />
           <ThemeName />
-          <MappingModuleCodeToColourName />
+          <MappingTagToColourName />
+          <UserTagManager />
         </DialogContent>
 
         <DialogActions>

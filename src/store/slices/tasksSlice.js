@@ -11,12 +11,13 @@ import {
   UPDATING_REDUCER,
 } from "../storeHelpers/statusHelpers";
 import { setIsInitialSnackBarOpen } from "./isInitialSnackBarOpenSlice";
-import { _setMappingModuleCodeToColourName } from "./mappingModuleCodeToColourNameSlice";
+import { _setMappingTagToColourName } from "./mappingTagToColourNameSlice";
 import { refreshMatrix, setMatrix } from "./matrixSlice";
 import { _setModules } from "./modulesSlice";
 import { _setNUSModsURL } from "./NUSModsURLSlice";
 import { setTaskEditorPopupWarningOpen } from "./TaskEditorPopupSlice";
 import { _setThemeName } from "./themeNameSlice";
+import { _setUserTags } from "./userTagsSlice";
 
 const initialState = {
   data: [],
@@ -413,7 +414,8 @@ export const fetchTasks = createAsyncThunk(
 
         getItemFromDatabase("NUSModsURL", userId),
         getItemFromDatabase("themeName", userId),
-        getItemFromDatabase("mappingModuleCodeToColourName", userId),
+        getItemFromDatabase("mappingTagToColourName", userId),
+        getItemFromDatabase("userTags", userId),
       ]);
 
       const [
@@ -422,7 +424,8 @@ export const fetchTasks = createAsyncThunk(
 
         databaseNUSModsURL,
         databaseThemeName,
-        databaseMappingModuleCodeToColourName,
+        databaseMappingTagToColourName,
+        databaseUserTags,
       ] = items;
 
       dispatch(_setTasks(databaseTasks));
@@ -430,9 +433,8 @@ export const fetchTasks = createAsyncThunk(
 
       dispatch(_setNUSModsURL(databaseNUSModsURL));
       dispatch(_setThemeName(databaseThemeName));
-      dispatch(
-        _setMappingModuleCodeToColourName(databaseMappingModuleCodeToColourName)
-      );
+      dispatch(_setMappingTagToColourName(databaseMappingTagToColourName));
+      dispatch(_setUserTags(databaseUserTags));
 
       // refresh the matrix after fetching the task and module objects from database
       dispatch(refreshMatrix());
