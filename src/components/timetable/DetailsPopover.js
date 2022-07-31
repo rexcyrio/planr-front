@@ -5,9 +5,9 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import Tooltip from "@mui/material/Tooltip";
-import PropTypes from "prop-types";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selfPropTypes } from "../../helper/selfPropTypesHelper";
 import {
   markTaskAsComplete,
   markTaskAsIncomplete,
@@ -17,23 +17,7 @@ import TaskEditor from "../tasks/TaskEditor";
 import styles from "./TimetableCell.module.css";
 
 DetailsPopover.propTypes = {
-  self: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-
-    name: PropTypes.string.isRequired,
-    dueDate: PropTypes.string.isRequired,
-    dueTime: PropTypes.string.isRequired,
-    durationHours: PropTypes.string.isRequired,
-    moduleCode: PropTypes.string.isRequired,
-    links: PropTypes.array.isRequired,
-
-    row: PropTypes.number.isRequired,
-    col: PropTypes.number.isRequired,
-    timeUnits: PropTypes.number.isRequired,
-
-    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
-    mondayKey: PropTypes.array.isRequired,
-  }).isRequired,
+  self: selfPropTypes,
 };
 
 function DetailsPopover({ self }) {
@@ -125,7 +109,7 @@ function DetailsPopover({ self }) {
               justifyContent: "space-between",
             }}
           >
-            <div style={{ fontWeight: "bold" }}>{self.moduleCode}</div>
+            <div style={{ fontWeight: "bold" }}>{self.tag}</div>
             <div>
               {isModuleItem(self) ? (
                 <ModuleLinksManager self={self} />
