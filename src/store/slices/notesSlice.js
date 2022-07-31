@@ -30,14 +30,17 @@ const notesSlice = createSlice({
       return state;
     },
     _deleteNote: (state, action) => {
+      const notes = state.data;
       const id = action.payload;
-      const newNotes = state.data.filter((each) => each._id !== id);
-      state.data = newNotes;
+
+      const index = notes.findIndex((each) => each._id === id);
+      notes.splice(index, 1);
       return state;
     },
     _saveNote: (state, action) => {
-      const newNote = action.payload;
       const notes = state.data;
+      const newNote = action.payload;
+
       const index = notes.findIndex((each) => each._id === newNote._id);
       notes[index] = newNote;
       return state;
@@ -97,6 +100,10 @@ export function saveNote(self, tempNote) {
     dispatch(updateNotesInDatabase());
   };
 }
+
+// ============================================================================
+// Database thunks
+// ============================================================================
 
 export const fetchNotes = createAsyncThunk(
   "notes/fetchNotes",

@@ -16,7 +16,7 @@ TimetableCell.propTypes = {
 
 function TimetableCell({ row, col }) {
   const dispatch = useDispatch();
-  const tasks = useSelector(selectCurrentWeekTasks());
+  const tasks = useSelector((state) => selectCurrentWeekTasks(state));
   const modules = useSelector((state) => state.modules);
   const matrix = useSelector((state) => state.matrix);
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);

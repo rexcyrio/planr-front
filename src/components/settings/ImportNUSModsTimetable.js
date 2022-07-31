@@ -82,8 +82,8 @@ function ImportNUSModsTimetable() {
   const alertMessage = useMemo(
     () => (
       <Alert severity="warning">
-        When importing a new NUSMods timetable, tasks that were associated with
-        old modules will be converted to &quot;Others&quot; automatically.
+        When importing a new NUSMods timetable, tasks that are associated with 
+        old module codes will be converted to &quot;Others&quot; automatically.
       </Alert>
     ),
     []
