@@ -89,17 +89,19 @@ function Private() {
                     keepMounted: true,
                   }}
                 >
-                  <div style={{ height: "calc(3rem + 1px)" }} />
+                  <div style={{ height: "calc(3rem + 1px)" }}></div>
                   <div
                     style={{
-                      maxWidth: "25rem",
                       height: "calc(100vh - 3rem - 1px)",
+                      width: "20rem",
                     }}
                   >
                     <div style={{ height: "40%" }}>
                       <Links />
                     </div>
+
                     <Divider />
+
                     <div style={{ height: "calc(60% - 1px)" }}>
                       <Notes />
                     </div>
