@@ -35,17 +35,14 @@ function NoteItem({ self, deleteNote, exitEditMode }) {
     setEditMode(true);
   }
 
-  const confirmEditHandler = useCallback(
-    (e) => {
-      if (tempNote === "") {
-        deleteNote(self);
-      } else {
-        exitEditMode(self, tempNote);
-      }
-      setEditMode(false);
-    },
-    [self, deleteNote, exitEditMode, tempNote]
-  );
+  const confirmEditHandler = useCallback(() => {
+    if (tempNote === "") {
+      deleteNote(self);
+    } else {
+      exitEditMode(self, tempNote);
+    }
+    setEditMode(false);
+  }, [self, deleteNote, exitEditMode, tempNote]);
 
   const cancelEditHandler = useCallback(() => {
     setEditMode(false);
