@@ -79,7 +79,7 @@ function NoteItem({ self, deleteNote, exitEditMode }) {
   return (
     <>
       <ListItem
-        sx={{ overflowWrap: "break-word" }}
+        sx={{ overflowWrap: "break-word", backgroundColor: "#f5f5dc60" }}
         onDoubleClick={() => handleDoubleClick(self)}
         secondaryAction={secondaryAction}
       >
@@ -95,6 +95,7 @@ function NoteItem({ self, deleteNote, exitEditMode }) {
               size="small"
               multiline={true}
               maxRows={8}
+              sx={{ backgroundColor: "white" }}
               onChange={(e) => setTempNote(e.target.value)}
             />
             <div>
