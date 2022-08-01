@@ -12,6 +12,7 @@ import PropTypes from "prop-types";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { renameUserTag } from "../../store/slices/userTagsSlice";
+import { selectTags } from "../../store/storeHelpers/selectors";
 import { MAX_TAG_LENGTH, newTagNameStates } from "./UserTagManager";
 
 UserTagItemRenameDialog.propTypes = {
@@ -20,7 +21,7 @@ UserTagItemRenameDialog.propTypes = {
 
 function UserTagItemRenameDialog({ userTag }) {
   const dispatch = useDispatch();
-  const userTags = useSelector((state) => state.userTags);
+  const tags = useSelector((state) => selectTags(state));
   const [open, setOpen] = useState(false);
   const [newTagName, setNewTagName] = useState(userTag);
   const [newTagNameState, setNewTagNameState] = useState("NONE");
@@ -43,17 +44,19 @@ function UserTagItemRenameDialog({ userTag }) {
 
   const isTagNameValid = useCallback(
     (_newTagName) => {
-      if (_newTagName.trim() === "") {
+      const trimmedNewTagName = _newTagName.trim();
+
+      if (trimmedNewTagName === "") {
         setNewTagNameState("INVALID");
         return false;
       }
 
-      if (_newTagName.length > MAX_TAG_LENGTH) {
+      if (trimmedNewTagName.length > MAX_TAG_LENGTH) {
         setNewTagNameState("TOO_LONG");
         return false;
       }
 
-      if (userTags.includes(_newTagName)) {
+      if (tags.includes(trimmedNewTagName)) {
         setNewTagNameState("DUPLICATE");
         return false;
       }
@@ -61,7 +64,7 @@ function UserTagItemRenameDialog({ userTag }) {
       setNewTagNameState("NONE");
       return true;
     },
-    [userTags]
+    [tags]
   );
 
   const handleTagNameChange = useCallback(

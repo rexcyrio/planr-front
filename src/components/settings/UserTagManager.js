@@ -7,9 +7,11 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addUserTag } from "../../store/slices/userTagsSlice";
 import UserTagItem from "./UserTagItem";
+import { selectTags } from "../../store/storeHelpers/selectors";
 
 function UserTagManager() {
   const dispatch = useDispatch();
+  const tags = useSelector((state) => selectTags(state));
   const userTags = useSelector((state) => state.userTags);
   const [newTagName, setNewTagName] = useState("");
   const [newTagNameState, setNewTagNameState] = useState("NONE");
@@ -21,17 +23,19 @@ function UserTagManager() {
 
   const isTagNameValid = useCallback(
     (_newTagName) => {
-      if (_newTagName.trim() === "") {
+      const trimmedNewTagName = _newTagName.trim();
+
+      if (trimmedNewTagName === "") {
         setNewTagNameState("INVALID");
         return false;
       }
 
-      if (_newTagName.length > MAX_TAG_LENGTH) {
+      if (trimmedNewTagName.length > MAX_TAG_LENGTH) {
         setNewTagNameState("TOO_LONG");
         return false;
       }
 
-      if (userTags.includes(_newTagName)) {
+      if (tags.includes(trimmedNewTagName)) {
         setNewTagNameState("DUPLICATE");
         return false;
       }
@@ -39,7 +43,7 @@ function UserTagManager() {
       setNewTagNameState("NONE");
       return true;
     },
-    [userTags]
+    [tags]
   );
 
   const handleTagNameChange = useCallback(
@@ -148,7 +152,7 @@ export const MAX_TAG_LENGTH = 8;
 
 export const newTagNameStates = {
   NONE: {
-    helperText: " ",
+    helperText: "Leading and trailing spaces will be automatically removed",
     error: false,
   },
   TOO_LONG: {
