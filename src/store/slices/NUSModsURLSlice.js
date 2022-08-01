@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 import formatErrorMessage from "../../helper/formatErrorMessage";
 import { resetReduxStore } from "../storeHelpers/actions";
+import { selectModuleCodes } from "../storeHelpers/selectors";
 import {
   removeAllModulesInTheme,
   updateModulesInTheme,
@@ -192,7 +193,7 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
       //            |__________________________|
       //             RECTANGLE: new module codes
 
-      const oldModuleCodes = getModuleCodes(getState);
+      const oldModuleCodes = selectModuleCodes(getState());
 
       const moduleCodesNoLongerInUse = oldModuleCodes.filter(
         (each) => !newModuleCodes.includes(each)
@@ -272,7 +273,7 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
 export function removeNUSModsTimetable() {
   return function thunk(dispatch, getState) {
     const tasks = getState().tasks.data;
-    const moduleCodes = getModuleCodes(getState);
+    const moduleCodes = selectModuleCodes(getState());
 
     const moduleCodesObject = Object.fromEntries(
       moduleCodes.map((each) => [each, true])
@@ -514,17 +515,5 @@ function getRow(hour, min) {
 function isEmptyObject(obj) {
   return Object.keys(obj).length === 0;
 }
-
-function getModuleCodes(getState) {
-  const mappingTagToColourName = getState().mappingTagToColourName;
-  const userTags = getState().userTags;
-
-  const allTags = Object.keys(mappingTagToColourName);
-  const userTagsObject = Object.fromEntries(userTags.map((tag) => [tag, true]));
-
-  const moduleCodes = allTags.filter((tag) => !(tag in userTagsObject));
-  return moduleCodes;
-}
-
 
 export default NUSModsURLSlice.reducer;

@@ -29,10 +29,31 @@ export const selectTaskLinks = createSelector(
   }
 );
 
+export const selectModuleCodes = createSelector(
+  (state) => state.mappingTagToColourName,
+  (state) => state.userTags,
+  (mappingTagToColourName, userTags) => {
+    const allTags = Object.keys(mappingTagToColourName);
+    const userTagsObject = Object.fromEntries(
+      userTags.map((tag) => [tag, true])
+    );
+
+    const moduleCodes = allTags.filter((tag) => !(tag in userTagsObject));
+    return moduleCodes;
+  }
+);
+
 export const selectTags = createSelector(
   (state) => state.mappingTagToColourName,
-  (mappingTagToColourName) => {
-    return Object.keys(mappingTagToColourName);
+  (state) => state.userTags,
+  (mappingTagToColourName, userTags) => {
+    const allTags = Object.keys(mappingTagToColourName);
+    const userTagsObject = Object.fromEntries(
+      userTags.map((tag) => [tag, true])
+    );
+
+    const moduleCodes = allTags.filter((tag) => !(tag in userTagsObject));
+    return [...moduleCodes, ...userTags];
   }
 );
 

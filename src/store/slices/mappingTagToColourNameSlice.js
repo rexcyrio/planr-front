@@ -45,25 +45,8 @@ export function updateModulesInTheme(oldModuleCodes, newModuleCodes) {
   return function thunk(dispatch, getState) {
     const old_mappingTagToColourName = getState().mappingTagToColourName;
 
-    // ========================================================================
-    // split colour mapping into "module codes" and "user tags"
-    // ========================================================================
-
-    const userTags = getState().userTags;
-    const userTags_themeMapping = {};
-
     // deep copy
     const temp_mappingTagToColourName = { ...old_mappingTagToColourName };
-
-    for (const tag of userTags) {
-      userTags_themeMapping[tag] = temp_mappingTagToColourName[tag];
-
-      // delete colour mapping for user tags once copied over...
-      delete temp_mappingTagToColourName[tag];
-    }
-
-    // ...so that all that remains will be the colour mapping for module codes
-    const moduleCodes_themeMapping = { ...temp_mappingTagToColourName };
 
     // ========================================================================
     // remove colour mapping for modules no longer in use
@@ -76,17 +59,14 @@ export function updateModulesInTheme(oldModuleCodes, newModuleCodes) {
     ] = splitIntoVennDiagramSections(oldModuleCodes, newModuleCodes);
 
     for (const moduleCode of moduleCodes_noLongerInUse) {
-      delete moduleCodes_themeMapping[moduleCode];
+      delete temp_mappingTagToColourName[moduleCode];
     }
 
     // ========================================================================
     // find colours for the module codes that we've never seen before
     // ========================================================================
 
-    const unusedColourNames = getUnusedColourNames({
-      ...moduleCodes_themeMapping,
-      ...userTags_themeMapping,
-    });
+    const unusedColourNames = getUnusedColourNames(temp_mappingTagToColourName);
 
     const moduleCodes_unusedColourNames = moduleCodes_neverSeenBefore.slice(
       0,
@@ -99,25 +79,32 @@ export function updateModulesInTheme(oldModuleCodes, newModuleCodes) {
     for (let i = 0; i < moduleCodes_unusedColourNames.length; i++) {
       const moduleCode = moduleCodes_unusedColourNames[i];
       const colourName = unusedColourNames[i];
-      moduleCodes_themeMapping[moduleCode] = colourName;
+      temp_mappingTagToColourName[moduleCode] = colourName;
     }
 
     for (let i = 0; i < moduleCodes_randomColourNames.length; i++) {
       const moduleCode = moduleCodes_randomColourNames[i];
       const randomColourName = getRandomColourName();
-      moduleCodes_themeMapping[moduleCode] = randomColourName;
+      temp_mappingTagToColourName[moduleCode] = randomColourName;
     }
 
     // ========================================================================
     // sorting keys
     // ========================================================================
 
-    // display module codes first followed by user tags
-    // + sort module codes alphabetically
-    const new_mappingTagToColourName = {
-      ...sortObjectByKey(moduleCodes_themeMapping),
-      ...userTags_themeMapping,
-    };
+    const new_mappingTagToColourName = {};
+    const sortedModuleCodes = [...newModuleCodes].sort();
+
+    // manually copying to preserve ordering of module codes
+    for (const moduleCode of sortedModuleCodes) {
+      new_mappingTagToColourName[moduleCode] =
+        temp_mappingTagToColourName[moduleCode];
+
+      delete temp_mappingTagToColourName[moduleCode];
+    }
+
+    // copy over all colour mappings from `temp` to `new`
+    Object.assign(new_mappingTagToColourName, temp_mappingTagToColourName);
 
     dispatch(_setMappingTagToColourName(new_mappingTagToColourName));
     dispatch(updateMappingTagToColourNameInDatabase());
@@ -138,7 +125,6 @@ export function removeAllModulesInTheme() {
 
     dispatch(_setMappingTagToColourName(new_mappingTagToColourName));
     dispatch(updateMappingTagToColourNameInDatabase());
-
   };
 }
 
@@ -211,17 +197,6 @@ export const updateMappingTagToColourNameInDatabase = createAsyncThunk(
 // ============================================================================
 // Helper functions
 // ============================================================================
-
-function sortObjectByKey(obj) {
-  const keys = Object.keys(obj);
-
-  const sortedObject = keys.sort().reduce((newObject, key) => {
-    newObject[key] = obj[key];
-    return newObject;
-  }, {});
-
-  return sortedObject;
-}
 
 function getUnusedColourNames(mappingTagToColourName) {
   const isColourNameUsed = Object.fromEntries(
