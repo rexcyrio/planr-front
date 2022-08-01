@@ -3,7 +3,7 @@ import styles from "./LinksList.module.css";
 import Stack from "@mui/material/Stack";
 import LinkItem from "./LinkItem";
 import generateSkeletons from "../../helper/skeletonHelper";
-import TasksLinks from "./TimetableLinks";
+import TimetableLinks from "./TimetableLinks";
 import { FETCHING, FETCH_FAILURE } from "../helperComponents/DataStatus";
 import { useSelector } from "react-redux";
 
@@ -36,7 +36,7 @@ function LinksList() {
                 <LinkItem self={self} />
               </React.Fragment>
             ))}
-            <TasksLinks isPermLinksEmpty={links.length === 0} />
+            <TimetableLinks isPermLinksEmpty={links.length === 0} />
           </>
         )}
       </Stack>

@@ -1,10 +1,11 @@
 import PropTypes from "prop-types";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { allThemes } from "../../helper/themeHelper";
 import { setTimetableColumn } from "../../store/slices/timeSlice";
 import {
-  selectModuleLinks,
-  selectTaskLinks,
+  selectModuleLinksWithTags,
+  selectTaskLinksWithTags,
 } from "../../store/storeHelpers/selectors";
 import LinkItem from "./LinkItem";
 
@@ -16,10 +17,20 @@ function TimetableLinks({ isPermLinksEmpty }) {
   const dispatch = useDispatch();
 
   // links from modules that are scheduled today
-  const modulesLinks = useSelector((state) => selectModuleLinks(state));
+  const modulesLinks = useSelector((state) => selectModuleLinksWithTags(state));
 
   // links from tasks that are scheduled today
-  const tasksLinks = useSelector((state) => selectTaskLinks(state));
+  const tasksLinks = useSelector((state) => selectTaskLinksWithTags(state));
+
+  const mappingTagToColourName = useSelector(
+    (state) => state.mappingTagToColourName
+  );
+  const themeName = useSelector((state) => state.themeName);
+
+  function getColor(tag) {
+    const colourName = mappingTagToColourName[tag];
+    return allThemes[themeName][colourName];
+  }
 
   useEffect(() => {
     // set interval till the next day
@@ -38,16 +49,20 @@ function TimetableLinks({ isPermLinksEmpty }) {
     <div>There are no links.</div>
   ) : (
     <>
-      {modulesLinks.map((self) => (
-        <React.Fragment key={self._id}>
-          <LinkItem self={self} />
-        </React.Fragment>
-      ))}
-      {tasksLinks.map((self) => (
-        <React.Fragment key={self._id}>
-          <LinkItem self={self} />
-        </React.Fragment>
-      ))}
+      {modulesLinks.flatMap((self) => {
+        return self.links.map((linkObj) => (
+          <React.Fragment key={linkObj._id}>
+            <LinkItem self={linkObj} color={getColor(self.tag)} />
+          </React.Fragment>
+        ));
+      })}
+      {tasksLinks.flatMap((self) => {
+        return self.links.map((linkObj) => (
+          <React.Fragment key={linkObj._id}>
+            <LinkItem self={linkObj} color={getColor(self.tag)} />
+          </React.Fragment>
+        ));
+      })}
     </>
   );
 }

@@ -11,6 +11,16 @@ export const selectModuleLinks = createSelector(
   }
 );
 
+export const selectModuleLinksWithTags = createSelector(
+  (state) => state.time.timetableColumn,
+  (state) => state.modules,
+  (timetableColumn, modules) => {
+    return modules
+      .filter((module) => module.col === timetableColumn)
+      .map((module) => ({ links: module.links, tag: module.tag }));
+  }
+);
+
 export const selectTaskLinks = createSelector(
   (state) => state.time.timetableColumn,
   (state) => state.tasks.data,
@@ -26,6 +36,26 @@ export const selectTaskLinks = createSelector(
       .flatMap((task) => task.links);
 
     return scheduledRecurringTasksLinks.concat(currentWeekTasksLinks);
+  }
+);
+
+export const selectTaskLinksWithTags = createSelector(
+  (state) => state.time.timetableColumn,
+  (state) => state.tasks.data,
+  (timetableColumn, tasks) => {
+    const scheduledRecurringTasksLinksWithTags = tasks
+      .filter((task) => task.col === timetableColumn && task.dueDate === "--")
+      .map((task) => ({ links: task.links, tag: task.tag }));
+
+    const currentWeekTasksLinksWithTags = tasks
+      .filter(
+        (task) => task.col === timetableColumn && isCurrentWeek(task.mondayKey)
+      )
+      .map((task) => ({ links: task.links, tag: task.tag }));
+
+    return scheduledRecurringTasksLinksWithTags.concat(
+      currentWeekTasksLinksWithTags
+    );
   }
 );
 
