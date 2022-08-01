@@ -12,6 +12,7 @@ import {
   setLoggedInUsername,
   setUserId,
 } from "../store/slices/userSlice";
+import logo from "../icons/logo.svg";
 
 function Login() {
   const dispatch = useDispatch();
@@ -133,38 +134,79 @@ function Login() {
       >
         <Card
           sx={{
-            width: "20rem",
-            p: "0 2rem 0.5rem",
+            width: "48rem",
             m: "2rem 0",
 
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
             alignItems: "center",
 
             overflow: "visible",
             height: "fit-content",
           }}
         >
-          <h1>Welcome!</h1>
-          <Box component="form" onSubmit={handleSubmit}>
-            {loginUsernameTextField}
-            <br />
-            {loginPasswordTextField}
-            <br />
-            {button}
-          </Box>
+          <div
+            style={{
+              backgroundImage:
+                "linear-gradient(to bottom right, orange, beige)",
+              width: "50%",
+              height: "100%",
+              borderRadius: "5px 0 0 5px",
 
-          <p>
-            Don&apos;t have an account? <Link to="/signup">Sign up</Link>
-          </p>
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <img
+              src={logo}
+              alt="PlanR Logo"
+              className="logo"
+              style={{
+                width: "8rem",
+                marginTop: "3rem",
+                paddingLeft: "1rem",
+              }}
+            />
+            <p
+              style={{
+                fontSize: "1.5rem",
+                textAlign: "center",
+                padding: "1rem",
+              }}
+            >
+              Your NUSMods timetable and todo list scheduler all-in-one!
+            </p>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "0rem 2rem 0.5rem",
+            }}
+          >
+            <h1>Welcome!</h1>
+            <Box component="form" onSubmit={handleSubmit}>
+              {loginUsernameTextField}
+              <br />
+              {loginPasswordTextField}
+              <br />
+              {button}
+            </Box>
 
-          {error ? (
-            <Alert severity="error" sx={{ mb: "0.5rem" }}>
-              Username or password is incorrect.
-            </Alert>
-          ) : (
-            <></>
-          )}
+            <p>
+              Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+            </p>
+
+            {error ? (
+              <Alert severity="error" sx={{ mb: "0.5rem" }}>
+                Username or password is incorrect.
+              </Alert>
+            ) : (
+              <></>
+            )}
+          </div>
         </Card>
         <div style={{ marginTop: "5rem" }}>
           <LoginCarousel />
