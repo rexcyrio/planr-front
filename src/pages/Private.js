@@ -21,9 +21,8 @@ import Tooltip from "@mui/material/Tooltip";
 
 function Private() {
   const dispatch = useDispatch();
-  const isBigScreen = useMediaQuery({ query: "(min-width: 88em)" });
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 88em)" });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  console.log(isBigScreen);
 
   useEffect(() => {
     dispatch(fetchPermLinks());
@@ -41,12 +40,22 @@ function Private() {
         <MyDragLayer />
         <div className="background">
           <div className="grid">
-            {isBigScreen ? (
+            {!isSmallScreen ? (
               <>
-                <div className="links-section">
+                <div
+                  className="links-section"
+                  style={{
+                    borderBottomRightRadius: "5px",
+                  }}
+                >
                   <Links />
                 </div>
-                <div className="notes-section">
+                <div
+                  className="notes-section"
+                  style={{
+                    borderTopRightRadius: "5px",
+                  }}
+                >
                   <Notes />
                 </div>
               </>
