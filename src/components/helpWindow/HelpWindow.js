@@ -2,6 +2,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import HelpIcon from "@mui/icons-material/Help";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import InsightsIcon from "@mui/icons-material/Insights";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -14,6 +15,7 @@ import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import NUSMods_M_only from "./../../icons/logo NUSMods M only.svg";
 
 function HelpWindow() {
   const [open, setOpen] = useState(false);
@@ -60,11 +62,15 @@ function HelpWindow() {
               <span style={{ color: "#ff5138", fontWeight: "bold" }}>
                 NUSMods
               </span>{" "}
-              timetable via the Settings icon{" "}
+              timetable via the{" "}
               <InlineIcon>
-                <SettingsIcon fontSize="small" />{" "}
-              </InlineIcon>
-              at the top right hand corner.
+                <img
+                  src={NUSMods_M_only}
+                  alt="Import NUSMods timetable"
+                  style={{ height: "1.5rem", width: "1.5rem" }}
+                />
+              </InlineIcon>{" "}
+              icon at the top right hand corner.
             </DialogContentText>
             <DialogContentText component="li" sx={{ margin: "0.75rem 0" }}>
               Create tasks using the{" "}
@@ -82,6 +88,22 @@ function HelpWindow() {
               them.
             </DialogContentText>
           </ol>
+
+          <h4>
+            Settings{" "}
+            <InlineIcon>
+              <SettingsIcon fontSize="small" />
+            </InlineIcon>
+          </h4>
+
+          <ul>
+            <DialogContentText component="li">
+              Pick and choose colours for all your tasks.
+            </DialogContentText>
+            <DialogContentText component="li">
+              Create and manage your own tags.
+            </DialogContentText>
+          </ul>
 
           <h4>Lessons</h4>
           <ul>
@@ -109,7 +131,12 @@ function HelpWindow() {
             </DialogContentText>
           </ul>
 
-          <h4>Statistics</h4>
+          <h4>
+            Statistics{" "}
+            <InlineIcon>
+              <InsightsIcon fontSize="small" />
+            </InlineIcon>
+          </h4>
           <ul>
             <DialogContentText component="li">
               Navigate to different weeks to view the stats for that week.
