@@ -4,8 +4,8 @@
  * @returns An array of three elements representing the sets `A \ B`, `A ∩ B` and `B \ A` respectively
  */
 export function splitIntoVennDiagramSections(A, B) {
-  const objectA = A.map((each) => [each, true]);
-  const objectB = B.map((each) => [each, true]);
+  const objectA = Object.fromEntries(A.map((each) => [each, true]));
+  const objectB = Object.fromEntries(B.map((each) => [each, true]));
 
   const onlyA = [];
   const intersection = [];
