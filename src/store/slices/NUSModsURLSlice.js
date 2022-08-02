@@ -11,9 +11,9 @@ import { refreshMatrix } from "./matrixSlice";
 import { setModules } from "./modulesSlice";
 import {
   addTask,
+  deleteTask,
   unscheduleTasks,
   updateTaskFields,
-  _setTasks,
 } from "./tasksSlice";
 
 const initialState = {
@@ -243,11 +243,13 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
       const updatedTasks = getState().tasks.data;
 
       // remove previously auto generated tutorial tasks
-      dispatch(
-        _setTasks(
-          updatedTasks.filter((each) => each._id.slice(0, 9) !== "auto-gen-")
-        )
-      );
+      for (const task of updatedTasks) {
+        const { _id } = task;
+
+        if (_id.slice(0, 9) === "auto-gen-") {
+          dispatch(deleteTask(_id));
+        }
+      }
 
       // generate new tutorial tasks
       for (const newModuleItem of newModuleItems) {
@@ -314,11 +316,13 @@ export function removeNUSModsTimetable() {
     const updatedTasks = getState().tasks.data;
 
     // remove previously auto generated tutorial tasks
-    dispatch(
-      _setTasks(
-        updatedTasks.filter((each) => each._id.slice(0, 9) !== "auto-gen-")
-      )
-    );
+    for (const task of updatedTasks) {
+      const { _id } = task;
+
+      if (_id.slice(0, 9) === "auto-gen-") {
+        dispatch(deleteTask(_id));
+      }
+    }
 
     dispatch(refreshMatrix());
   };
