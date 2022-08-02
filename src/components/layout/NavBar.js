@@ -10,6 +10,7 @@ import {
 } from "../../store/slices/userSlice";
 import { resetReduxStore } from "../../store/storeHelpers/actions";
 import HelpWindow from "../helpWindow/HelpWindow";
+import ImportNUSModsTimetable from "../settings/ImportNUSModsTimetable";
 import Settings from "../settings/Settings";
 import Statistics from "../statistics/Statistics";
 import logo from "./../../icons/logo.svg";
@@ -59,6 +60,7 @@ function NavBar() {
         <div className={styles.utility}>
           {isAuthenticated && (
             <>
+              <ImportNUSModsTimetable />
               <Statistics />
               <HelpWindow />
               <Settings />

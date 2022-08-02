@@ -114,6 +114,31 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         return [moduleItems, moduleCodes];
       })();
 
+      // ======================================================================
+      // check for overlapping lessons in module items
+      // ======================================================================
+
+      const moduleItems_occupiedCells = {};
+
+      for (const newModuleItem of newModuleItems) {
+        const { row, col, timeUnits } = newModuleItem;
+
+        for (let i = 0; i < timeUnits; i++) {
+          const str = `${row + i},${col}`;
+
+          if (str in moduleItems_occupiedCells) {
+            dispatch(_setStatus("OVERLAPPING_LESSONS_ERROR"));
+            return;
+          }
+
+          moduleItems_occupiedCells[str] = true;
+        }
+      }
+
+      // ======================================================================
+      // check for current PlanR timetable <-> incoming NUSMods timetable clash
+      // ======================================================================
+
       const matrix = getState().matrix;
 
       // case 1: no conflicts  + autoRemoveTasks === false    => [FALL THROUGH] setMatrix like normal
@@ -134,7 +159,7 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
             // old module item => "__CS1010X..."
             if (id !== "0" && id.slice(0, 2) !== "__") {
               // case 2
-              dispatch(_setStatus("WARNING"));
+              dispatch(_setStatus("AUTO_UNSCHEDULE_WARNING"));
               return;
             }
           }
@@ -142,18 +167,8 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
       }
 
       // handling cases 1, 4
-      const occupiedCells = {};
       const tasks = getState().tasks.data;
       const offendingTaskIds = [];
-
-      for (const newModuleItem of newModuleItems) {
-        const { row, col, timeUnits } = newModuleItem;
-
-        for (let i = 0; i < timeUnits; i++) {
-          const str = `${row + i},${col}`;
-          occupiedCells[str] = true;
-        }
-      }
 
       for (const task of tasks) {
         const { _id, row, col, timeUnits } = task;
@@ -161,7 +176,7 @@ export function importNUSModsTimetable(NUSModsURL, autoRemoveTasks) {
         for (let i = 0; i < timeUnits; i++) {
           const str = `${row + i},${col}`;
 
-          if (str in occupiedCells) {
+          if (str in moduleItems_occupiedCells) {
             offendingTaskIds.push(_id);
             break;
           }
