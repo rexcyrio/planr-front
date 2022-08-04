@@ -18,47 +18,17 @@ const lineStyle = {
 };
 
 function getLeft(day) {
-  const devicePixelRatio = window.devicePixelRatio;
-
-  if (devicePixelRatio <= 1) {
-    return mappingDayToLeft_100[day];
-  } else if (devicePixelRatio <= 1.25) {
-    return mappingDayToLeft_125[day];
-  } else if (devicePixelRatio <= 1.5) {
-    return mappingDayToLeft_150[day];
-  } else {
-    return mappingDayToLeft_150[day];
-  }
+  return mappingDayToLeft_100[day];
 }
 
 const mappingDayToLeft_100 = {
-  1: "5.5625rem", // Monday
-  2: "11.5rem", // Tuesday
-  3: "17.5rem", // Wednesday
-  4: "23.5rem", // Thursday
-  5: "29.5rem", // Friday
-  6: "35.5rem", // Saturday
-  0: "41.4375rem", // Sunday
-};
-
-const mappingDayToLeft_125 = {
-  1: "5.5rem", // Monday
-  2: "11.5rem", // Tuesday
-  3: "17.4375rem", // Wednesday
-  4: "23.4375rem", // Thursday
-  5: "29.375rem", // Friday
-  6: "35.375rem", // Saturday
-  0: "41.34375rem", // Sunday
-};
-
-const mappingDayToLeft_150 = {
-  1: "5.46875rem", // Monday
-  2: "11.46875rem", // Tuesday
-  3: "17.4375rem", // Wednesday
-  4: "23.375rem", // Thursday
-  5: "29.34375rem", // Friday
-  6: "35.3125rem", // Saturday
-  0: "41.3125rem", // Sunday
+  1: "-0.4375rem", // Monday
+  2: "5.5rem", // Tuesday
+  3: "11.5rem", // Wednesday
+  4: "17.4375rem", // Thursday
+  5: "23.4375rem", // Friday
+  6: "29.4375rem", // Saturday
+  0: "35.375rem", // Sunday
 };
 
 function getTop(hour, min) {
@@ -87,16 +57,22 @@ function LineMarker() {
   return (
     <div
       style={{
-        position: "absolute",
-        left: getLeft(date.getDay()),
-        top: getTop(date.getHours(), date.getMinutes()),
-        zIndex: "6",
+        height: "0",
+        width: "0",
       }}
     >
       <div
         style={{
           display: "flex",
           alignItems: "center",
+
+          position: "relative",
+          left: getLeft(date.getDay()),
+          top: getTop(date.getHours(), date.getMinutes()),
+          zIndex: "6",
+          
+          width: "fit-content",
+          pointerEvents: "none",
         }}
       >
         <div style={circleStyle}></div>
@@ -106,4 +82,4 @@ function LineMarker() {
   );
 }
 
-export default LineMarker;
+export default React.memo(LineMarker);

@@ -5,9 +5,10 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import Tooltip from "@mui/material/Tooltip";
-import PropTypes from "prop-types";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import isModuleItem from "../../helper/isModuleItemHelper";
+import { selfPropTypes } from "../../helper/selfPropTypesHelper";
 import {
   markTaskAsComplete,
   markTaskAsIncomplete,
@@ -17,23 +18,7 @@ import TaskEditor from "../tasks/TaskEditor";
 import styles from "./TimetableCell.module.css";
 
 DetailsPopover.propTypes = {
-  self: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-
-    name: PropTypes.string.isRequired,
-    dueDate: PropTypes.string.isRequired,
-    dueTime: PropTypes.string.isRequired,
-    durationHours: PropTypes.string.isRequired,
-    moduleCode: PropTypes.string.isRequired,
-    links: PropTypes.array.isRequired,
-
-    row: PropTypes.number.isRequired,
-    col: PropTypes.number.isRequired,
-    timeUnits: PropTypes.number.isRequired,
-
-    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
-    mondayKey: PropTypes.array.isRequired,
-  }).isRequired,
+  self: selfPropTypes,
 };
 
 function DetailsPopover({ self }) {
@@ -125,7 +110,7 @@ function DetailsPopover({ self }) {
               justifyContent: "space-between",
             }}
           >
-            <div style={{ fontWeight: "bold" }}>{self.moduleCode}</div>
+            <div style={{ fontWeight: "bold" }}>{self.tag}</div>
             <div>
               {isModuleItem(self) ? (
                 <ModuleLinksManager self={self} />
@@ -139,7 +124,7 @@ function DetailsPopover({ self }) {
               )}
             </div>
           </div>
-          
+
           <p className={styles["task-name-paragraph"]}>{self.name}</p>
 
           {!isModuleItem(self) && (
@@ -159,9 +144,22 @@ function DetailsPopover({ self }) {
             </p>
           )}
 
+          {isModuleItem(self) && <p>Venue: {self.venue}</p>}
+
           {self.links.map((link) => (
             <React.Fragment key={link._id}>
-              <a href={link.url} rel="noreferrer noopener" target="_blank">
+              <a
+                href={link.url}
+                rel="noreferrer noopener"
+                target="_blank"
+                style={{
+                  display: "block",
+                  maxWidth: "12rem",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
                 {link.name}
               </a>
               <br />
@@ -171,10 +169,6 @@ function DetailsPopover({ self }) {
       </Popover>
     </>
   );
-}
-
-function isModuleItem(self) {
-  return self._id.slice(0, 2) === "__";
 }
 
 export default React.memo(DetailsPopover);

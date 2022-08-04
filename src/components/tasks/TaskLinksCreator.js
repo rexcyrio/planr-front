@@ -69,7 +69,24 @@ function TaskLinksCreator({
           <ListItemText
             primary={link.name}
             secondary={link.url}
-            sx={{ margin: 0 }}
+            sx={{
+              margin: 0,
+              maxWidth: "30rem",
+            }}
+            primaryTypographyProps={{
+              style: {
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              },
+            }}
+            secondaryTypographyProps={{
+              style: {
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              },
+            }}
           />
         </ListItem>
         <Divider />
@@ -103,7 +120,11 @@ function TaskLinksCreator({
   }, [linkName, linkURL, setLinkName, setLinkURL, setTaskLinks, setUrlState]);
 
   const linksList = useMemo(
-    () => <List disablePadding={true}>{generateTaskLinks()}</List>,
+    () => (
+      <List disablePadding={true} sx={{ mb: "1rem" }}>
+        {generateTaskLinks()}
+      </List>
+    ),
     [generateTaskLinks]
   );
 
@@ -158,19 +179,26 @@ function TaskLinksCreator({
   return (
     <>
       {linksList}
+      
       {isAddingLink ? (
-        <>
+        <div style={{ display: "flex" }}>
           {linkNameTextField}
           {linkURLTextField}
-          <Button
-            onClick={addTaskLinkHandler}
-            sx={{ ml: "0.5rem", marginTop: "1.1rem" }}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "3.5rem",
+              marginTop: "8px",
+              marginLeft: "0.5rem",
+            }}
           >
-            Add Link
-          </Button>
-        </>
+            <Button onClick={addTaskLinkHandler}>Add Link</Button>
+          </div>
+        </div>
       ) : (
-        <>{startAddingLinkButton}</>
+        startAddingLinkButton
       )}
     </>
   );

@@ -12,9 +12,11 @@ LinkItem.propTypes = {
     name: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
   }).isRequired,
+
+  color: PropTypes.string,
 };
 
-function LinkItem({ self }) {
+function LinkItem({ self, color }) {
   return (
     <Slide in={true} direction="right">
       <Tooltip
@@ -28,7 +30,10 @@ function LinkItem({ self }) {
           rel="noreferrer noopener"
           target="_blank"
         >
-          <div className={styles["link-button"]}>
+          <div
+            className={styles["link-button"]}
+            style={{ backgroundColor: color ? color : "#e4d1ff" }}
+          >
             <div className={styles["link-item-name"]}>{self.name}</div>
             <ArrowForwardIcon />
           </div>

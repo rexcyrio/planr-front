@@ -8,6 +8,7 @@ import NoMatch from "./pages/NoMatch";
 import Private from "./pages/Private";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
+import { setDevicePixelRatio } from "./store/slices/devicePixelRatioSlice";
 import {
   setIsAuthenticated,
   setLoggedInUsername,
@@ -51,6 +52,20 @@ function App() {
         dispatch(setUserId(json.userId));
       })
       .then(() => setIsLoading(false));
+  }, [dispatch]);
+
+  useEffect(() => {
+    function updatePixelRatio() {
+      const newDevicePixelRatio = window.devicePixelRatio;
+
+      dispatch(setDevicePixelRatio(newDevicePixelRatio));
+
+      window
+        .matchMedia(`(resolution: ${newDevicePixelRatio}dppx)`)
+        .addEventListener("change", updatePixelRatio, { once: true });
+    }
+
+    updatePixelRatio();
   }, [dispatch]);
 
   function makePrivate(component) {

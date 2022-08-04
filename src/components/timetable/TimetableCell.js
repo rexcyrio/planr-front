@@ -1,47 +1,48 @@
 import PropTypes from "prop-types";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDrop } from "react-dnd";
 import { useDispatch, useSelector } from "react-redux";
+import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
 import { setMatrix } from "../../store/slices/matrixSlice";
 import { updateTaskFields } from "../../store/slices/tasksSlice";
+import { selectCurrentWeekTasks } from "../../store/storeHelpers/selectors";
 import styles from "./TimetableCell.module.css";
 import TimetableCellCard from "./TimetableCellCard";
 
 TimetableCell.propTypes = {
-  self: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-
-    name: PropTypes.string.isRequired,
-    dueDate: PropTypes.string.isRequired,
-    dueTime: PropTypes.string.isRequired,
-    durationHours: PropTypes.string.isRequired,
-    moduleCode: PropTypes.string.isRequired,
-    links: PropTypes.array.isRequired,
-
-    row: PropTypes.number.isRequired,
-    col: PropTypes.number.isRequired,
-    timeUnits: PropTypes.number.isRequired,
-
-    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
-    mondayKey: PropTypes.array.isRequired,
-  }).isRequired,
-
   row: PropTypes.number.isRequired,
   col: PropTypes.number.isRequired,
-
-  isBlack: PropTypes.bool,
 };
 
-function TimetableCell({ self, row, col, isBlack = false }) {
+function TimetableCell({ row, col }) {
   const dispatch = useDispatch();
+  const tasks = useSelector((state) => selectCurrentWeekTasks(state));
+  const modules = useSelector((state) => state.modules);
   const matrix = useSelector((state) => state.matrix);
   const [droppingTaskTimeUnits, setDroppingTaskTimeUnits] = useState(0);
 
-  const numberOfAvailableTimeUnits = useMemo(() => {
-    function getId(row, col) {
-      return matrix[row][col];
+  const isBlack = useMemo(
+    () => matrix[row][col] === "black",
+    [matrix, row, col]
+  );
+
+  const getId = useCallback((row, col) => matrix[row][col], [matrix]);
+
+  const self = useMemo(() => {
+    const id = getId(row, col);
+
+    if (id === "0" || id === "black") {
+      return EMPTY_TASK;
     }
 
+    if (id.slice(0, 2) === "__") {
+      return modules.find((each) => each._id === id);
+    }
+
+    return tasks.find((each) => each._id === id);
+  }, [getId, row, col, modules, tasks]);
+
+  const numberOfAvailableTimeUnits = useMemo(() => {
     if (getId(row, col) !== "0") {
       return 0;
     }
@@ -52,7 +53,7 @@ function TimetableCell({ self, row, col, isBlack = false }) {
     }
 
     return rowPointer - row + 1;
-  }, [row, col, matrix]);
+  }, [getId, row, col]);
 
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
@@ -95,25 +96,32 @@ function TimetableCell({ self, row, col, isBlack = false }) {
     [matrix]
   );
 
+  if (
+    isNonEmptyItem(self) &&
+    row > 0 &&
+    getId(row - 1, col) === getId(row, col)
+  ) {
+    // render nothing to enable the cell to span multiple rows
+    return <></>;
+  }
+
   return (
-    <>
-      <td ref={drop} className={styles["cell"]} rowSpan={self.timeUnits}>
-        {isNonEmptyItem(self) && <TimetableCellCard self={self} />}
-        {isOver && (
-          <div
-            style={{
-              position: "absolute",
-              top: "0",
-              left: "0",
-              height: getRem(droppingTaskTimeUnits),
-              width: "5.9rem",
-              zIndex: "4",
-              backgroundColor: canDrop ? "green" : "red",
-            }}
-          ></div>
-        )}
-      </td>
-    </>
+    <td ref={drop} className={styles["cell"]} rowSpan={self.timeUnits}>
+      {isNonEmptyItem(self) ? <TimetableCellCard self={self} /> : <>&nbsp;</>}
+      {isOver && (
+        <div
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "0",
+            height: getRem(droppingTaskTimeUnits),
+            width: "5.9rem",
+            zIndex: "4",
+            backgroundColor: canDrop ? "green" : "red",
+          }}
+        ></div>
+      )}
+    </td>
   );
 }
 
@@ -131,33 +139,25 @@ function getRem(timeUnits) {
     return `${mappingTimeUnitsToRemUnits[timeUnits]}rem`;
   }
 
-  const numGaps = Math.floor((timeUnits - 1) / 4);
-  const gapsRem = numGaps * 1.35;
-
-  const numChunks = Math.floor(timeUnits / 4);
-  const chunksRem = (numChunks - 1) * 4.2;
-
-  const remainder = timeUnits % 4;
-  const remainderRem = Math.max((remainder - 1) * 1.4, 0);
-
-  const total = roundOff(5.5 + gapsRem + chunksRem + remainderRem, 2);
+  const adjustments = Math.floor((timeUnits - 1) / 2) * 0.05;
+  const total = roundOff(timeUnits * 1.35 + adjustments, 2);
   return `${total}rem`;
 }
 
 const mappingTimeUnitsToRemUnits = {
   0: 0,
 
-  1: 1.3,
+  1: 1.35,
   2: 2.7,
   3: 4.1,
-  4: 5.5,
+  4: 5.45,
 
   5: 6.85,
-  6: 8.25,
-  7: 9.65,
-  8: 11.05,
+  6: 8.2,
+  7: 9.6,
+  8: 10.95,
 
-  9: 12.4,
+  9: 12.35,
 };
 
 export default React.memo(TimetableCell);

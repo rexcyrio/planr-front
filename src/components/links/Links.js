@@ -10,9 +10,9 @@ import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewPermLink, fetchPermLinks } from "../../store/slices/linksSlice";
+import { addNewPermLink } from "../../store/slices/linksSlice";
 import DataStatus from "../helperComponents/DataStatus";
 import styles from "./Links.module.css";
 import LinksEditor from "./LinksEditor";
@@ -25,10 +25,6 @@ function Links() {
   const [newName, setNewName] = useState("");
   const [newURL, setNewURL] = useState("");
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    dispatch(fetchPermLinks());
-  }, [dispatch]);
 
   function addNewLink() {
     dispatch(addNewPermLink(newName, newURL));

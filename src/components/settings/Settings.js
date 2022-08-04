@@ -7,18 +7,14 @@ import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { resetNUSModsURLStatus } from "../../store/slices/NUSModsURLSlice";
-import ImportNUSModsTimetable from "./ImportNUSModsTimetable";
-import MappingModuleCodeToColourName from "./MappingModuleCodeToColourName";
+import MappingTagToColourName from "./MappingTagToColourName";
 import ThemeName from "./ThemeName";
+import UserTagManager from "./UserTagManager";
 
 function Settings() {
-  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
 
   const openDialog = () => {
-    dispatch(resetNUSModsURLStatus());
     setOpen(true);
   };
 
@@ -38,9 +34,9 @@ function Settings() {
         <DialogTitle>Settings</DialogTitle>
 
         <DialogContent sx={{ overflowX: "hidden" }}>
-          <ImportNUSModsTimetable />
           <ThemeName />
-          <MappingModuleCodeToColourName />
+          <MappingTagToColourName />
+          <UserTagManager />
         </DialogContent>
 
         <DialogActions>

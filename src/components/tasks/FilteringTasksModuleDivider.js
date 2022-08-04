@@ -2,7 +2,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import Divider from "@mui/material/Divider";
 import React from "react";
 
-function FilteringTasksModuleDivider() {
+function FilteringTasksTagsDivider() {
   return (
     <Divider>
       <DialogContentText
@@ -11,10 +11,10 @@ function FilteringTasksModuleDivider() {
           m: "0.5rem 0",
         }}
       >
-        Modules
+        Tags
       </DialogContentText>
     </Divider>
   );
 }
 
-export default React.memo(FilteringTasksModuleDivider);
+export default React.memo(FilteringTasksTagsDivider);

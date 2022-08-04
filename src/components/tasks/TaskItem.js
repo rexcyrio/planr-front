@@ -7,11 +7,11 @@ import Grow from "@mui/material/Grow";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Tooltip from "@mui/material/Tooltip";
-import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
+import { selfPropTypes } from "../../helper/selfPropTypesHelper";
 import { getAccentColour, getBackgroundColour } from "../../helper/themeHelper";
 import { blackenCells, refreshMatrix } from "../../store/slices/matrixSlice";
 import {
@@ -22,31 +22,15 @@ import TaskEditor from "./TaskEditor";
 import classes from "./TaskItem.module.css";
 
 TaskItem.propTypes = {
-  self: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-
-    name: PropTypes.string.isRequired,
-    dueDate: PropTypes.string.isRequired,
-    dueTime: PropTypes.string.isRequired,
-    durationHours: PropTypes.string.isRequired,
-    moduleCode: PropTypes.string.isRequired,
-    links: PropTypes.array.isRequired,
-
-    row: PropTypes.number.isRequired,
-    col: PropTypes.number.isRequired,
-    timeUnits: PropTypes.number.isRequired,
-
-    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
-    mondayKey: PropTypes.array.isRequired,
-  }).isRequired,
+  self: selfPropTypes,
 };
 
 function TaskItem({ self }) {
   const dispatch = useDispatch();
   const themeName = useSelector((state) => state.themeName);
   const mondayKey = useSelector((state) => state.time.mondayKey);
-  const mappingModuleCodeToColourName = useSelector(
-    (state) => state.mappingModuleCodeToColourName
+  const mappingTagToColourName = useSelector(
+    (state) => state.mappingTagToColourName
   );
   const [isMouseOver, setIsMouseOver] = useState(false);
 
@@ -102,13 +86,13 @@ function TaskItem({ self }) {
     };
   }, [self, drag, mondayKey]);
 
-  function handleMouseEnter() {
+  const handleMouseEnter = useCallback(() => {
     setIsMouseOver(true);
-  }
+  }, []);
 
-  function handleMouseLeave() {
+  const handleMouseLeave = useCallback(() => {
     setIsMouseOver(false);
-  }
+  }, []);
 
   useEffect(() => {
     preview(getEmptyImage(), { captureDraggingState: true });
@@ -122,13 +106,13 @@ function TaskItem({ self }) {
             style={{
               color: getAccentColour(
                 themeName,
-                mappingModuleCodeToColourName,
+                mappingTagToColourName,
                 self,
                 mondayKey
               ),
             }}
           >
-            [{self.moduleCode}]
+            [{self.tag}]
           </span>{" "}
           {self.name} ({self.durationHours} hr)
         </div>
@@ -138,7 +122,7 @@ function TaskItem({ self }) {
             style={{
               color: getAccentColour(
                 themeName,
-                mappingModuleCodeToColourName,
+                mappingTagToColourName,
                 self,
                 mondayKey
               ),
@@ -152,7 +136,7 @@ function TaskItem({ self }) {
               style={{
                 color: getAccentColour(
                   themeName,
-                  mappingModuleCodeToColourName,
+                  mappingTagToColourName,
                   self,
                   mondayKey
                 ),
@@ -165,7 +149,7 @@ function TaskItem({ self }) {
         )}
       </div>
     ),
-    [self, mappingModuleCodeToColourName, themeName, mondayKey]
+    [self, mappingTagToColourName, themeName, mondayKey]
   );
 
   const dragIcon = useMemo(
@@ -192,6 +176,34 @@ function TaskItem({ self }) {
     [self, mondayKey, getDraggableState]
   );
 
+  const restoreTaskButton = useMemo(
+    () => (
+      <Tooltip title="Restore task">
+        <IconButton
+          size="small"
+          onClick={() => dispatch(markTaskAsIncomplete(self._id))}
+        >
+          <RestoreIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    [dispatch, self._id]
+  );
+
+  const markTaskAsCompleteButton = useMemo(
+    () => (
+      <Tooltip title="Mark task as complete">
+        <IconButton
+          size="small"
+          onClick={() => dispatch(markTaskAsComplete(self._id))}
+        >
+          <DoneIcon />
+        </IconButton>
+      </Tooltip>
+    ),
+    [dispatch, self._id]
+  );
+
   return (
     <Grow in={true}>
       <Paper onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
@@ -199,7 +211,7 @@ function TaskItem({ self }) {
           style={{
             backgroundColor: getBackgroundColour(
               themeName,
-              mappingModuleCodeToColourName,
+              mappingTagToColourName,
               self,
               mondayKey
             ),
@@ -239,25 +251,9 @@ function TaskItem({ self }) {
           >
             <TaskEditor self={self} />
 
-            {self.isCompleted[mondayKey] !== undefined ? (
-              <Tooltip title="Restore task">
-                <IconButton
-                  size="small"
-                  onClick={() => dispatch(markTaskAsIncomplete(self._id))}
-                >
-                  <RestoreIcon />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip title="Mark task as complete">
-                <IconButton
-                  size="small"
-                  onClick={() => dispatch(markTaskAsComplete(self._id))}
-                >
-                  <DoneIcon />
-                </IconButton>
-              </Tooltip>
-            )}
+            {self.isCompleted[mondayKey] !== undefined
+              ? restoreTaskButton
+              : markTaskAsCompleteButton}
           </div>
         </div>
       </Paper>

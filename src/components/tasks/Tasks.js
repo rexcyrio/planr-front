@@ -1,15 +1,15 @@
 import Stack from "@mui/material/Stack";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
 import generateSkeletons from "../../helper/skeletonHelper";
-import {
-  getFilterStateFromLocalStorage,
-  mappingFilterOptionToFilterFunction,
-} from "../../store/slices/filteringTasksSlice";
+import { convertTagToFilterOptionKey } from "../../store/slices/filteringTasksSlice";
 import { mappingSortByToSortFunction } from "../../store/slices/sortingTasksSlice";
 import { fetchTasks } from "../../store/slices/tasksSlice";
-import { selectCurrentWeekTasks } from "../../store/storeHelpers/selectors";
+import {
+  selectCurrentWeekTasks,
+  selectTags,
+} from "../../store/storeHelpers/selectors";
 import DataStatus, {
   FETCHING,
   FETCH_FAILURE,
@@ -27,16 +27,38 @@ const EMPTY_TASK_ITEM = <TaskItem self={EMPTY_TASK} />;
 function Tasks() {
   const dispatch = useDispatch();
   const status = useSelector((state) => state.tasks.status);
-  const tasks = useSelector(selectCurrentWeekTasks());
+  const tasks = useSelector((state) => selectCurrentWeekTasks(state));
   const mondayKey = useSelector((state) => state.time.mondayKey);
 
   const filterState = useSelector((state) => state.filteringTasks);
   const sortBy = useSelector((state) => state.sortingTasks.sortBy);
+  const tags = useSelector((state) => selectTags(state));
 
   useEffect(() => {
     dispatch(fetchTasks());
-    dispatch(getFilterStateFromLocalStorage());
   }, [dispatch]);
+
+  const mappingFilterOptionToFilterFunction = useMemo(() => {
+    const mapping = {
+      "is scheduled": (each) => each.row !== -1 && each.col !== -1,
+      "is unscheduled": (each) => each.row === -1 && each.col === -1,
+
+      "is completed": (each) => mondayKey in each.isCompleted,
+      "is incomplete": (each) => !(mondayKey in each.isCompleted),
+
+      "is recurring": (each) => each.dueDate === "--",
+      "is one-off": (each) => each.dueDate !== "--",
+    };
+
+    for (const tag of tags) {
+      const filterOptionKey = convertTagToFilterOptionKey(tag);
+      const filterFunction = (each) => each.tag === tag;
+
+      mapping[filterOptionKey] = filterFunction;
+    }
+
+    return mapping;
+  }, [mondayKey, tags]);
 
   function filterTasks(tasks) {
     const { filterMode, anyAll, filterOptions } = filterState;
@@ -57,19 +79,7 @@ function Tasks() {
         const filterFunction =
           mappingFilterOptionToFilterFunction[filterOption];
 
-        let filteredTasks;
-
-        if (
-          filterOption === "is completed" ||
-          filterOption === "is incomplete"
-        ) {
-          // need to supply mondayKey before filtering
-          filteredTasks = tasks.filter((each) =>
-            filterFunction(mondayKey)(each)
-          );
-        } else {
-          filteredTasks = tasks.filter((each) => filterFunction(each));
-        }
+        const filteredTasks = tasks.filter((each) => filterFunction(each));
 
         for (const task of filteredTasks) {
           const { _id } = task;
@@ -91,17 +101,7 @@ function Tasks() {
         const filterFunction =
           mappingFilterOptionToFilterFunction[filterOption];
 
-        if (
-          filterOption === "is completed" ||
-          filterOption === "is incomplete"
-        ) {
-          // need to supply mondayKey before filtering
-          tasksToShow = tasksToShow.filter((each) =>
-            filterFunction(mondayKey)(each)
-          );
-        } else {
-          tasksToShow = tasksToShow.filter((each) => filterFunction(each));
-        }
+        tasksToShow = tasksToShow.filter((each) => filterFunction(each));
       }
 
       return tasksToShow;
@@ -117,6 +117,25 @@ function Tasks() {
 
     if (sortBy === "Date created (newest)") {
       return tasks.reverse();
+    }
+
+    if (sortBy === "Tag name") {
+      const mappingTagToTasks = Object.fromEntries(
+        tags.map((tag) => [tag, []])
+      );
+
+      for (const task of tasks) {
+        const { tag } = task;
+        mappingTagToTasks[tag].push(task);
+      }
+
+      const sortedTasks = [];
+
+      for (const tag of tags) {
+        sortedTasks.push(...mappingTagToTasks[tag]);
+      }
+
+      return sortedTasks;
     }
 
     const sortFunction = mappingSortByToSortFunction[sortBy];
@@ -182,7 +201,6 @@ function Tasks() {
         sx={{
           marginX: "0.5rem",
           overflowY: "auto",
-          marginBottom: "10rem",
           height: "calc(100% - 8.15rem)",
         }}
       >

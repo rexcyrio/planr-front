@@ -3,14 +3,9 @@ import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  addNote,
-  deleteNote,
-  fetchNotes,
-  saveNote,
-} from "../../store/slices/notesSlice";
+import { addNote, deleteNote, saveNote } from "../../store/slices/notesSlice";
 import DataStatus, {
   FETCHING,
   FETCH_FAILURE,
@@ -23,10 +18,6 @@ function Notes() {
   const notes = useSelector((state) => state.notes.data);
   const dataState = useSelector((state) => state.notes.status);
   const [newNoteText, setNewNoteText] = useState("");
-
-  useEffect(() => {
-    dispatch(fetchNotes());
-  }, [dispatch]);
 
   function insertNote() {
     dispatch(addNote(newNoteText));
@@ -106,4 +97,4 @@ function Notes() {
   );
 }
 
-export default Notes;
+export default React.memo(Notes);

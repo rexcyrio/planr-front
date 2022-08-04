@@ -6,30 +6,14 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { selfPropTypes } from "../../helper/selfPropTypesHelper";
 import { addModuleLinks } from "../../store/slices/modulesSlice";
 import TaskLinksCreator from "../tasks/TaskLinksCreator";
 
 ModuleLinksManager.propTypes = {
-  self: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-
-    name: PropTypes.string.isRequired,
-    dueDate: PropTypes.string.isRequired,
-    dueTime: PropTypes.string.isRequired,
-    durationHours: PropTypes.string.isRequired,
-    moduleCode: PropTypes.string.isRequired,
-    links: PropTypes.array.isRequired,
-
-    row: PropTypes.number.isRequired,
-    col: PropTypes.number.isRequired,
-    timeUnits: PropTypes.number.isRequired,
-
-    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
-    mondayKey: PropTypes.array.isRequired,
-  }).isRequired,
+  self: selfPropTypes,
 };
 
 function ModuleLinksManager({ self }) {

@@ -95,4 +95,4 @@ function TimetableNavigator() {
   );
 }
 
-export default TimetableNavigator;
+export default React.memo(TimetableNavigator);
