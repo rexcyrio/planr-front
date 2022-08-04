@@ -5,7 +5,7 @@ export const EMPTY_TASK = {
   dueDate: "",
   dueTime: "",
   durationHours: "",
-  moduleCode: "",
+  tag: "",
   links: [],
 
   row: -1,

@@ -17,40 +17,25 @@ import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selfPropTypes } from "../../helper/selfPropTypesHelper";
 import { setTaskEditorPopupWarningOpen } from "../../store/slices/TaskEditorPopupSlice";
 import { deleteTask, saveEditedTask } from "../../store/slices/tasksSlice";
-import { selectModuleCodes } from "../../store/storeHelpers/selectors";
+import { selectTags } from "../../store/storeHelpers/selectors";
 import TaskLinksCreator from "./TaskLinksCreator";
 
 TaskEditor.propTypes = {
-  self: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-
-    name: PropTypes.string.isRequired,
-    dueDate: PropTypes.string.isRequired,
-    dueTime: PropTypes.string.isRequired,
-    durationHours: PropTypes.string.isRequired,
-    moduleCode: PropTypes.string.isRequired,
-    links: PropTypes.array.isRequired,
-
-    row: PropTypes.number.isRequired,
-    col: PropTypes.number.isRequired,
-    timeUnits: PropTypes.number.isRequired,
-
-    isCompleted: PropTypes.objectOf(PropTypes.bool).isRequired,
-    mondayKey: PropTypes.array.isRequired,
-  }).isRequired,
+  self: selfPropTypes,
 };
 
 function TaskEditor({ self }) {
   const dispatch = useDispatch();
-  const moduleCodes = useSelector((state) => selectModuleCodes(state));
+  const tags = useSelector((state) => selectTags(state));
 
   const [name, setName] = useState(self.name);
   const [dueDate, setDueDate] = useState(self.dueDate);
   const [dueTime, setDueTime] = useState(self.dueTime);
   const [durationHours, setDurationHours] = useState(self.durationHours);
-  const [moduleCode, setModuleCode] = useState(self.moduleCode);
+  const [tag, setTag] = useState(self.tag);
   const [open, setOpen] = useState(false);
   const [taskLinks, setTaskLinks] = useState(self.links);
   const [linkName, setLinkName] = useState("");
@@ -64,7 +49,7 @@ function TaskEditor({ self }) {
     setDueDate(self.dueDate);
     setDueTime(self.dueTime);
     setDurationHours(self.durationHours);
-    setModuleCode(self.moduleCode);
+    setTag(self.tag);
     setTaskLinks(self.links);
     setLinkName("");
     setLinkURL("");
@@ -113,7 +98,7 @@ function TaskEditor({ self }) {
       dueDate: dueDate,
       dueTime: dueTime,
       durationHours: durationHours,
-      moduleCode: moduleCode,
+      tag: tag,
       links: taskLinks,
 
       row: self.row,
@@ -135,7 +120,7 @@ function TaskEditor({ self }) {
       dueDate: dueDate,
       dueTime: dueTime,
       durationHours: durationHours,
-      moduleCode: moduleCode,
+      tag: tag,
       links: taskLinks,
 
       row: self.row,
@@ -160,27 +145,27 @@ function TaskEditor({ self }) {
     [handleOpen]
   );
 
-  const moduleCodesSelector = useMemo(
+  const taskTagSelector = useMemo(
     () => (
       <FormControl sx={{ width: "10rem", mr: "1rem" }} margin="dense">
-        <InputLabel id="Module Code">Module Code</InputLabel>
+        <InputLabel id="Tag">Tag</InputLabel>
         <Select
-          labelId="Module Code"
-          id="moduleCode"
-          value={moduleCode}
-          label="Module Code"
-          onChange={(e) => setModuleCode(e.target.value)}
+          labelId="Tag"
+          id="tag"
+          value={tag}
+          label="Tag"
+          onChange={(e) => setTag(e.target.value)}
           required
         >
-          {moduleCodes.map((moduleCode) => (
-            <MenuItem key={moduleCode} value={moduleCode}>
-              {moduleCode}
+          {tags.map((_tag) => (
+            <MenuItem key={_tag} value={_tag}>
+              {_tag}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
     ),
-    [moduleCode, moduleCodes]
+    [tag, tags]
   );
 
   const taskNameTextField = useMemo(
@@ -234,7 +219,6 @@ function TaskEditor({ self }) {
         variant="outlined"
         required
         value={dueDate}
-        placeholder=""
         onChange={(e) => setDueDate(e.target.value)}
         helperText=" "
       />
@@ -260,7 +244,7 @@ function TaskEditor({ self }) {
     [dueTime]
   );
 
-  const dialogAction = useMemo(
+  const dialogActions = useMemo(
     () => (
       <DialogActions sx={{ justifyContent: "space-between" }}>
         <Box sx={{ ml: "0.5rem" }}>
@@ -292,7 +276,7 @@ function TaskEditor({ self }) {
         <DialogTitle>Edit your Task</DialogTitle>
         <Box component="form" onSubmit={handleSubmit}>
           <DialogContent>
-            {moduleCodesSelector}
+            {taskTagSelector}
             {taskNameTextField}
             <br />
             {taskDurationTextField}
@@ -313,7 +297,7 @@ function TaskEditor({ self }) {
               setUrlState={setUrlState}
             />
           </DialogContent>
-          {dialogAction}
+          {dialogActions}
         </Box>
 
         <AutoUnscheduleSelfPopup continueFunction={continueFunction} />
@@ -408,4 +392,4 @@ const durationStates = {
 const unsignedFloatRegex =
   /(^0\.\d*[1-9]\d*$)|(^[1-9]\d*\.\d+$)|(^[1-9]\d*$)/gm;
 
-export default TaskEditor;
+export default React.memo(TaskEditor);

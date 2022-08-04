@@ -95,7 +95,7 @@ export const allColourNames = [
 
 export function getBackgroundColour(
   themeName,
-  mappingModuleCodeToColourName,
+  mappingTagToColourName,
   self,
   mondayKey
 ) {
@@ -108,15 +108,15 @@ export function getBackgroundColour(
     return "lightgrey";
   }
 
-  const { moduleCode } = self;
-  const colourName = mappingModuleCodeToColourName[moduleCode];
+  const { tag } = self;
+  const colourName = mappingTagToColourName[tag];
   const hexColour = allThemes[themeName][colourName];
   return hexColour;
 }
 
 export function getAccentColour(
   themeName,
-  mappingModuleCodeToColourName,
+  mappingTagToColourName,
   self,
   mondayKey
 ) {
@@ -129,8 +129,8 @@ export function getAccentColour(
     return "grey";
   }
 
-  const { moduleCode } = self;
-  const colourName = mappingModuleCodeToColourName[moduleCode];
+  const { tag } = self;
+  const colourName = mappingTagToColourName[tag];
   // "lightPink" ==> "darkPink"
   const accentColourName = "dark" + colourName.slice(5);
   const hexColour = allThemes[themeName][accentColourName];

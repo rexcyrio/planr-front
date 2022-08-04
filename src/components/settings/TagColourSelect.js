@@ -6,15 +6,15 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { allColourNames } from "../../helper/themeHelper";
-import { updateModuleColour } from "../../store/slices/mappingModuleCodeToColourNameSlice";
+import { updateTagColour } from "../../store/slices/mappingTagToColourNameSlice";
 import ColourIcon from "./ColourIcon";
 
-ModuleColourSelect.propTypes = {
-  moduleCode: PropTypes.string.isRequired,
+TagColourSelect.propTypes = {
+  tag: PropTypes.string.isRequired,
   colourName: PropTypes.string.isRequired,
 };
 
-function ModuleColourSelect({ moduleCode, colourName }) {
+function TagColourSelect({ tag, colourName }) {
   const dispatch = useDispatch();
   const themeName = useSelector((state) => state.themeName);
 
@@ -27,7 +27,16 @@ function ModuleColourSelect({ moduleCode, colourName }) {
         justifyContent: "space-between",
       }}
     >
-      <div>{moduleCode}</div>
+      <div
+        title={tag}
+        style={{
+          width: "100%",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {tag}
+      </div>
 
       <Select
         renderValue={(_) => (
@@ -43,17 +52,17 @@ function ModuleColourSelect({ moduleCode, colourName }) {
             <ColourIcon themeName={themeName} colourName={colourName} />
           </div>
         )}
-        id={`${moduleCode}_colourName`}
+        id={`${tag}_colourName`}
         value={colourName}
         onChange={(e) => {
-          dispatch(updateModuleColour(moduleCode, e.target.value));
+          dispatch(updateTagColour(tag, e.target.value));
         }}
       >
-        {allColourNames.map((otherColourName) => (
-          <MenuItem key={otherColourName} value={otherColourName}>
-            <ListItemText>{getDisplayName(otherColourName)}</ListItemText>
+        {allColourNames.map((_colourName) => (
+          <MenuItem key={_colourName} value={_colourName}>
+            <ListItemText>{getDisplayName(_colourName)}</ListItemText>
             <ListItemIcon>
-              <ColourIcon themeName={themeName} colourName={otherColourName} />
+              <ColourIcon themeName={themeName} colourName={_colourName} />
             </ListItemIcon>
           </MenuItem>
         ))}
@@ -66,4 +75,4 @@ function getDisplayName(colourName) {
   return colourName.slice(5).toLowerCase();
 }
 
-export default React.memo(ModuleColourSelect);
+export default React.memo(TagColourSelect);

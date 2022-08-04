@@ -3,6 +3,7 @@ import Skeleton from "@mui/material/Skeleton";
 
 function generateSkeletons(count, child) {
   const arr = [];
+
   for (let i = 0; i < count; i++) {
     arr.push(
       <React.Fragment key={i}>
@@ -17,6 +18,7 @@ function generateSkeletons(count, child) {
       </React.Fragment>
     );
   }
+
   return arr;
 }
 

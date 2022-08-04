@@ -11,6 +11,16 @@ export const selectModuleLinks = createSelector(
   }
 );
 
+export const selectModuleLinksWithTags = createSelector(
+  (state) => state.time.timetableColumn,
+  (state) => state.modules,
+  (timetableColumn, modules) => {
+    return modules
+      .filter((module) => module.col === timetableColumn)
+      .map((module) => ({ links: module.links, tag: module.tag }));
+  }
+);
+
 export const selectTaskLinks = createSelector(
   (state) => state.time.timetableColumn,
   (state) => state.tasks.data,
@@ -29,18 +39,58 @@ export const selectTaskLinks = createSelector(
   }
 );
 
-export const selectModuleCodes = createSelector(
-  (state) => state.mappingModuleCodeToColourName,
-  (mappingModuleCodeToColourName) => {
-    return Object.keys(mappingModuleCodeToColourName);
+export const selectTaskLinksWithTags = createSelector(
+  (state) => state.time.timetableColumn,
+  (state) => state.tasks.data,
+  (timetableColumn, tasks) => {
+    const scheduledRecurringTasksLinksWithTags = tasks
+      .filter((task) => task.col === timetableColumn && task.dueDate === "--")
+      .map((task) => ({ links: task.links, tag: task.tag }));
+
+    const currentWeekTasksLinksWithTags = tasks
+      .filter(
+        (task) => task.col === timetableColumn && isCurrentWeek(task.mondayKey)
+      )
+      .map((task) => ({ links: task.links, tag: task.tag }));
+
+    return scheduledRecurringTasksLinksWithTags.concat(
+      currentWeekTasksLinksWithTags
+    );
   }
 );
 
-export function selectCurrentWeekTasks() {
-  return (state) => {
-    const mondayKey = state.time.mondayKey;
-    const tasks = state.tasks.data;
+export const selectModuleCodes = createSelector(
+  (state) => state.mappingTagToColourName,
+  (state) => state.userTags,
+  (mappingTagToColourName, userTags) => {
+    const allTags = Object.keys(mappingTagToColourName);
+    const userTagsObject = Object.fromEntries(
+      userTags.map((tag) => [tag, true])
+    );
 
+    const moduleCodes = allTags.filter((tag) => !(tag in userTagsObject));
+    return moduleCodes;
+  }
+);
+
+export const selectTags = createSelector(
+  (state) => state.mappingTagToColourName,
+  (state) => state.userTags,
+  (mappingTagToColourName, userTags) => {
+    const allTags = Object.keys(mappingTagToColourName);
+    const userTagsObject = Object.fromEntries(
+      userTags.map((tag) => [tag, true])
+    );
+
+    const moduleCodes = allTags.filter((tag) => !(tag in userTagsObject));
+    return [...moduleCodes, ...userTags];
+  }
+);
+
+export const selectCurrentWeekTasks = createSelector(
+  (state) => state.time.mondayKey,
+  (state) => state.tasks.data,
+  (mondayKey, tasks) => {
     const currentWeekTasks = tasks.filter((each) => {
       if (each.mondayKey.length === 0) {
         return true;
@@ -51,9 +101,10 @@ export function selectCurrentWeekTasks() {
           return false;
         }
       }
+
       return true;
     });
 
     return currentWeekTasks;
-  };
-}
+  }
+);

@@ -43,7 +43,7 @@ export function refreshMatrix() {
     const matrix = defaultMatrix();
 
     const modules = getState().modules;
-    const tasks = selectCurrentWeekTasks()(getState());
+    const tasks = selectCurrentWeekTasks(getState());
 
     for (const items of [modules, tasks]) {
       for (const item of items) {

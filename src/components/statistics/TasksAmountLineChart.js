@@ -53,7 +53,7 @@ const labels = [
   "3 weeks after",
 ];
 
-function mondayKeySwitcher(value, mondayKey, modulesWeekHours) {
+function mondayKeySwitcher(value, mondayKey) {
   const [dateNumber, monthNumber, yearNumber] = mondayKey;
   const dateObject = new Date(yearNumber, monthNumber, dateNumber + 7 * value);
   const newMondayKey = convertToKey(dateObject);
@@ -85,6 +85,7 @@ function getModulesWeekHours(modules) {
   for (const module of modules) {
     count += module.timeUnits / 2;
   }
+
   return count;
 }
 
@@ -96,6 +97,7 @@ function getRecurringTasksWeekHours(tasks) {
       count += task.timeUnits / 2;
     }
   }
+
   return count;
 }
 

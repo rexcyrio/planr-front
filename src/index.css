@@ -50,6 +50,8 @@ Navbar
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid hsl(0, 0%, 80%);
+  position: relative;
+  z-index: 1201;
 }
 
 .logo-wrapper {
@@ -94,12 +96,32 @@ Private
   display: grid;
   grid-template:
     "links timetable tasks" 40%
-    "notes timetable tasks" 60% / minmax(13.5rem, 1fr) 50rem 2fr;
+    "notes timetable tasks" 60% / minmax(13.5rem, 1fr) minmax(30rem, 50rem) minmax(23rem, 2fr);
   grid-gap: var(--grid-gap);
+}
+
+@media only screen and (max-width: 88em) {
+  .grid {
+    --grid-gap: 0.5rem;
+
+    /* 1px is for the bottom border of the navbar */
+    height: calc(100vh - var(--navbar-height) - 1px - var(--grid-gap));
+    width: calc(100vw - var(--grid-gap));
+    display: grid;
+    grid-template: "drawer timetable tasks" 100% / 1.25rem minmax(30rem, 50rem) minmax(
+        23rem,
+        2fr
+      );
+    grid-gap: var(--grid-gap);
+  }
 }
 
 .grid > * {
   background-color: hsl(0, 0%, 99%);
+}
+
+.drawer-section {
+  grid-area: drawer;
 }
 
 .links-section {

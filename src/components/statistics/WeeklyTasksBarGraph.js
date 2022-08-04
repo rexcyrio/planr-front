@@ -54,6 +54,7 @@ const labels = [
 
 function toArrayCountObject(object, keys) {
   const arrayCountObject = { ...object };
+
   for (const key of keys) {
     arrayCountObject[key] = generateEmptyWeekArray();
   }
@@ -67,10 +68,11 @@ function generateWeekWorkloadHoursDistributionData(
   modules
 ) {
   for (const task of weekTasks) {
-    arrayCountObject[task.moduleCode][task.col] += task.timeUnits / 2;
+    arrayCountObject[task.tag][task.col] += task.timeUnits / 2;
   }
+
   for (const module of modules) {
-    arrayCountObject[module.moduleCode][module.col] += module.timeUnits / 2;
+    arrayCountObject[module.tag][module.col] += module.timeUnits / 2;
   }
 
   return arrayCountObject;
@@ -78,19 +80,20 @@ function generateWeekWorkloadHoursDistributionData(
 
 function generateDatasetObjectsArray(
   nestedDataObject,
-  keys,
+  tags,
   themeName,
-  mappingModuleCodeToColourName
+  mappingTagToColourName
 ) {
   const datasets = [];
 
-  for (const key of keys) {
-    const colorName = mappingModuleCodeToColourName[key];
+  for (const tag of tags) {
+    const colourName = mappingTagToColourName[tag];
     const data = {
-      label: key,
-      data: nestedDataObject[key],
-      backgroundColor: allThemes[themeName][colorName],
+      label: tag,
+      data: nestedDataObject[tag],
+      backgroundColor: allThemes[themeName][colourName],
     };
+
     datasets.push(data);
   }
 
@@ -98,23 +101,21 @@ function generateDatasetObjectsArray(
 }
 
 WeeklyTasksBarGraph.propTypes = {
-  taskType: PropTypes.string,
+  taskType: PropTypes.string.isRequired,
 };
 
 function WeeklyTasksBarGraph({ taskType }) {
-  let currentWeekTasks = useSelector(selectCurrentWeekTasks());
+  let currentWeekTasks = useSelector(state => selectCurrentWeekTasks(state));
   let modules = useSelector((state) => state.modules);
-  const themeName = useSelector((state) => state.themeName);
-  const mappingModuleCodeToColourName = useSelector(
-    (state) => state.mappingModuleCodeToColourName
-  );
-  const mondayKey = useSelector((state) => state.time.mondayKey);
 
-  const moduleCodeKeys = Object.keys(mappingModuleCodeToColourName);
-  const arrayCountObject = toArrayCountObject(
-    mappingModuleCodeToColourName,
-    moduleCodeKeys
+  const themeName = useSelector((state) => state.themeName);
+  const mondayKey = useSelector((state) => state.time.mondayKey);
+  const mappingTagToColourName = useSelector(
+    (state) => state.mappingTagToColourName
   );
+  const tags = Object.keys(mappingTagToColourName);
+
+  const arrayCountObject = toArrayCountObject(mappingTagToColourName, tags);
 
   if (taskType === "Completed") {
     currentWeekTasks = currentWeekTasks.filter(
@@ -122,6 +123,7 @@ function WeeklyTasksBarGraph({ taskType }) {
     );
     modules = [];
   }
+
   if (taskType === "Incomplete") {
     currentWeekTasks = currentWeekTasks.filter(
       (task) => task.isCompleted[mondayKey] === undefined
@@ -139,9 +141,9 @@ function WeeklyTasksBarGraph({ taskType }) {
     labels,
     datasets: generateDatasetObjectsArray(
       nestedDataObject,
-      moduleCodeKeys,
+      tags,
       themeName,
-      mappingModuleCodeToColourName
+      mappingTagToColourName
     ),
   };
 
