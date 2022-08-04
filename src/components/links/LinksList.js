@@ -36,6 +36,7 @@ function LinksList() {
                 <LinkItem self={self} />
               </React.Fragment>
             ))}
+
             <TimetableLinks isPermLinksEmpty={links.length === 0} />
           </>
         )}

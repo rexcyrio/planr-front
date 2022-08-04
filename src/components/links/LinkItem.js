@@ -12,6 +12,7 @@ LinkItem.propTypes = {
     name: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
   }).isRequired,
+
   color: PropTypes.string,
 };
 
