@@ -10,11 +10,10 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  filterModes,
-  setFilterState,
-} from "../../store/slices/filteringTasksSlice";
+import { setFilterState } from "../../store/slices/filteringTasksSlice";
 import FilteringTasksCheckbox from "./FilteringTasksCheckbox";
+import FilteringTasksModuleDivider from "./FilteringTasksModuleDivider";
+import FiltersUpdatedSnackBar from "./FiltersUpdatedSnackBar";
 
 function FilteringTasks() {
   const dispatch = useDispatch();
@@ -26,6 +25,8 @@ function FilteringTasks() {
   const [tempFilterMode, setTempFilterMode] = useState("");
   const [tempAnyAll, setTempAnyAll] = useState("");
   const [tempFilterOptions, setTempFilterOptions] = useState({});
+
+  const isFilterApplied = filterMode !== "Show all";
 
   const openDialog = useCallback(() => {
     setTempFilterMode(filterMode);
@@ -44,10 +45,6 @@ function FilteringTasks() {
 
     dispatch(setFilterState(newFilterState));
     setOpen(false);
-  }
-
-  function isFilterApplied() {
-    return filterMode !== "Show all";
   }
 
   const handleCheckboxChange = useCallback(
@@ -100,7 +97,7 @@ function FilteringTasks() {
         onChange={(e) => setTempFilterMode(e.target.value)}
         sx={{ width: "10rem", m: "1rem 0" }}
       >
-        {filterModes.map((filterMode) => (
+        {["Show all", "Show only..."].map((filterMode) => (
           <MenuItem key={filterMode} value={filterMode}>
             {filterMode}
           </MenuItem>
@@ -145,7 +142,9 @@ function FilteringTasks() {
 
   return (
     <>
-      {isFilterApplied() ? filtersAppliedButton : noFiltersAppliedButton}
+      <FiltersUpdatedSnackBar />
+
+      {isFilterApplied ? filtersAppliedButton : noFiltersAppliedButton}
 
       <Dialog open={open} onClose={() => setOpen(false)}>
         {title}
@@ -164,6 +163,8 @@ function FilteringTasks() {
             {Object.entries(tempFilterOptions).map(
               ([filterOption, isChecked], index) => (
                 <React.Fragment key={filterOption}>
+                  {index === 6 && <FilteringTasksModuleDivider />}
+
                   <FilteringTasksCheckbox
                     tempFilterMode={tempFilterMode}
                     filterOption={filterOption}

@@ -10,6 +10,7 @@ import {
   UPDATE_SUCCESS_REDUCER,
   UPDATING_REDUCER,
 } from "../storeHelpers/statusHelpers";
+import { getFilterStateFromLocalStorage } from "./filteringTasksSlice";
 import { setIsInitialSnackBarOpen } from "./isInitialSnackBarOpenSlice";
 import { _setMappingTagToColourName } from "./mappingTagToColourNameSlice";
 import { refreshMatrix, setMatrix } from "./matrixSlice";
@@ -435,6 +436,9 @@ export const fetchTasks = createAsyncThunk(
       dispatch(_setThemeName(databaseThemeName));
       dispatch(_setMappingTagToColourName(databaseMappingTagToColourName));
       dispatch(_setUserTags(databaseUserTags));
+
+      // enable user to filter tasks based on tags fetched from db
+      dispatch(getFilterStateFromLocalStorage());
 
       // refresh the matrix after fetching the task and module objects from database
       dispatch(refreshMatrix());

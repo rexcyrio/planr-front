@@ -1,12 +1,9 @@
 import Stack from "@mui/material/Stack";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { EMPTY_TASK } from "../../helper/EmptyTaskHelper";
 import generateSkeletons from "../../helper/skeletonHelper";
-import {
-  getFilterStateFromLocalStorage,
-  mappingFilterOptionToFilterFunction,
-} from "../../store/slices/filteringTasksSlice";
+import { convertTagToFilterOptionKey } from "../../store/slices/filteringTasksSlice";
 import { mappingSortByToSortFunction } from "../../store/slices/sortingTasksSlice";
 import { fetchTasks } from "../../store/slices/tasksSlice";
 import {
@@ -39,8 +36,29 @@ function Tasks() {
 
   useEffect(() => {
     dispatch(fetchTasks());
-    dispatch(getFilterStateFromLocalStorage());
   }, [dispatch]);
+
+  const mappingFilterOptionToFilterFunction = useMemo(() => {
+    const mapping = {
+      "is scheduled": (each) => each.row !== -1 && each.col !== -1,
+      "is unscheduled": (each) => each.row === -1 && each.col === -1,
+
+      "is completed": (each) => mondayKey in each.isCompleted,
+      "is incomplete": (each) => !(mondayKey in each.isCompleted),
+
+      "is recurring": (each) => each.dueDate === "--",
+      "is one-off": (each) => each.dueDate !== "--",
+    };
+
+    for (const tag of tags) {
+      const filterOptionKey = convertTagToFilterOptionKey(tag);
+      const filterFunction = (each) => each.tag === tag;
+
+      mapping[filterOptionKey] = filterFunction;
+    }
+
+    return mapping;
+  }, [mondayKey, tags]);
 
   function filterTasks(tasks) {
     const { filterMode, anyAll, filterOptions } = filterState;
@@ -61,19 +79,7 @@ function Tasks() {
         const filterFunction =
           mappingFilterOptionToFilterFunction[filterOption];
 
-        let filteredTasks;
-
-        if (
-          filterOption === "is completed" ||
-          filterOption === "is incomplete"
-        ) {
-          // need to supply mondayKey before filtering
-          filteredTasks = tasks.filter((each) =>
-            filterFunction(mondayKey)(each)
-          );
-        } else {
-          filteredTasks = tasks.filter((each) => filterFunction(each));
-        }
+        const filteredTasks = tasks.filter((each) => filterFunction(each));
 
         for (const task of filteredTasks) {
           const { _id } = task;
@@ -95,17 +101,7 @@ function Tasks() {
         const filterFunction =
           mappingFilterOptionToFilterFunction[filterOption];
 
-        if (
-          filterOption === "is completed" ||
-          filterOption === "is incomplete"
-        ) {
-          // need to supply mondayKey before filtering
-          tasksToShow = tasksToShow.filter((each) =>
-            filterFunction(mondayKey)(each)
-          );
-        } else {
-          tasksToShow = tasksToShow.filter((each) => filterFunction(each));
-        }
+        tasksToShow = tasksToShow.filter((each) => filterFunction(each));
       }
 
       return tasksToShow;
@@ -133,13 +129,11 @@ function Tasks() {
         mappingTagToTasks[tag].push(task);
       }
 
-      const sortedTasks = Object.values(mappingTagToTasks).reduce(
-        (newArray, someTasks) => {
-          newArray.push(...someTasks);
-          return newArray;
-        },
-        []
-      );
+      const sortedTasks = [];
+
+      for (const tag of tags) {
+        sortedTasks.push(...mappingTagToTasks[tag]);
+      }
 
       return sortedTasks;
     }
