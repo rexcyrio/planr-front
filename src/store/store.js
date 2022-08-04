@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import devicePixelRatioReducer from "./slices/devicePixelRatioSlice";
 import filteringTasksReducer from "./slices/filteringTasksSlice";
+import isFiltersUpdatedSnackBarOpenReducer from "./slices/isFiltersUpdatedSnackBarOpenSlice";
 import isInitialSnackBarOpenReducer from "./slices/isInitialSnackBarOpenSlice";
 import isNewUserReducer from "./slices/isNewUserSlice";
 import linksReducer from "./slices/linksSlice";
@@ -36,6 +37,7 @@ export const store = configureStore({
     // extras
     isNewUser: isNewUserReducer,
     isInitialSnackBarOpen: isInitialSnackBarOpenReducer,
+    isFiltersUpdatedSnackBarOpen: isFiltersUpdatedSnackBarOpenReducer,
     devicePixelRatio: devicePixelRatioReducer,
 
     // popup manager
