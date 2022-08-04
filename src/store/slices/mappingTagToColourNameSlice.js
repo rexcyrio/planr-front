@@ -3,6 +3,7 @@ import formatErrorMessage from "../../helper/formatErrorMessage";
 import { allColourNames } from "../../helper/themeHelper";
 import { resetReduxStore } from "../storeHelpers/actions";
 import { splitIntoVennDiagramSections } from "../storeHelpers/splitIntoVennDiagramSectionsHelper";
+import { refreshTagsInFilterOptions } from "./filteringTasksSlice";
 
 const initialState = {
   Others: "lightPink",
@@ -23,6 +24,14 @@ const mappingTagToColourNameSlice = createSlice({
       delete state[tag];
       return state;
     },
+    _renameTagInTheme: (state, action) => {
+      const { oldTagName, newTagName } = action.payload;
+
+      state[newTagName] = state[oldTagName];
+      delete state[oldTagName];
+
+      return state;
+    },
     _updateTagColour: (state, action) => {
       const { tag, newColourName } = action.payload;
       state[tag] = newColourName;
@@ -38,8 +47,12 @@ export const { _setMappingTagToColourName } =
   mappingTagToColourNameSlice.actions;
 
 // private functions
-const { _addTagToTheme, _deleteTagInTheme, _updateTagColour } =
-  mappingTagToColourNameSlice.actions;
+const {
+  _addTagToTheme,
+  _deleteTagInTheme,
+  _renameTagInTheme,
+  _updateTagColour,
+} = mappingTagToColourNameSlice.actions;
 
 export function updateModulesInTheme(oldModuleCodes, newModuleCodes) {
   return function thunk(dispatch, getState) {
@@ -108,6 +121,7 @@ export function updateModulesInTheme(oldModuleCodes, newModuleCodes) {
 
     dispatch(_setMappingTagToColourName(new_mappingTagToColourName));
     dispatch(updateMappingTagToColourNameInDatabase());
+    dispatch(refreshTagsInFilterOptions(true));
   };
 }
 
@@ -125,6 +139,7 @@ export function removeAllModulesInTheme() {
 
     dispatch(_setMappingTagToColourName(new_mappingTagToColourName));
     dispatch(updateMappingTagToColourNameInDatabase());
+    dispatch(refreshTagsInFilterOptions(true));
   };
 }
 
@@ -143,6 +158,7 @@ export function addTagToTheme(tag) {
 
     dispatch(_addTagToTheme(payload));
     dispatch(updateMappingTagToColourNameInDatabase());
+    dispatch(refreshTagsInFilterOptions(true));
   };
 }
 
@@ -150,6 +166,18 @@ export function deleteTagInTheme(tag) {
   return function thunk(dispatch, getState) {
     dispatch(_deleteTagInTheme(tag));
     dispatch(updateMappingTagToColourNameInDatabase());
+    dispatch(refreshTagsInFilterOptions(true));
+  };
+}
+
+export function renameTagInTheme(oldTagName, newTagName) {
+  return function thunk(dispatch, getState) {
+    const payload = { oldTagName, newTagName };
+
+    dispatch(_renameTagInTheme(payload));
+    dispatch(updateMappingTagToColourNameInDatabase());
+    // no need to call `refreshTagsInFilterOptions(true)` here since the caller
+    // of this function is responsible for managing the filters
   };
 }
 

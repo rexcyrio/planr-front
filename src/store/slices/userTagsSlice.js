@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import formatErrorMessage from "../../helper/formatErrorMessage";
 import { resetReduxStore } from "../storeHelpers/actions";
+import { renameTagInFilterOptions } from "./filteringTasksSlice";
 import {
   addTagToTheme,
   deleteTagInTheme,
-  updateMappingTagToColourNameInDatabase,
-  _setMappingTagToColourName,
+  renameTagInTheme,
 } from "./mappingTagToColourNameSlice";
 import { deleteTask, updateTaskFields } from "./tasksSlice";
 
@@ -85,12 +85,9 @@ export function deleteUserTag(userTag, deleteMode) {
         throw new Error("Invalid deleteMode");
     }
 
-    dispatch(deleteTagInTheme(userTag));
-    dispatch(updateMappingTagToColourNameInDatabase());
-    
     dispatch(_deleteUserTag(userTag));
+    dispatch(deleteTagInTheme(userTag));
     dispatch(updateUserTagsInDatabase());
-    
   };
 }
 
@@ -110,29 +107,10 @@ export function renameUserTag(oldTagName, newTagName) {
       }
     }
 
-    // ========================================================================
-    // update theme mapping
-    // ========================================================================
-
-    const mappingTagToColourName = getState().mappingTagToColourName;
-    const new_mappingTagToColourName = {};
-
-    // manually copying over colour mapping to maintain order of keys
-    for (const tag of Object.keys(mappingTagToColourName)) {
-      if (tag === oldTagName) {
-        new_mappingTagToColourName[newTagName] =
-          mappingTagToColourName[oldTagName];
-      } else {
-        new_mappingTagToColourName[tag] = mappingTagToColourName[tag];
-      }
-    }
-
-    dispatch(_setMappingTagToColourName(new_mappingTagToColourName));
-    dispatch(updateMappingTagToColourNameInDatabase());
-
     const payload = { oldTagName, newTagName };
     dispatch(_renameUserTag(payload));
-
+    dispatch(renameTagInTheme(oldTagName, newTagName));
+    dispatch(renameTagInFilterOptions(oldTagName, newTagName));
     dispatch(updateUserTagsInDatabase());
   };
 }
