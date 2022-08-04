@@ -7,6 +7,7 @@ import Popover from "@mui/material/Popover";
 import Tooltip from "@mui/material/Tooltip";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import isModuleItem from "../../helper/isModuleItemHelper";
 import { selfPropTypes } from "../../helper/selfPropTypesHelper";
 import {
   markTaskAsComplete,
@@ -143,6 +144,8 @@ function DetailsPopover({ self }) {
             </p>
           )}
 
+          {isModuleItem(self) && <p>Venue: {self.venue}</p>}
+
           {self.links.map((link) => (
             <React.Fragment key={link._id}>
               <a
@@ -166,10 +169,6 @@ function DetailsPopover({ self }) {
       </Popover>
     </>
   );
-}
-
-function isModuleItem(self) {
-  return self._id.slice(0, 2) === "__";
 }
 
 export default React.memo(DetailsPopover);

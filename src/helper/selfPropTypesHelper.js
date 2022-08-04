@@ -7,6 +7,7 @@ export const selfPropTypes = PropTypes.shape({
   dueDate: PropTypes.string.isRequired,
   dueTime: PropTypes.string.isRequired,
   durationHours: PropTypes.string.isRequired,
+  venue: PropTypes.string,
   tag: PropTypes.string.isRequired,
   links: PropTypes.array.isRequired,
 

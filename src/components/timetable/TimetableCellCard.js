@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { useDispatch, useSelector } from "react-redux";
+import isModuleItem from "../../helper/isModuleItemHelper";
 import { selfPropTypes } from "../../helper/selfPropTypesHelper";
 import { getBackgroundColour } from "../../helper/themeHelper";
 import {
@@ -166,10 +167,6 @@ function TimetableCellCard({ self }) {
       </Card>
     </>
   );
-}
-
-function isModuleItem(self) {
-  return self._id.slice(0, 2) === "__";
 }
 
 export default React.memo(TimetableCellCard);

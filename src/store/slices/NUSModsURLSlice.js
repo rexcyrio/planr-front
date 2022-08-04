@@ -456,6 +456,7 @@ async function fetchModuleItems(NUSModsURL) {
           dueDate: "--",
           dueTime: "--",
           durationHours: durationHours,
+          venue: lesson.venue,
           tag: moduleCode,
           links: [],
 
