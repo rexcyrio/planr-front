@@ -307,6 +307,7 @@ export function removeNUSModsTimetable() {
 
     dispatch(_setNUSModsURL(""));
     dispatch(setNUSModsURLInDatabase(""));
+    dispatch(resetNUSModsURLStatus());
 
     dispatch(removeAllModulesInTheme());
     dispatch(setModules([]));
