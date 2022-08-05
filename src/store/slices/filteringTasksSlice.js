@@ -41,25 +41,6 @@ export function setFilterState(filterState) {
 
 export function getFilterStateFromLocalStorage() {
   return function thunk(dispatch, getState) {
-    const jsonString = window.localStorage.getItem("filterState");
-
-    if (jsonString === null) {
-      dispatch(refreshTagsInFilterOptions(true));
-      return;
-    }
-
-    // compare the state in local storage against that generated from the database
-    const localStorage_state = JSON.parse(jsonString);
-    const {
-      filterMode: localStorage_filterMode, // eslint-disable-line no-unused-vars
-      anyAll: localStorage_anyAll, // eslint-disable-line no-unused-vars
-      filterOptions: localStorage_filterOptions,
-    } = localStorage_state;
-
-    const localStorage_filterOptionKeys = Object.keys(
-      localStorage_filterOptions
-    );
-
     const initialFilterOptionKeys = Object.keys(initialState.filterOptions);
     const tags = selectTags(getState());
 
@@ -68,29 +49,49 @@ export function getFilterStateFromLocalStorage() {
       ...tags.map((tag) => convertTagToFilterOptionKey(tag)),
     ];
 
-    const isFilterOptionKeysEqual = (() => {
-      if (localStorage_filterOptionKeys.length !== newFilterOptionKeys.length) {
-        return false;
-      }
+    const jsonString = window.localStorage.getItem("filterState");
 
-      for (const key of newFilterOptionKeys) {
-        if (!(key in localStorage_filterOptions)) {
+    if (jsonString !== null) {
+      // compare the state in local storage against that generated from the database
+      const localStorage_state = JSON.parse(jsonString);
+      const {
+        filterMode: localStorage_filterMode, // eslint-disable-line no-unused-vars
+        anyAll: localStorage_anyAll, // eslint-disable-line no-unused-vars
+        filterOptions: localStorage_filterOptions,
+      } = localStorage_state;
+
+      const localStorage_filterOptionKeys = Object.keys(
+        localStorage_filterOptions
+      );
+
+      const isFilterOptionKeysEqual = (() => {
+        if (
+          localStorage_filterOptionKeys.length !== newFilterOptionKeys.length
+        ) {
           return false;
         }
+
+        for (const key of newFilterOptionKeys) {
+          if (!(key in localStorage_filterOptions)) {
+            return false;
+          }
+        }
+
+        return true;
+      })();
+
+      if (isFilterOptionKeysEqual) {
+        // directly calling private reducer instead of thunk wrapper since
+        // localStorage does not need to be updated again
+        dispatch(_setFilterState(localStorage_state));
+        return;
       }
-
-      return true;
-    })();
-
-    if (isFilterOptionKeysEqual) {
-      // directly calling private reducer instead of thunk wrapper since
-      // localStorage does not need to be updated again
-      dispatch(_setFilterState(localStorage_state));
-      return;
     }
 
-    // since the state in the local storage does not match that generated from
-    // the database, reconstruct a new state instead
+    // local storage does not have any `filterState`
+    // OR
+    // the state in local storage does not match that generated from the database
+    // ==> reconstruct a new state instead
 
     // by default, all filter options are set to `false`
     const newFilterState = {
@@ -103,7 +104,6 @@ export function getFilterStateFromLocalStorage() {
 
     // calling thunk wrapper since the localStorage needs to be updated
     dispatch(setFilterState(newFilterState));
-    dispatch(setIsFiltersUpdatedSnackBarOpen(true));
   };
 }
 
