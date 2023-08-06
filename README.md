@@ -12,6 +12,18 @@
 - View statistics on how you spent your time
 - Import your [NUSMods](https://nusmods.com) timetable into PlanR using the NUSMods share link
 
+## Tech Stack
+
+- MERN
+  - [MongoDB](https://www.mongodb.com)
+  - [Express](https://expressjs.com)
+  - [React](https://react.dev)
+  - [Node.js](https://nodejs.org)
+- [Redux](https://react-redux.js.org)
+- [Material UI](https://mui.com/material-ui)
+
+The front-end is hosted on [Netlify](https://www.netlify.com) while the back-end is hosted on [~~Heroku~~](https://www.heroku.com) [Render](https://render.com).
+
 ## Project Structure
 
 - [GitHub repository for front-end code](https://github.com/rexcyrio/planr-front)
