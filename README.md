@@ -1,70 +1,43 @@
-# Getting Started with Create React App
+# PlanR
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[PlanR](https://planr-orbital.netlify.app) is an interactive and responsive website that helps you plan your schedule more efficiently.
 
-## Available Scripts
+![Screenshot of PlanR](planr.png)
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- Drag and drop tasks onto your timetable to schedule them
+- Color-code tasks based on subject and type
+- Access web links associated with your tasks
+- View statistics on how you spent your time
+- Import your [NUSMods](https://nusmods.com) timetable into PlanR using the NUSMods share link
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Project Structure
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- [GitHub repository for front-end code](https://github.com/rexcyrio/planr-front)
+- [GitHub repository for back-end code](https://github.com/rexcyrio/planr-back)
 
-### `npm test`
+## Milestone Reports
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+In our milestone reports, we share on our target audience, user stories, features, design choices, tech stack, various testing conducted, development plans, and project log.
 
-### `npm run build`
+- [Milestone 1 report](https://docs.google.com/document/d/1NoKy0co0kDOky7yAW9wh3ylhPuuvNzNLvNM-9O3rTDA)
+- [Milestone 2 report](https://docs.google.com/document/d/1OcCyBzBgf0Dy5PeIfKMLBF2T4RFLMXmKsIhE-J6U4EI)
+- [Milestone 3 report (final)](https://docs.google.com/document/d/1M-zp3v4NN0dnDNYOVMZTjzeT7V1nqucU8fTubLCxs0k)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Splashdown Submission
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- [Live website](https://planr-orbital.netlify.app)
+- [Demo video](https://youtu.be/ccki3p1nzdo?list=PLLSECIsYjSIwLRWCruGapCHftSrGAPhmc)
+- [Poster](https://drive.google.com/file/d/1td9zN11_imdD6b44G9agxm87ELuMs0Uj/view?usp=sharing)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Authors
 
-### `npm run eject`
+- [Lee Wei Chong Stefan](https://github.com/rexcyrio)
+- [Tan Wei Zhe](https://github.com/wz2k)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Notes
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+PlanR was developed during the NUS AY21/22 summer break for [Orbital](https://orbital.comp.nus.edu.sg) (a.k.a. *CP2106: Independent Software Development Project*)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Level of achievement: Apollo 11
